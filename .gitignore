@@ -1,0 +1,7 @@
+/.sass-cache/
+_site
+*~
+*.swp
+Gemfile.lock
+/.jekyll-metadata
+/tmp/

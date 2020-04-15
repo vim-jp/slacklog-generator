@@ -1,0 +1,28 @@
+name: 'Build Pages'
+on:
+  push:
+    branches:
+      - master
+      - log-data
+
+jobs:
+  build-pages:
+    name: 'Build Pages'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@v2'
+        with:
+          ref: 'master'
+      - name: 'Build'
+        run: |
+          git fetch origin log-data
+          git checkout origin/log-data -- slacklog_data
+          ./update_slack_logs.sh
+          git rm -r --cached --quiet slacklog_data
+          rm -fr slacklog_data
+          git checkout --orphan=gh-pages
+          git add --all
+          git config user.email "$(git log -1 --format=format:%ce ${GITHUB_SHA})"
+          git config user.name "$(git log -1 --format=format:%cn ${GITHUB_SHA})"
+          git commit --message='publish' --quiet
+          git push --force origin gh-pages

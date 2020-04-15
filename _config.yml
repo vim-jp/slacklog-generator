@@ -1,0 +1,47 @@
+############################################################################
+# 原則 http://jekyllrb.com/docs/configuration/#default-configuration からの
+# 差分のみ記述している。記述順序も前述に従う。
+
+### Handling Reading
+exclude:
+  - 'scripts'
+  - 'Gemfile'
+  - 'README.md'
+  - 'vendor'
+  - 'slacklog_template'
+# デフォルトと同じだが「utf-8で記事を書こう」という宣言的な意味合で残した。
+encoding: utf-8
+
+### Filtering Content
+future: true
+
+### Plugins
+plugins:
+  - jemoji
+  - jekyll-sitemap
+  - jekyll-redirect-from
+  - jekyll-seo-tag
+
+### Outputting
+# デフォルトと同じだが、万が一デフォルトが変わってしまうと記事のURLが変わってし
+# まいクリティカルなので、明示的に指定した。
+permalink: date
+
+### Markdown Processors
+kramdown:
+  input: GFM
+
+############################################################################
+# 以下はvim-jp固有の設定項目
+
+hotkeys: true
+
+twitter:
+  username: vim_jp
+logo: https://vim-jp.org/assets/images/vim2-128.png?20170201003200
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/images/vim2-128.png
