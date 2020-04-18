@@ -18,8 +18,7 @@ jobs:
           git fetch origin log-data
           git checkout origin/log-data -- slacklog_data
           ./scripts/update_slack_logs.sh
-          git rm -r --cached --quiet slacklog_data
-          rm -fr slacklog_data
+          rm -fr slacklog_data/ slacklog_template/ scripts/
           git checkout --orphan=gh-pages
           git add --all
           git config user.email "$(git log -1 --format=format:%ce ${GITHUB_SHA})"

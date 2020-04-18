@@ -6,6 +6,7 @@
 exclude:
   - 'scripts'
   - 'Gemfile'
+  - 'LICENSE.txt'
   - 'README.md'
   - 'vendor'
   - 'slacklog_template'
