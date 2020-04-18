@@ -53,12 +53,12 @@ func doMain() error {
 
 	emptyChannel := make(map[string]bool, len(channels))
 	for i := range channels {
-		if err := mkdir(filepath.Join(outDir, channels[i].Name)); err != nil {
-			return fmt.Errorf("could not create %s/%s directory: %s", outDir, channels[i].Name, err)
+		if err := mkdir(filepath.Join(outDir, channels[i].Id)); err != nil {
+			return fmt.Errorf("could not create %s/%s directory: %s", outDir, channels[i].Id, err)
 		}
-		msgMap, threadMap, err := getMsgPerMonth(inDir, channels[i].Name)
+		msgMap, threadMap, err := getMsgPerMonth(inDir, channels[i].Id)
 		if len(msgMap) == 0 {
-			emptyChannel[channels[i].Name] = true
+			emptyChannel[channels[i].Id] = true
 			continue
 		}
 		if err != nil {
@@ -67,24 +67,24 @@ func doMain() error {
 		// Generate {outdir}/{channel}/index.html (links to {channel}/{year}/{month})
 		content, err := genChannelIndex(inDir, filepath.Join(templateDir, "channel_index.tmpl"), &channels[i], msgMap, cfg)
 		if err != nil {
-			return fmt.Errorf("could not generate %s/%s: %s", outDir, channels[i].Name, err)
+			return fmt.Errorf("could not generate %s/%s: %s", outDir, channels[i].Id, err)
 		}
-		err = ioutil.WriteFile(filepath.Join(outDir, channels[i].Name, "index.html"), content, 0666)
+		err = ioutil.WriteFile(filepath.Join(outDir, channels[i].Id, "index.html"), content, 0666)
 		if err != nil {
-			return fmt.Errorf("could not create %s/%s/index.html: %s", outDir, channels[i].Name, err)
+			return fmt.Errorf("could not create %s/%s/index.html: %s", outDir, channels[i].Id, err)
 		}
 		// Generate {outdir}/{channel}/{year}/{month}/index.html
 		for _, msgPerMonth := range msgMap {
-			if err := mkdir(filepath.Join(outDir, channels[i].Name, msgPerMonth.Year, msgPerMonth.Month)); err != nil {
-				return fmt.Errorf("could not create %s/%s/%s/%s directory: %s", outDir, channels[i].Name, msgPerMonth.Year, msgPerMonth.Month, err)
+			if err := mkdir(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month)); err != nil {
+				return fmt.Errorf("could not create %s/%s/%s/%s directory: %s", outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, err)
 			}
 			content, err := genChannelPerMonthIndex(inDir, filepath.Join(templateDir, "channel_per_month_index.tmpl"), &channels[i], msgPerMonth, userMap, threadMap, cfg)
 			if err != nil {
-				return fmt.Errorf("could not generate %s/%s/%s/%s/index.html: %s", outDir, channels[i].Name, msgPerMonth.Year, msgPerMonth.Month, err)
+				return fmt.Errorf("could not generate %s/%s/%s/%s/index.html: %s", outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, err)
 			}
-			err = ioutil.WriteFile(filepath.Join(outDir, channels[i].Name, msgPerMonth.Year, msgPerMonth.Month, "index.html"), content, 0666)
+			err = ioutil.WriteFile(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, "index.html"), content, 0666)
 			if err != nil {
-				return fmt.Errorf("could not create %s/%s/index.html: %s", outDir, channels[i].Name, err)
+				return fmt.Errorf("could not create %s/%s/index.html: %s", outDir, channels[i].Id, err)
 			}
 		}
 	}
@@ -92,7 +92,7 @@ func doMain() error {
 	// Remove empty channels
 	newChannels := make([]channel, 0, len(channels))
 	for i := range channels {
-		if !emptyChannel[channels[i].Name] {
+		if !emptyChannel[channels[i].Id] {
 			newChannels = append(newChannels, channels[i])
 		}
 	}

@@ -2,7 +2,7 @@
 # vim:set ts=2 sts=2 sw=2 et:
 layout: slacklog
 title: vim-jp.slack.com log - &#35<< .channel.Name >>
-permalink: /<< .channel.Name >>/index:output_ext
+permalink: /<< .channel.Id >>/index:output_ext
 ---
 <div>
 <h2><a href='{{ site.baseurl }}/'>vim-jp.slack.com log</a> - &#35<< .channel.Name >></h2>
@@ -12,7 +12,7 @@ permalink: /<< .channel.Name >>/index:output_ext
 
 <ul>
 <<- range .msgMap >>
-<li><a href='{{ site.baseurl }}/<< $.channel.Name >>/<< .Year >>/<< .Month >>/index.html'><< .Year >>年<< .Month >>月</a></li>
+<li><a href='{{ site.baseurl }}/<< $.channel.Id >>/<< .Year >>/<< .Month >>/index.html'><< .Year >>年<< .Month >>月</a></li>
 <<- end >>
 </ul>
 

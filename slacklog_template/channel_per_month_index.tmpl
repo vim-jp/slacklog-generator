@@ -2,10 +2,10 @@
 # vim:set ts=2 sts=2 sw=2 et:
 layout: slacklog
 title: vim-jp.slack.com log - &#35<< .channel.Name >> - << .msgPerMonth.Year >>年<< .msgPerMonth.Month >>月
-permalink: /<< .channel.Name >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/index:output_ext
+permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/index:output_ext
 ---
 <div>
-<h2><a href='{{ site.baseurl }}/'>vim-jp.slack.com log</a> - <a href='{{ site.baseurl }}/<< .channel.Name >>/'>&#35<< .channel.Name >></a> - << .msgPerMonth.Year >>年<< .msgPerMonth.Month >>月</h2>
+<h2><a href='{{ site.baseurl }}/'>vim-jp.slack.com log</a> - <a href='{{ site.baseurl }}/<< .channel.Id >>/'>&#35<< .channel.Name >></a> - << .msgPerMonth.Year >>年<< .msgPerMonth.Month >>月</h2>
 
 <<- range .msgPerMonth.Messages >>
 <<- if visible . >>
