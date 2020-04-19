@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	if err := slacklog.DoMain(); err != nil {
+	if err := slacklog.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "[error] %s\n", err)
 		os.Exit(1)
 	}
