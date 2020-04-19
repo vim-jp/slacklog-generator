@@ -17,7 +17,7 @@ func Run() error {
 	subCmdName := os.Args[1]
 	switch subCmdName {
 	case "update":
-		return updateSlackLogs()
+		return doUpdate()
 	}
 
 	return nil
