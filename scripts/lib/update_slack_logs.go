@@ -1,4 +1,4 @@
-package main
+package slacklog
 
 import (
 	"bytes"
@@ -16,14 +16,7 @@ import (
 	"time"
 )
 
-func main() {
-	if err := doMain(); err != nil {
-		fmt.Fprintf(os.Stderr, "[error] %s\n", err)
-		os.Exit(1)
-	}
-}
-
-func doMain() error {
+func DoMain() error {
 	if len(os.Args) < 5 {
 		fmt.Println("Usage: go run scripts/update_slack_logs.go {config.json} {templatedir} {indir} {outdir}")
 		return nil
@@ -504,7 +497,7 @@ func readMessages(msgJsonPath string, msgPerMonth *msgPerMonth, threadMap map[st
 			if rootMsgOfThread {
 				threadTs := msgs[i].ThreadTs
 				replies := threadMap[msgs[i].ThreadTs]
-				for j := 0; j < len(replies); {    // remove root message(s)
+				for j := 0; j < len(replies); { // remove root message(s)
 					if replies[j].Ts == threadTs {
 						replies = append(replies[:j], replies[j+1:]...)
 						continue
