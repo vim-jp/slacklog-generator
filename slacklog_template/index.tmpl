@@ -12,7 +12,7 @@ permalink: /index:output_ext
 
 <ul>
 <<- range .channels >>
-<li><a href='{{ site.baseurl }}/<< .Name >>/'>#<< .Name >></a></li>
+<li><a href='{{ site.baseurl }}/<< .Id >>/'>#<< .Name >></a></li>
 <<- end >>
 </ul>
 
