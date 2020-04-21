@@ -325,12 +325,10 @@ func getMsgPerMonth(inDir string, channelName string) (map[string]*msgPerMonth, 
 	}
 	defer dir.Close()
 	names, err := dir.Readdirnames(0)
-	sort.SliceStable(names, func(i, j int) bool {
-		return names[i] < names[j]
-	})
 	if err != nil {
 		return nil, nil, err
 	}
+	sort.Strings(names)
 	msgMap := make(map[string]*msgPerMonth)
 	threadMap := make(map[string][]*message)
 	for i := range names {

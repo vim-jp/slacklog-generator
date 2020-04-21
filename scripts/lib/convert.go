@@ -88,12 +88,10 @@ func readAllMessages(inDir string) ([]*message, error) {
 	}
 	defer dir.Close()
 	names, err := dir.Readdirnames(0)
-	sort.SliceStable(names, func(i, j int) bool {
-		return names[i] < names[j]
-	})
 	if err != nil {
 		return nil, err
 	}
+	sort.Strings(names)
 	var messages []*message
 	for i := range names {
 		content, err := ioutil.ReadFile(filepath.Join(inDir, names[i]))
