@@ -45,6 +45,7 @@ func doConvert() error {
 		}
 		for _, message := range messages {
 			message.UserProfile = nil
+			message.removeTokenFromURLs()
 		}
 		channelDir := filepath.Join(outDir, channel.Id)
 		if err := mkdir(channelDir); err != nil {

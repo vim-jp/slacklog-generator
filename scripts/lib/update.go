@@ -701,3 +701,24 @@ func filterChannel(channels []channel, cfgChannels []string) []channel {
 	}
 	return newChannels
 }
+
+var reToken = regexp.MustCompile(`\?t=xoxe-[-a-f0-9]+$`)
+
+func (m *message) removeTokenFromURLs() {
+	for i := range m.Files {
+		m.Files[i].UrlPrivate = reToken.ReplaceAllLiteralString(m.Files[i].UrlPrivate, "")
+		m.Files[i].UrlPrivateDownload = reToken.ReplaceAllLiteralString(m.Files[i].UrlPrivateDownload, "")
+		m.Files[i].Thumb64 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb64, "")
+		m.Files[i].Thumb80 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb80, "")
+		m.Files[i].Thumb160 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb160, "")
+		m.Files[i].Thumb360 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360, "")
+		m.Files[i].Thumb480 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480, "")
+		m.Files[i].Thumb720 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb720, "")
+		m.Files[i].Thumb800 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb800, "")
+		m.Files[i].Thumb960 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb960, "")
+		m.Files[i].Thumb1024 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb1024, "")
+		m.Files[i].Thumb360Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360Gif, "")
+		m.Files[i].Thumb480Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480Gif, "")
+		m.Files[i].ThumbVideo = reToken.ReplaceAllLiteralString(m.Files[i].ThumbVideo, "")
+	}
+}
