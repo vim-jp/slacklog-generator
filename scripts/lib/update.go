@@ -286,7 +286,7 @@ func ts2datetime(ts string) time.Time {
 	if err != nil {
 		return time.Time{}
 	}
-	nsec, err := strconv.ParseInt(t[0], 10, 64)
+	nsec, err := strconv.ParseInt(t[1], 10, 64)
 	if err != nil {
 		return time.Time{}
 	}
