@@ -11,14 +11,17 @@ func Run() error {
 		fmt.Println("Usage: go run scripts/main.go {subcmd}")
 		fmt.Println("  Subcmd:")
 		fmt.Println("    - update")
+		fmt.Println("    - convert")
 		return nil
 	}
 
 	subCmdName := os.Args[1]
 	switch subCmdName {
+	case "convert":
+		return doConvert()
 	case "update":
 		return doUpdate()
 	}
 
-	return nil
+	return fmt.Errorf("Unknown subcmd: %s", subCmdName)
 }

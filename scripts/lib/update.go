@@ -206,25 +206,6 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 	var funcAttachmentText = func(attachment *messageAttachment) string {
 		return text2Html(attachment.Text)
 	}
-	var ts2datetime = func(ts string) time.Time {
-		t := strings.Split(ts, ".")
-		if len(t) != 2 {
-			return time.Time{}
-		}
-		sec, err := strconv.ParseInt(t[0], 10, 64)
-		if err != nil {
-			return time.Time{}
-		}
-		nsec, err := strconv.ParseInt(t[0], 10, 64)
-		if err != nil {
-			return time.Time{}
-		}
-		japan, err := time.LoadLocation("Asia/Tokyo")
-		if err != nil {
-			return time.Time{}
-		}
-		return time.Unix(sec, nsec).In(japan)
-	}
 	var ts2threadMtime = func(ts string) time.Time {
 		lastMsg := threadMap[ts][len(threadMap[ts])-1]
 		return ts2datetime(lastMsg.Ts)
@@ -294,6 +275,26 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 	}
 	err = t.Execute(&out, params)
 	return out.Bytes(), err
+}
+
+func ts2datetime(ts string) time.Time {
+	t := strings.Split(ts, ".")
+	if len(t) != 2 {
+		return time.Time{}
+	}
+	sec, err := strconv.ParseInt(t[0], 10, 64)
+	if err != nil {
+		return time.Time{}
+	}
+	nsec, err := strconv.ParseInt(t[0], 10, 64)
+	if err != nil {
+		return time.Time{}
+	}
+	japan, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		return time.Time{}
+	}
+	return time.Unix(sec, nsec).In(japan)
 }
 
 func getDisplayNameByUserId(userId string, userMap map[string]*user) string {
