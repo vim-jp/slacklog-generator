@@ -370,27 +370,30 @@ func getMsgPerMonth(inDir string, channelName string) (map[string]*msgPerMonth, 
 }
 
 type message struct {
-	ClientMsgId string              `json:"client_msg_id"`
-	Typ         string              `json:"type"`
-	Subtype     string              `json:"subtype"`
-	Text        string              `json:"text"`
-	User        string              `json:"user"`
-	Ts          string              `json:"ts"`
-	ThreadTs    string              `json:"thread_ts"`
-	Username    string              `json:"username"`
-	BotId       string              `json:"bot_id"`
-	Team        string              `json:"team"`
-	UserTeam    string              `json:"user_team"`
-	SourceTeam  string              `json:"source_team"`
-	UserProfile messageUserProfile  `json:"user_profile"`
-	Attachments []messageAttachment `json:"attachments"`
-	// Blocks      []messageBlock     `json:"blocks"`    // TODO
-	Reactions []messageReaction `json:"reactions"`
-	Edited    *messageEdited    `json:"edited"`
-	Icons     *messageIcons     `json:"icons"`
-	Files     []messageFile     `json:"files"`
-	Root      *message          `json:"root"`
-	Trail     bool              // if true, the message user the same as the previous one
+	ClientMsgId  string              `json:"client_msg_id,omitempty"`
+	Typ          string              `json:"type"`
+	Subtype      string              `json:"subtype,omitempty"`
+	Text         string              `json:"text"`
+	User         string              `json:"user"`
+	Ts           string              `json:"ts"`
+	ThreadTs     string              `json:"thread_ts,omitempty"`
+	ParentUserId string              `json:"parent_user_id,omitempty"`
+	Username     string              `json:"username,omitempty"`
+	BotId        string              `json:"bot_id,omitempty"`
+	Team         string              `json:"team,omitempty"`
+	UserTeam     string              `json:"user_team,omitempty"`
+	SourceTeam   string              `json:"source_team,omitempty"`
+	UserProfile  *messageUserProfile `json:"user_profile,omitempty"`
+	Attachments  []messageAttachment `json:"attachments,omitempty"`
+	Blocks       []interface{}       `json:"blocks,omitempty"` // TODO: Use messageBlock
+	Reactions    []messageReaction   `json:"reactions,omitempty"`
+	Edited       *messageEdited      `json:"edited,omitempty"`
+	Icons        *messageIcons       `json:"icons,omitempty"`
+	Files        []messageFile       `json:"files,omitempty"`
+	Root         *message            `json:"root,omitempty"`
+	DisplayAsBot bool                `json:"display_as_bot,omitempty"`
+	Upload       bool                `json:"upload,omitempty"`
+	Trail        bool                // if true, the message user the same as the previous one
 }
 
 type messageFile struct {
@@ -414,9 +417,37 @@ type messageFile struct {
 	Username           string `json:"username"`
 	UrlPrivate         string `json:"url_private"`
 	UrlPrivateDownload string `json:"url_private_download"`
+	Thumb64            string `json:"thumb_64,omitempty"`
+	Thumb80            string `json:"thumb_80,omitempty"`
+	Thumb160           string `json:"thumb_160,omitempty"`
+	Thumb360           string `json:"thumb_360,omitempty"`
+	Thumb360W          int64  `json:"thumb_360_w,omitempty"`
+	Thumb360H          int64  `json:"thumb_360_h,omitempty"`
+	Thumb480           string `json:"thumb_480,omitempty"`
+	Thumb480W          int64  `json:"thumb_480_w,omitempty"`
+	Thumb480H          int64  `json:"thumb_480_h,omitempty"`
+	Thumb720           string `json:"thumb_720,omitempty"`
+	Thumb720W          int64  `json:"thumb_720_w,omitempty"`
+	Thumb720H          int64  `json:"thumb_720_h,omitempty"`
+	Thumb800           string `json:"thumb_800,omitempty"`
+	Thumb800W          int64  `json:"thumb_800_w,omitempty"`
+	Thumb800H          int64  `json:"thumb_800_h,omitempty"`
+	Thumb960           string `json:"thumb_960,omitempty"`
+	Thumb960W          int64  `json:"thumb_960_w,omitempty"`
+	Thumb960H          int64  `json:"thumb_960_h,omitempty"`
+	Thumb1024          string `json:"thumb_1024,omitempty"`
+	Thumb1024W         int64  `json:"thumb_1024_w,omitempty"`
+	Thumb1024H         int64  `json:"thumb_1024_h,omitempty"`
+	Thumb360Gif        string `json:"thumb_360_gif,omitempty"`
+	Thumb480Gif        string `json:"thumb_480_gif,omitempty"`
+	DeanimateGif       string `json:"deanimate_gif,omitempty"`
+	ThumbTiny          string `json:"thumb_tiny,omitempty"`
+	OriginalW          int64  `json:"original_w,omitempty"`
+	OriginalH          int64  `json:"original_h,omitempty"`
+	ThumbVideo         string `json:"thumb_video,omitempty"`
 	Permalink          string `json:"permalink"`
 	PermalinkPublic    string `json:"permalink_public"`
-	EditLink           string `json:"edit_link"`
+	EditLink           string `json:"edit_link,omitempty"`
 	IsStarred          bool   `json:"is_starred"`
 	HasRichPreview     bool   `json:"has_rich_preview"`
 }
@@ -455,26 +486,26 @@ type messageBlockElement struct {
 }
 
 type messageAttachment struct {
-	ServiceName     string `json:"service_name"`
-	AuthorIcon      string `json:"author_icon"`
-	AuthorName      string `json:"author_name"`
-	AuthorSubname   string `json:"author_subname"`
-	Title           string `json:"title"`
-	TitleLink       string `json:"title_link"`
-	Text            string `json:"text"`
-	Fallback        string `json:"fallback"`
-	ThumbUrl        string `json:"thumb_url"`
-	FromUrl         string `json:"from_url"`
-	ThumbWidth      int    `json:"thumb_width"`
-	ThumbHeight     int    `json:"thumb_height"`
-	ServiceIcon     string `json:"service_icon"`
+	ServiceName     string `json:"service_name,omitempty"`
+	AuthorIcon      string `json:"author_icon,omitempty"`
+	AuthorName      string `json:"author_name,omitempty"`
+	AuthorSubname   string `json:"author_subname,omitempty"`
+	Title           string `json:"title,omitempty"`
+	TitleLink       string `json:"title_link,omitempty"`
+	Text            string `json:"text,omitempty"`
+	Fallback        string `json:"fallback,omitempty"`
+	ThumbUrl        string `json:"thumb_url,omitempty"`
+	FromUrl         string `json:"from_url,omitempty"`
+	ThumbWidth      int    `json:"thumb_width,omitempty"`
+	ThumbHeight     int    `json:"thumb_height,omitempty"`
+	ServiceIcon     string `json:"service_icon,omitempty"`
 	Id              int    `json:"id"`
-	OriginalUrl     string `json:"original_url"`
-	VideoHtml       string `json:"video_html"`
-	VideoHtmlWidth  int    `json:"video_html_width"`
-	VideoHtmlHeight int    `json:"video_html_height"`
-	Footer          string `json:"footer"`
-	FooterIcon      string `json:"footer_icon"`
+	OriginalUrl     string `json:"original_url,omitempty"`
+	VideoHtml       string `json:"video_html,omitempty"`
+	VideoHtmlWidth  int    `json:"video_html_width,omitempty"`
+	VideoHtmlHeight int    `json:"video_html_height,omitempty"`
+	Footer          string `json:"footer,omitempty"`
+	FooterIcon      string `json:"footer_icon,omitempty"`
 }
 
 type messageReaction struct {
