@@ -49,7 +49,7 @@ func doConvert() error {
 		}
 		channelDir := filepath.Join(outDir, channel.Id)
 		if err := mkdir(channelDir); err != nil {
-			return fmt.Errorf("could not create %s/%s directory: %s", outDir, channel.Id, err)
+			return fmt.Errorf("could not create %s directory: %s", channelDir, err)
 		}
 		messagesPerDay := groupMessagesByDay(messages)
 		for key := range messagesPerDay {
