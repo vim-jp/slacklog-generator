@@ -155,7 +155,7 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 	var reCodeShort = regexp.MustCompile("[`｀]([^`]+?)[`｀]")
 	var reDel = regexp.MustCompile(`~([^~]+?)~`)
 	var reMention = regexp.MustCompile(`&lt;@(\w+?)&gt;`)
-	var reChannel = regexp.MustCompile(`&lt;#\w+?\|([^&]+?)&gt;`)
+	var reChannel = regexp.MustCompile(`&lt;#([^|]+?)\|([^&]+?)&gt;`)
 	var reNewline = regexp.MustCompile(`\n`)
 	var escapeSpecialChars = func(text string) string {
 		text = html.EscapeString(html.UnescapeString(text))
@@ -180,9 +180,10 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 					return whole
 				})
 				chunks[i] = reChannel.ReplaceAllStringFunc(chunks[i], func(whole string) string {
-					channelName := reChannel.FindStringSubmatch(whole)[1]
-					name := html.EscapeString(channelName)
-					return "<a href='{{ site.baseurl }}/" + name + "/'>#" + name + "</a>"
+					matchResult := reChannel.FindStringSubmatch(whole)
+					channelId := matchResult[1]
+					channelName := matchResult[2]
+					return "<a href='{{ site.baseurl }}/" + channelId + "/'>#" + channelName + "</a>"
 				})
 			} else {
 				chunks[i] = "<pre>" + chunks[i] + "</pre>"
