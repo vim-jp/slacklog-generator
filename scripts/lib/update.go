@@ -356,6 +356,15 @@ func getMsgPerMonth(inDir string, channelName string) (map[string]*msgPerMonth, 
 			// must be the same digits, so no need to convert the timestamp to a number
 			return msgMap[key].Messages[i].Ts < msgMap[key].Messages[j].Ts
 		})
+		m := msgMap[key].Messages
+		var lastUser string
+		for i := range m {
+			if lastUser == m[i].User {
+				(&m[i]).Trail = true
+			} else {
+				lastUser = m[i].User
+			}
+		}
 	}
 	return msgMap, threadMap, nil
 }
@@ -381,6 +390,7 @@ type message struct {
 	Icons     *messageIcons     `json:"icons"`
 	Files     []messageFile     `json:"files"`
 	Root      *message          `json:"root"`
+	Trail     bool              // if true, the message user the same as the previous one
 }
 
 type messageFile struct {

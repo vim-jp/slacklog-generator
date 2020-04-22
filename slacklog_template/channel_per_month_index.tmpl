@@ -10,8 +10,10 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
 <<- range .msgPerMonth.Messages >>
 <<- if visible . >>
   <span class='slacklog-message' id='<< .Ts >>'>
+    <<- if not .Trail >>
     <img class='slacklog-icon' src='<< userIconUrl . >>'>
     <span class='slacklog-name'><< username . >></span>
+    <<- end >>
     <a class='slacklog-datetime' href='#ts-<< .Ts >>'><< datetime .Ts >></a>
 
     <<- if and (ne .ThreadTs "") (ne .ThreadTs .Ts) >>
