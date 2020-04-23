@@ -10,8 +10,9 @@ func Run() error {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: go run scripts/main.go {subcmd}")
 		fmt.Println("  Subcmd:")
-		fmt.Println("    - update")
 		fmt.Println("    - convert")
+		fmt.Println("    - download")
+		fmt.Println("    - update")
 		return nil
 	}
 
@@ -19,6 +20,8 @@ func Run() error {
 	switch subCmdName {
 	case "convert":
 		return doConvert()
+	case "download":
+		return doDownload()
 	case "update":
 		return doUpdate()
 	}
