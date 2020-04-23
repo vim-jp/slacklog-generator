@@ -9,7 +9,7 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
 
 <<- range .msgPerMonth.Messages >>
 <<- if visible . >>
-  <span class='slacklog-message' id='<< .Ts >>'>
+  <span class='slacklog-message' id='ts-<< .Ts >>'>
     <<- if not .Trail >>
     <img class='slacklog-icon' src='<< userIconUrl . >>'>
     <span class='slacklog-name'><< username . >></span>
