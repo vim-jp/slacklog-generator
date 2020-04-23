@@ -718,6 +718,7 @@ func (m *message) removeTokenFromURLs() {
 		m.Files[i].Thumb1024 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb1024, "")
 		m.Files[i].Thumb360Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360Gif, "")
 		m.Files[i].Thumb480Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480Gif, "")
+		m.Files[i].DeanimateGif = reToken.ReplaceAllLiteralString(m.Files[i].DeanimateGif, "")
 		m.Files[i].ThumbVideo = reToken.ReplaceAllLiteralString(m.Files[i].ThumbVideo, "")
 	}
 }
