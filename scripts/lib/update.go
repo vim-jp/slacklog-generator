@@ -392,7 +392,8 @@ type message struct {
 	Root         *message            `json:"root,omitempty"`
 	DisplayAsBot bool                `json:"display_as_bot,omitempty"`
 	Upload       bool                `json:"upload,omitempty"`
-	Trail        bool                // if true, the message user the same as the previous one
+	// if true, the message user the same as the previous one
+	Trail bool `json:"-"`
 }
 
 type messageFile struct {
