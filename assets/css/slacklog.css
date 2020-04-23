@@ -48,6 +48,10 @@
   grid-row: 3;
   grid-column: 2 / 4;
 }
+.slacklog-files {
+  grid-row: 3;
+  grid-column: 2 / 4;
+}
 .slacklog-attachment {
   padding-left: 10px;
   margin-top: 10px;

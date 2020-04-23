@@ -68,6 +68,25 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
     </span>
     <<- end >>
 
+    <<- if .Files >>
+    <span class='slacklog-files'>
+      <<- range .Files >>
+      <div>
+        <a href="{{ site.baseurl }}/files/<< .OriginalFilePath >>">
+        <<- if eq .TopLevelMimetype "image" >>
+        <img src="{{ site.baseurl }}/files/<< .ThumbImagePath >>" width="<< .ThumbImageWidth >>" height="<< .ThumbImageHeight >>" alt="<< .Title >>">
+        <<- else if eq .TopLevelMimetype "video" >>
+        <video src="{{ site.baseurl }}/files/<< .OriginalFilePath >>" poster="{{ site.baseurl }}/files/<< .ThumbVideoPath >>" controls>>" alt="<< .Title >>">
+        </video>
+        <<- else >>
+        [[ダウンロード: << .Title >>(<< .PrettyType >>)]]
+        <<- end >>
+        </a>
+      </div>
+      <<- end >>
+    </span>
+    <<- end >>
+
     <<- if threads .Ts >>
     <details class='slacklog-thread'>
       <summary class-'slacklog-thread-summary'>

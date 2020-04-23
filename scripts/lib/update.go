@@ -722,3 +722,40 @@ func (m *message) removeTokenFromURLs() {
 		m.Files[i].ThumbVideo = reToken.ReplaceAllLiteralString(m.Files[i].ThumbVideo, "")
 	}
 }
+
+func (f *messageFile) TopLevelMimetype() string {
+	i := strings.Index(f.Mimetype, "/")
+	if i < 0 {
+		return ""
+	}
+	return f.Mimetype[:i]
+}
+
+func (f *messageFile) OriginalFilePath() string {
+	return f.Id + "/" + urlToFilename(f.UrlPrivate)
+}
+
+func (f *messageFile) ThumbImagePath() string {
+	if f.Thumb1024 != "" {
+		return f.Id + "/" + urlToFilename(f.Thumb1024)
+	}
+	return f.OriginalFilePath()
+}
+
+func (f *messageFile) ThumbImageWidth() int64 {
+	if f.Thumb1024 != "" {
+		return f.Thumb1024W
+	}
+	return f.OriginalW
+}
+
+func (f *messageFile) ThumbImageHeight() int64 {
+	if f.Thumb1024 != "" {
+		return f.Thumb1024H
+	}
+	return f.OriginalH
+}
+
+func (f *messageFile) ThumbVideoPath() string {
+	return f.Id + "/" + urlToFilename(f.ThumbVideo)
+}
