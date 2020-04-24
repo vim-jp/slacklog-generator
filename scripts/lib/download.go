@@ -141,6 +141,9 @@ func (f *messageFile) downloadFile(outDir, url, slackToken string) error {
 
 func downloadFile(url, destFile, slackToken string) error {
 	client := &http.Client{}
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
