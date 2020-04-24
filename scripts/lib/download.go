@@ -21,7 +21,7 @@ func doDownload() error {
 	}
 
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: go run scripts/main.go convert {log-dir} {files-dir}")
+		fmt.Println("Usage: go run scripts/main.go download {log-dir} {files-dir}")
 		return nil
 	}
 
