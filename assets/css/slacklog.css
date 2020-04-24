@@ -43,6 +43,9 @@
 .slacklog-text-edited {
   color: gray;
 }
+.slacklog-emoji {
+  height: 1em;
+}
 
 .slacklog-attachments {
   grid-row: 3;

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -40,6 +41,8 @@ func doUpdate() error {
 		return fmt.Errorf("could not read channels.json: %s", err)
 	}
 
+	emojis := readEmojiJson(cfg, configJsonPath)
+
 	if err := mkdir(outDir); err != nil {
 		return fmt.Errorf("could not create out directory: %s", err)
 	}
@@ -71,7 +74,7 @@ func doUpdate() error {
 			if err := mkdir(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month)); err != nil {
 				return fmt.Errorf("could not create %s/%s/%s/%s directory: %s", outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, err)
 			}
-			content, err := genChannelPerMonthIndex(inDir, filepath.Join(templateDir, "channel_per_month_index.tmpl"), &channels[i], msgPerMonth, userMap, threadMap, cfg)
+			content, err := genChannelPerMonthIndex(inDir, filepath.Join(templateDir, "channel_per_month_index.tmpl"), &channels[i], msgPerMonth, userMap, threadMap, emojis, cfg)
 			if err != nil {
 				return fmt.Errorf("could not generate %s/%s/%s/%s/index.html: %s", outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, err)
 			}
@@ -140,7 +143,7 @@ func genChannelIndex(inDir, tmplFile string, channel *channel, msgMap map[string
 	return out.Bytes(), err
 }
 
-func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMonth *msgPerMonth, userMap map[string]*user, threadMap map[string][]*message, cfg *config) ([]byte, error) {
+func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMonth *msgPerMonth, userMap map[string]*user, threadMap map[string][]*message, emojis map[string]string, cfg *config) ([]byte, error) {
 	params := make(map[string]interface{})
 	params["channel"] = channel
 	params["msgPerMonth"] = msgPerMonth
@@ -156,6 +159,7 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 	var reDel = regexp.MustCompile(`~([^~]+?)~`)
 	var reMention = regexp.MustCompile(`&lt;@(\w+?)&gt;`)
 	var reChannel = regexp.MustCompile(`&lt;#([^|]+?)\|([^&]+?)&gt;`)
+	var reEmoji = regexp.MustCompile(`:[^\s!"#$%&()=^/?\\\[\]<>,.;@{}~:]+:`)
 	var reNewline = regexp.MustCompile(`\n`)
 	var escapeSpecialChars = func(text string) string {
 		text = html.EscapeString(html.UnescapeString(text))
@@ -172,6 +176,24 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 				chunks[i] = reLink.ReplaceAllString(chunks[i], "<a href='${1}'>${1}</a>")
 				chunks[i] = reCodeShort.ReplaceAllString(chunks[i], "<code>${1}</code>")
 				chunks[i] = reDel.ReplaceAllString(chunks[i], "<del>${1}</del>")
+				chunks[i] = reEmoji.ReplaceAllStringFunc(chunks[i], func(whole string) string {
+					name := whole[1 : len(whole)-1]
+					originalUrl, ok := emojis[name]
+					if !ok {
+						return whole
+					}
+					for originalUrl[:6] == "alias:" {
+						name = originalUrl[6:]
+						originalUrl, ok = emojis[name]
+						if !ok {
+							return whole
+						}
+					}
+					dotPos := strings.LastIndex(originalUrl, ".")
+					extension := originalUrl[dotPos:]
+					src := "{{ site.baseurl }}/emojis/" + url.PathEscape(name) + extension
+					return "<img class='slacklog-emoji' title='" + whole + "' alt='" + whole + "' src='" + src + "'>"
+				})
 				chunks[i] = reMention.ReplaceAllStringFunc(chunks[i], func(whole string) string {
 					m := reMention.FindStringSubmatch(whole)
 					if name := getDisplayNameByUserId(m[1], userMap); name != "" {
@@ -558,6 +580,7 @@ func readMessages(msgJsonPath string, msgPerMonth *msgPerMonth, threadMap map[st
 type config struct {
 	EditedSuffix string   `json:"edited_suffix"`
 	Channels     []string `json:"channels"`
+	EmojiJson    string   `json:"emoji_json"`
 }
 
 func readConfig(configPath string) (*config, error) {
@@ -568,6 +591,22 @@ func readConfig(configPath string) (*config, error) {
 	var cfg config
 	err = json.Unmarshal(content, &cfg)
 	return &cfg, err
+}
+
+func readEmojiJson(cfg *config, configJsonPath string) map[string]string {
+	var emojis map[string]string
+	if cfg.EmojiJson == "" {
+		return emojis
+	}
+	emojiJsonPath := filepath.Join(filepath.Dir(configJsonPath), cfg.EmojiJson)
+	content, err := ioutil.ReadFile(emojiJsonPath)
+	if err != nil {
+		return emojis
+	}
+
+	json.Unmarshal(content, &emojis)
+
+	return emojis
 }
 
 type user struct {
