@@ -1,6 +1,7 @@
 package slacklog
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,6 +39,7 @@ func doDownload() error {
 
 	ch := make(chan *messageFile, downloadWorkerNum)
 	wg := new(sync.WaitGroup)
+	failed := false
 
 	for i := 0; i < cap(ch); i++ {
 		wg.Add(1)
@@ -46,6 +48,7 @@ func doDownload() error {
 			for m := range ch {
 				errs := m.downloadAll(filesDir, slackToken)
 				for i := range errs {
+					failed = true
 					fmt.Fprintf(os.Stderr, "[error] Download failed: %s\n", errs[i])
 				}
 			}
@@ -68,6 +71,9 @@ func doDownload() error {
 	close(ch)
 	wg.Wait()
 
+	if failed {
+		return errors.New("failed to download some file(s)")
+	}
 	return nil
 }
 
