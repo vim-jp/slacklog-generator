@@ -12,6 +12,7 @@ func Run() error {
 		fmt.Println("  Subcmd:")
 		fmt.Println("    - convert")
 		fmt.Println("    - download")
+		fmt.Println("    - emoji")
 		fmt.Println("    - update")
 		return nil
 	}
@@ -22,6 +23,8 @@ func Run() error {
 		return doConvert()
 	case "download":
 		return doDownload()
+	case "emoji":
+		return doEmoji()
 	case "update":
 		return doUpdate()
 	}
