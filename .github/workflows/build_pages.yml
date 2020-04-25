@@ -17,7 +17,7 @@ jobs:
         run: |
           git fetch origin log-data
           git archive origin/log-data | tar x
-          ./scripts/update_slack_logs.sh
+          ./scripts/generate_html.sh
           rm -fr slacklog_data/ slacklog_template/ scripts/
           git checkout --orphan=gh-pages
           git add --all --force
