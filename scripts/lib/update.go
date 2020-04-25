@@ -178,19 +178,17 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 				chunks[i] = reDel.ReplaceAllString(chunks[i], "<del>${1}</del>")
 				chunks[i] = reEmoji.ReplaceAllStringFunc(chunks[i], func(whole string) string {
 					name := whole[1 : len(whole)-1]
-					originalUrl, ok := emojis[name]
+					extension, ok := emojis[name]
 					if !ok {
 						return whole
 					}
-					for originalUrl[:6] == "alias:" {
-						name = originalUrl[6:]
-						originalUrl, ok = emojis[name]
+					for 6 <= len(extension) && extension[:6] == "alias:" {
+						name = extension[6:]
+						extension, ok = emojis[name]
 						if !ok {
 							return whole
 						}
 					}
-					dotPos := strings.LastIndex(originalUrl, ".")
-					extension := originalUrl[dotPos:]
 					src := "{{ site.baseurl }}/emojis/" + url.PathEscape(name) + extension
 					return "<img class='slacklog-emoji' title='" + whole + "' alt='" + whole + "' src='" + src + "'>"
 				})

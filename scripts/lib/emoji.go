@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/slack-go/slack"
 )
@@ -33,17 +32,7 @@ func doEmoji() error {
 		return err
 	}
 
-	emojisJson, err := json.Marshal(emojis)
-	if err != nil {
-		return err
-	}
-
 	err = mkdir(emojisDir)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(filepath.Join(emojisDir, "emoji.json"), emojisJson, 0666)
 	if err != nil {
 		return err
 	}
@@ -53,14 +42,24 @@ func doEmoji() error {
 			continue
 		}
 		downloadEmojiToFile(url, name, emojisDir)
+		emojis[name] = filepath.Ext(emojis[name])
+	}
+
+	emojisJson, err := json.Marshal(emojis)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(filepath.Join(emojisDir, "emoji.json"), emojisJson, 0666)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func downloadEmojiToFile(url, name, basePath string) error {
-	dotPos := strings.LastIndex(url, ".")
-	extension := url[dotPos:]
+	extension := filepath.Ext(url)
 	destFile := filepath.Join(basePath, name+extension)
 	if _, err := os.Stat(destFile); err == nil {
 		return nil
