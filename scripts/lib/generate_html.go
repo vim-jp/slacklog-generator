@@ -775,12 +775,14 @@ func (f *messageFile) TopLevelMimetype() string {
 }
 
 func (f *messageFile) OriginalFilePath() string {
-	return f.Id + "/" + urlToFilename(f.UrlPrivate)
+	suffix := f.downloadURLsAndSuffixes()[f.UrlPrivate]
+	return f.Id + "/" + url.PathEscape(f.downloadFilename(f.UrlPrivate, suffix))
 }
 
 func (f *messageFile) ThumbImagePath() string {
 	if f.Thumb1024 != "" {
-		return f.Id + "/" + urlToFilename(f.Thumb1024)
+		suffix := f.downloadURLsAndSuffixes()[f.Thumb1024]
+		return f.Id + "/" + url.PathEscape(f.downloadFilename(f.Thumb1024, suffix))
 	}
 	return f.OriginalFilePath()
 }
@@ -800,5 +802,6 @@ func (f *messageFile) ThumbImageHeight() int64 {
 }
 
 func (f *messageFile) ThumbVideoPath() string {
-	return f.Id + "/" + urlToFilename(f.ThumbVideo)
+	suffix := f.downloadURLsAndSuffixes()[f.ThumbVideo]
+	return f.Id + "/" + url.PathEscape(f.downloadFilename(f.ThumbVideo, suffix))
 }
