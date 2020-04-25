@@ -15,6 +15,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/kyokomi/emoji"
 )
 
 func doGenerateHTML() error {
@@ -180,6 +182,10 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 					name := whole[1 : len(whole)-1]
 					extension, ok := emojis[name]
 					if !ok {
+						char, ok := emoji.CodeMap()[whole]
+						if ok {
+							return char
+						}
 						return whole
 					}
 					for 6 <= len(extension) && extension[:6] == "alias:" {
