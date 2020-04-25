@@ -10,7 +10,7 @@ import (
 	"sort"
 )
 
-func doConvert() error {
+func doConvertExportedLogs() error {
 	if len(os.Args) < 4 {
 		fmt.Println("Usage: go run scripts/main.go convert {indir} {outdir}")
 		return nil
