@@ -97,9 +97,9 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
       <<- if eq .Subtype "thread_broadcast" >>
       <span class='slacklog-message-broadcasted'>
         <span class='slacklog-thread-broadcast-text'>チャンネルにも投稿済</span>
-        <span class='slacklog-message' id='<< .Ts >>'>
+        <span class='slacklog-message' id='ts-<< .Ts >>'>
       <<- else >>
-      <span class='slacklog-message' id='<< .Ts >>'>
+      <span class='slacklog-message' id='ts-<< .Ts >>'>
       <<- end >>
         <img class='slacklog-icon' src='<< userIconUrl . >>'>
         <span class='slacklog-name'><< username . >></span>
