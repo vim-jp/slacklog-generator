@@ -12,7 +12,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-func doEmoji() error {
+func doDownloadEmoji() error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		return fmt.Errorf("$SLACK_TOKEN required")

@@ -14,7 +14,7 @@ import (
 
 const downloadWorkerNum = 8
 
-func doDownload() error {
+func doDownloadFiles() error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		return fmt.Errorf("$SLACK_TOKEN required")

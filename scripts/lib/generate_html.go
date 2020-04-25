@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func doUpdate() error {
+func doGenerateHTML() error {
 	if len(os.Args) < 6 {
 		fmt.Println("Usage: go run scripts/main.go update {config.json} {templatedir} {indir} {outdir}")
 		return nil
