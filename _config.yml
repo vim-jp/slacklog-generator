@@ -16,7 +16,6 @@ encoding: utf-8
 
 ### Plugins
 plugins:
-  - jemoji
   - jekyll-sitemap
   - jekyll-redirect-from
   - jekyll-seo-tag
