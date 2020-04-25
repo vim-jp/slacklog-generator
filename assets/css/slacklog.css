@@ -176,3 +176,24 @@ details.slacklog-thread summary:hover {
   font-weight: bold;
   vertical-align: super;
 }
+
+/**
+ * highlight message at initial load.
+ * see also assets/javascripts/slacklog.js
+ */
+@keyframes slacklog-highlight-message {
+    0%{
+        background-color: inherit;
+    }
+    50%{
+        background-color: #f6ff7e;
+    }
+    100%{
+        background-color: inherit;
+    }
+}
+.slacklog-message.slacklog-highlight {
+    animation-name: slacklog-highlight-message;
+    animation-duration: 2s;
+    animation-iteration-count: 1;
+}
