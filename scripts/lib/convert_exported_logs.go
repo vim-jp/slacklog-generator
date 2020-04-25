@@ -12,7 +12,7 @@ import (
 
 func doConvertExportedLogs() error {
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: go run scripts/main.go convert {indir} {outdir}")
+		fmt.Println("Usage: go run scripts/main.go convert_exported_logs {indir} {outdir}")
 		return nil
 	}
 

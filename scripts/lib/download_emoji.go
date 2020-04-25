@@ -19,7 +19,7 @@ func doDownloadEmoji() error {
 	}
 
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: go run scripts/main.go emoji {emojis-dir}")
+		fmt.Println("Usage: go run scripts/main.go download_emoji {emojis-dir}")
 		return nil
 	}
 
