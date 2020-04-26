@@ -5,6 +5,7 @@ _site
 Gemfile.lock
 /.jekyll-metadata
 /tmp/
-/slacklog_data
-/slacklog_pages
-/files
+/slacklog_data/
+/slacklog_pages/
+/files/
+/emojis/
