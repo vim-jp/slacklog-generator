@@ -345,6 +345,7 @@ type msgEnum struct {
 	year     int
 	month    int
 	Messages []message
+	kv       *msgKeyValue
 }
 
 func (kv *msgKeyValue) remove(me *msgEnum) {
@@ -363,6 +364,7 @@ func (kv *msgKeyValue) Enumerate() []*msgEnum {
 			year:     year,
 			month:    month,
 			Messages: kv.msgMap[key],
+			kv:       kv,
 		})
 	}
 	sort.SliceStable(results, func(i, j int) bool {
@@ -390,7 +392,7 @@ func (kv *msgKeyValue) unpackKey(key string) (year, month int) {
 	return int(year64), int(month64)
 }
 
-func (kv *msgKeyValue) has(year, month int) bool {
+func (kv *msgKeyValue) hasEntry(year, month int) bool {
 	_, ok := kv.msgMap[kv.packKey(year, month)]
 	return ok
 }
@@ -403,8 +405,8 @@ func (kv *msgKeyValue) getMessagesByMonth(year, month int) []message {
 	return kv.msgMap[kv.packKey(year, month)]
 }
 
-func (kv *msgKeyValue) setMessagesByMonth(year, month int, msgs []message) {
-	kv.msgMap[kv.packKey(year, month)] = msgs
+func (kv *msgKeyValue) createEmptyEntry(year, month int) {
+	kv.msgMap[kv.packKey(year, month)] = []message{}
 }
 
 func (kv *msgKeyValue) appendMessagesByMonth(year, month int, msgs []message) {
@@ -418,6 +420,52 @@ func (me *msgEnum) Year() string {
 
 func (me *msgEnum) Month() string {
 	return fmt.Sprintf("%02d", me.month)
+}
+
+func (me *msgEnum) prevYearMonth() (year, month int) {
+	if me.month <= 1 {
+		return me.year - 1, 12
+	}
+	return me.year, me.month - 1
+}
+
+func (me *msgEnum) nextYearMonth() (year, month int) {
+	if me.month >= 12 {
+		return me.year + 1, 1
+	}
+	return me.year, me.month + 1
+}
+
+func (me *msgEnum) PrevYear() string {
+	year, _ := me.prevYearMonth()
+	return fmt.Sprintf("%4d", year)
+}
+
+func (me *msgEnum) PrevMonth() string {
+	_, month := me.prevYearMonth()
+	return fmt.Sprintf("%02d", month)
+}
+
+func (me *msgEnum) NextYear() string {
+	year, _ := me.nextYearMonth()
+	return fmt.Sprintf("%4d", year)
+}
+
+func (me *msgEnum) NextMonth() string {
+	_, month := me.nextYearMonth()
+	return fmt.Sprintf("%02d", month)
+}
+
+func (me *msgEnum) HasPrev() bool {
+	year, month := me.prevYearMonth()
+	msgs := me.kv.getMessagesByMonth(year, month)
+	return len(msgs) != 0
+}
+
+func (me *msgEnum) HasNext() bool {
+	year, month := me.nextYearMonth()
+	msgs := me.kv.getMessagesByMonth(year, month)
+	return len(msgs) != 0
 }
 
 // "{year}-{month}-{day}.json"
@@ -451,8 +499,8 @@ func getMsgPerMonth(inDir string, channelName string) (*msgKeyValue, msgThreadMa
 			return nil, nil, err
 		}
 		year, month := int(year64), int(month64)
-		if !msgKv.has(year, month) {
-			msgKv.setMessagesByMonth(year, month, []message{})
+		if !msgKv.hasEntry(year, month) {
+			msgKv.createEmptyEntry(year, month)
 		}
 		msgs, err := readMessages(filepath.Join(inDir, channelName, names[i]), threadMap)
 		if err != nil {
