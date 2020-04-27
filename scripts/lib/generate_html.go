@@ -54,8 +54,8 @@ func doGenerateHTML() error {
 		if err := mkdir(filepath.Join(outDir, channels[i].Id)); err != nil {
 			return fmt.Errorf("could not create %s/%s directory: %s", outDir, channels[i].Id, err)
 		}
-		msgMap, threadMap, err := getMsgPerMonth(inDir, channels[i].Id)
-		if len(msgMap) == 0 {
+		msgKv, threadMap, err := getMsgPerMonth(inDir, channels[i].Id)
+		if msgKv.isEmpty() {
 			emptyChannel[channels[i].Id] = true
 			continue
 		}
@@ -63,7 +63,7 @@ func doGenerateHTML() error {
 			return err
 		}
 		// Generate {outdir}/{channel}/index.html (links to {channel}/{year}/{month})
-		content, err := genChannelIndex(inDir, filepath.Join(templateDir, "channel_index.tmpl"), &channels[i], msgMap, cfg)
+		content, err := genChannelIndex(inDir, filepath.Join(templateDir, "channel_index.tmpl"), &channels[i], msgKv, cfg)
 		if err != nil {
 			return fmt.Errorf("could not generate %s/%s: %s", outDir, channels[i].Id, err)
 		}
@@ -72,15 +72,15 @@ func doGenerateHTML() error {
 			return fmt.Errorf("could not create %s/%s/index.html: %s", outDir, channels[i].Id, err)
 		}
 		// Generate {outdir}/{channel}/{year}/{month}/index.html
-		for _, msgPerMonth := range msgMap {
-			if err := mkdir(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month)); err != nil {
-				return fmt.Errorf("could not create %s/%s/%s/%s directory: %s", outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, err)
+		for _, msgPerMonth := range msgKv.Enumerate() {
+			if err := mkdir(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year(), msgPerMonth.Month())); err != nil {
+				return fmt.Errorf("could not create %s/%s/%s/%s directory: %s", outDir, channels[i].Id, msgPerMonth.Year(), msgPerMonth.Month(), err)
 			}
 			content, err := genChannelPerMonthIndex(inDir, filepath.Join(templateDir, "channel_per_month_index.tmpl"), &channels[i], msgPerMonth, userMap, threadMap, emojis, cfg)
 			if err != nil {
-				return fmt.Errorf("could not generate %s/%s/%s/%s/index.html: %s", outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, err)
+				return fmt.Errorf("could not generate %s/%s/%s/%s/index.html: %s", outDir, channels[i].Id, msgPerMonth.Year(), msgPerMonth.Month(), err)
 			}
-			err = ioutil.WriteFile(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year, msgPerMonth.Month, "index.html"), content, 0666)
+			err = ioutil.WriteFile(filepath.Join(outDir, channels[i].Id, msgPerMonth.Year(), msgPerMonth.Month(), "index.html"), content, 0666)
 			if err != nil {
 				return fmt.Errorf("could not create %s/%s/index.html: %s", outDir, channels[i].Id, err)
 			}
@@ -131,10 +131,10 @@ func genIndex(channels []channel, tmplFile string, cfg *config) ([]byte, error) 
 	return out.Bytes(), err
 }
 
-func genChannelIndex(inDir, tmplFile string, channel *channel, msgMap map[string]*msgPerMonth, cfg *config) ([]byte, error) {
+func genChannelIndex(inDir, tmplFile string, channel *channel, msgKv *msgKeyValue, cfg *config) ([]byte, error) {
 	params := make(map[string]interface{})
 	params["channel"] = channel
-	params["msgMap"] = msgMap
+	params["msgKv"] = msgKv
 	var out bytes.Buffer
 	name := filepath.Base(tmplFile)
 	t, err := template.New(name).Delims("<<", ">>").ParseFiles(tmplFile)
@@ -145,7 +145,7 @@ func genChannelIndex(inDir, tmplFile string, channel *channel, msgMap map[string
 	return out.Bytes(), err
 }
 
-func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMonth *msgPerMonth, userMap map[string]*user, threadMap map[string][]*message, emojis map[string]string, cfg *config) ([]byte, error) {
+func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMonth *msgEnum, userMap map[string]*user, threadMap msgThreadMap, emojis map[string]string, cfg *config) ([]byte, error) {
 	params := make(map[string]interface{})
 	params["channel"] = channel
 	params["msgPerMonth"] = msgPerMonth
@@ -335,16 +335,95 @@ func getDisplayNameByUserId(userId string, userMap map[string]*user) string {
 	return ""
 }
 
-type msgPerMonth struct {
-	Year     string
-	Month    string
+type msgKeyValue struct {
+	msgMap map[string][]message
+}
+
+type msgThreadMap map[string][]*message
+
+type msgEnum struct {
+	year     int
+	month    int
 	Messages []message
+}
+
+func (kv *msgKeyValue) remove(me *msgEnum) {
+	delete(kv.msgMap, kv.packKey(me.year, me.month))
+}
+
+func newMsgKeyValue() *msgKeyValue {
+	return &msgKeyValue{msgMap: make(map[string][]message)}
+}
+
+func (kv *msgKeyValue) Enumerate() []*msgEnum {
+	results := make([]*msgEnum, 0, len(kv.msgMap))
+	for key := range kv.msgMap {
+		year, month := kv.unpackKey(key)
+		results = append(results, &msgEnum{
+			year:     year,
+			month:    month,
+			Messages: kv.msgMap[key],
+		})
+	}
+	sort.SliceStable(results, func(i, j int) bool {
+		n1 := results[i].year*100 + results[i].month
+		n2 := results[j].year*100 + results[j].month
+		return n1 < n2
+	})
+	return results
+}
+
+func (kv *msgKeyValue) packKey(year, month int) string {
+	return fmt.Sprintf("%4d%02d", year, month)
+}
+
+func (kv *msgKeyValue) unpackKey(key string) (year, month int) {
+	yyyy, mm := key[:4], key[4:6]
+	year64, err := strconv.ParseInt(yyyy, 10, 32)
+	if err != nil {
+		panic(err)
+	}
+	month64, err := strconv.ParseInt(mm, 10, 32)
+	if err != nil {
+		panic(err)
+	}
+	return int(year64), int(month64)
+}
+
+func (kv *msgKeyValue) has(year, month int) bool {
+	_, ok := kv.msgMap[kv.packKey(year, month)]
+	return ok
+}
+
+func (kv *msgKeyValue) isEmpty() bool {
+	return len(kv.msgMap) == 0
+}
+
+func (kv *msgKeyValue) getMessagesByMonth(year, month int) []message {
+	return kv.msgMap[kv.packKey(year, month)]
+}
+
+func (kv *msgKeyValue) setMessagesByMonth(year, month int, msgs []message) {
+	kv.msgMap[kv.packKey(year, month)] = msgs
+}
+
+func (kv *msgKeyValue) appendMessagesByMonth(year, month int, msgs []message) {
+	key := kv.packKey(year, month)
+	kv.msgMap[key] = append(kv.msgMap[key], msgs...)
+}
+
+func (me *msgEnum) Year() string {
+	return fmt.Sprintf("%4d", me.year)
+}
+
+func (me *msgEnum) Month() string {
+	return fmt.Sprintf("%02d", me.month)
 }
 
 // "{year}-{month}-{day}.json"
 var reMsgFilename = regexp.MustCompile(`^(\d{4})-(\d{2})-\d{2}\.json$`)
 
-func getMsgPerMonth(inDir string, channelName string) (map[string]*msgPerMonth, map[string][]*message, error) {
+func getMsgPerMonth(inDir string, channelName string) (*msgKeyValue, msgThreadMap, error) {
 	dir, err := os.Open(filepath.Join(inDir, channelName))
 	if err != nil {
 		return nil, nil, err
@@ -355,43 +434,52 @@ func getMsgPerMonth(inDir string, channelName string) (map[string]*msgPerMonth, 
 		return nil, nil, err
 	}
 	sort.Strings(names)
-	msgMap := make(map[string]*msgPerMonth)
-	threadMap := make(map[string][]*message)
+	msgKv := newMsgKeyValue()
+	threadMap := make(msgThreadMap)
 	for i := range names {
 		m := reMsgFilename.FindStringSubmatch(names[i])
 		if len(m) == 0 {
 			fmt.Fprintf(os.Stderr, "[warning] skipping %s/%s/%s ...", inDir, channelName, names[i])
 			continue
 		}
-		key := m[1] + m[2]
-		if _, ok := msgMap[key]; !ok {
-			msgMap[key] = &msgPerMonth{Year: m[1], Month: m[2]}
-		}
-		err := readMessages(filepath.Join(inDir, channelName, names[i]), msgMap[key], threadMap)
+		year64, err := strconv.ParseInt(m[1], 10, 32)
 		if err != nil {
 			return nil, nil, err
 		}
+		month64, err := strconv.ParseInt(m[2], 10, 32)
+		if err != nil {
+			return nil, nil, err
+		}
+		year, month := int(year64), int(month64)
+		if !msgKv.has(year, month) {
+			msgKv.setMessagesByMonth(year, month, []message{})
+		}
+		msgs, err := readMessages(filepath.Join(inDir, channelName, names[i]), threadMap)
+		if err != nil {
+			return nil, nil, err
+		}
+		msgKv.appendMessagesByMonth(year, month, msgs)
 	}
-	for key := range msgMap {
-		if len(msgMap[key].Messages) == 0 {
-			delete(msgMap, key)
+	for _, msgPerMonth := range msgKv.Enumerate() {
+		m := msgPerMonth.Messages
+		if len(m) == 0 {
+			msgKv.remove(msgPerMonth)
 			continue
 		}
-		sort.SliceStable(msgMap[key].Messages, func(i, j int) bool {
+		sort.SliceStable(m, func(i, j int) bool {
 			// must be the same digits, so no need to convert the timestamp to a number
-			return msgMap[key].Messages[i].Ts < msgMap[key].Messages[j].Ts
+			return m[i].Ts < m[j].Ts
 		})
-		m := msgMap[key].Messages
 		var lastUser string
 		for i := range m {
 			if lastUser == m[i].User {
-				(&m[i]).Trail = true
+				m[i].Trail = true
 			} else {
 				lastUser = m[i].User
 			}
 		}
 	}
-	return msgMap, threadMap, nil
+	return msgKv, threadMap, nil
 }
 
 type message struct {
@@ -540,16 +628,17 @@ type messageReaction struct {
 	Count int      `json:"count"`
 }
 
-func readMessages(msgJsonPath string, msgPerMonth *msgPerMonth, threadMap map[string][]*message) error {
+func readMessages(msgJsonPath string, threadMap msgThreadMap) ([]message, error) {
 	content, err := ioutil.ReadFile(msgJsonPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var msgs []message
 	err = json.Unmarshal(content, &msgs)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal %s: %s", msgJsonPath, err)
+		return nil, fmt.Errorf("failed to unmarshal %s: %s", msgJsonPath, err)
 	}
+	results := make([]message, 0)
 	for i := range msgs {
 		if !visibleMsg(&msgs[i]) {
 			continue
@@ -559,7 +648,7 @@ func readMessages(msgJsonPath string, msgPerMonth *msgPerMonth, threadMap map[st
 			msgs[i].Subtype == "thread_broadcast" ||
 			msgs[i].Subtype == "bot_message" ||
 			msgs[i].Subtype == "slackbot_response" {
-			msgPerMonth.Messages = append(msgPerMonth.Messages, msgs[i])
+			results = append(results, msgs[i])
 		}
 		if msgs[i].ThreadTs != "" {
 			if rootMsgOfThread {
@@ -578,7 +667,7 @@ func readMessages(msgJsonPath string, msgPerMonth *msgPerMonth, threadMap map[st
 			}
 		}
 	}
-	return nil
+	return results, nil
 }
 
 type config struct {
@@ -718,7 +807,7 @@ func readChannels(channelsJsonPath string, cfgChannels []string) ([]channel, map
 	var channels []channel
 	err = json.Unmarshal(content, &channels)
 	channels = filterChannel(channels, cfgChannels)
-	sort.Slice(channels, func(i, j int) bool {
+	sort.SliceStable(channels, func(i, j int) bool {
 		return channels[i].Name < channels[j].Name
 	})
 	channelMap := make(map[string]*channel, len(channels))

@@ -11,7 +11,7 @@ permalink: /<< .channel.Id >>/index:output_ext
 <a href='/docs/chat.html'>vim-jpのチャットルームについて</a></p>
 
 <ul>
-<<- range .msgMap >>
+<<- range .msgKv.Enumerate >>
 <li><a href='{{ site.baseurl }}/<< $.channel.Id >>/<< .Year >>/<< .Month >>/index.html'><< .Year >>年<< .Month >>月</a></li>
 <<- end >>
 </ul>
