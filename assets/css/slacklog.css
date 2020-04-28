@@ -36,6 +36,22 @@
 .slacklog-datetime, .slacklog-datetime:link, .slacklog-datetime:visited {
   color: gray;
 }
+
+.slacklog-slack-link {
+  visibility: hidden;
+  margin-left: 10px;
+  grid-row: 1;
+  grid-column: 4;
+}
+
+.slacklog-slack-link, .slacklog-slack-link:link, .slacklog-slack-link:visited {
+  color: gray;
+}
+
+.slacklog-message:hover .slacklog-slack-link {
+    visibility: visible;
+}
+
 .slacklog-trail {
     visibility: hidden;
 }
