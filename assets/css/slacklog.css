@@ -183,6 +183,24 @@ details.slacklog-thread summary:hover {
   vertical-align: super;
 }
 
+.slacklog-header, .slacklog-footer {
+  display: grid;
+  grid-template-columns: 150px auto 150px;
+}
+.slacklog-footer {
+  border-top: 2px solid #ddd;
+  padding-top: 1.2em;
+  margin-top: 1em;
+}
+.slacklog-prev-month {
+  grid-column: 1;
+  text-align: left;
+}
+.slacklog-next-month {
+  grid-column: 3;
+  text-align: right;
+}
+
 /**
  * highlight message at initial load.
  * see also assets/javascripts/slacklog.js

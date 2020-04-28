@@ -5,6 +5,18 @@ title: vim-jp.slack.com log - &#35<< .channel.Name >> - << .msgPerMonth.Year >>�
 permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/index:output_ext
 ---
 <div>
+
+<<- if or .msgPerMonth.HasPrev .msgPerMonth.HasNext >>
+<header class='slacklog-header'>
+  <<- if .msgPerMonth.HasPrev >>
+  <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.PrevYear >>/<< .msgPerMonth.PrevMonth >>/'>&lt;&lt;&nbsp;<< .msgPerMonth.PrevYear >>年<< .msgPerMonth.PrevMonth >>月</a>
+  <<- end >>
+  <<- if .msgPerMonth.HasNext >>
+  <a class='slacklog-next-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.NextYear >>/<< .msgPerMonth.NextMonth >>/'><< .msgPerMonth.NextYear >>年<< .msgPerMonth.NextMonth >>月&nbsp;&gt;&gt;</a>
+  <<- end >>
+</header>
+<<- end >>
+
 <h2><a href='{{ site.baseurl }}/'>vim-jp.slack.com log</a> - <a href='{{ site.baseurl }}/<< .channel.Id >>/'>&#35<< .channel.Name >></a> - << .msgPerMonth.Year >>年<< .msgPerMonth.Month >>月</h2>
 
 <<- range .msgPerMonth.Messages >>
@@ -162,6 +174,17 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
     <<- end >>
   </span>
 <<- end >>
+<<- end >>
+
+<<- if or .msgPerMonth.HasPrev .msgPerMonth.HasNext >>
+<footer class='slacklog-footer'>
+  <<- if .msgPerMonth.HasPrev >>
+  <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.PrevYear >>/<< .msgPerMonth.PrevMonth >>/'>&lt;&lt;&nbsp;<< .msgPerMonth.PrevYear >>年<< .msgPerMonth.PrevMonth >>月</a>
+  <<- end >>
+  <<- if .msgPerMonth.HasNext >>
+  <a class='slacklog-next-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.NextYear >>/<< .msgPerMonth.NextMonth >>/'><< .msgPerMonth.NextYear >>年<< .msgPerMonth.NextMonth >>月&nbsp;&gt;&gt;</a>
+  <<- end >>
+</footer>
 <<- end >>
 
 </div>
