@@ -336,7 +336,12 @@ func getDisplayNameByUserId(userId string, userMap map[string]*user) string {
 }
 
 type msgKeyValue struct {
-	msgMap map[string][]message
+	msgMap map[msgKey][]message
+}
+
+type msgKey struct {
+	year  int
+	month int
 }
 
 type msgThreadMap map[string][]*message
@@ -349,20 +354,19 @@ type msgEnum struct {
 }
 
 func (kv *msgKeyValue) remove(me *msgEnum) {
-	delete(kv.msgMap, kv.packKey(me.year, me.month))
+	delete(kv.msgMap, msgKey{year: me.year, month: me.month})
 }
 
 func newMsgKeyValue() *msgKeyValue {
-	return &msgKeyValue{msgMap: make(map[string][]message)}
+	return &msgKeyValue{msgMap: make(map[msgKey][]message)}
 }
 
 func (kv *msgKeyValue) Enumerate() []*msgEnum {
 	results := make([]*msgEnum, 0, len(kv.msgMap))
 	for key := range kv.msgMap {
-		year, month := kv.unpackKey(key)
 		results = append(results, &msgEnum{
-			year:     year,
-			month:    month,
+			year:     key.year,
+			month:    key.month,
 			Messages: kv.msgMap[key],
 			kv:       kv,
 		})
@@ -375,25 +379,8 @@ func (kv *msgKeyValue) Enumerate() []*msgEnum {
 	return results
 }
 
-func (kv *msgKeyValue) packKey(year, month int) string {
-	return fmt.Sprintf("%4d%02d", year, month)
-}
-
-func (kv *msgKeyValue) unpackKey(key string) (year, month int) {
-	yyyy, mm := key[:4], key[4:6]
-	year64, err := strconv.ParseInt(yyyy, 10, 32)
-	if err != nil {
-		panic(err)
-	}
-	month64, err := strconv.ParseInt(mm, 10, 32)
-	if err != nil {
-		panic(err)
-	}
-	return int(year64), int(month64)
-}
-
 func (kv *msgKeyValue) hasEntry(year, month int) bool {
-	_, ok := kv.msgMap[kv.packKey(year, month)]
+	_, ok := kv.msgMap[msgKey{year: year, month: month}]
 	return ok
 }
 
@@ -402,15 +389,15 @@ func (kv *msgKeyValue) isEmpty() bool {
 }
 
 func (kv *msgKeyValue) getMessagesByMonth(year, month int) []message {
-	return kv.msgMap[kv.packKey(year, month)]
+	return kv.msgMap[msgKey{year: year, month: month}]
 }
 
 func (kv *msgKeyValue) createEmptyEntry(year, month int) {
-	kv.msgMap[kv.packKey(year, month)] = []message{}
+	kv.msgMap[msgKey{year: year, month: month}] = []message{}
 }
 
 func (kv *msgKeyValue) appendMessagesByMonth(year, month int, msgs []message) {
-	key := kv.packKey(year, month)
+	key := msgKey{year: year, month: month}
 	kv.msgMap[key] = append(kv.msgMap[key], msgs...)
 }
 
