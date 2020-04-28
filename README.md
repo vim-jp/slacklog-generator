@@ -3,8 +3,9 @@
 ## 開発に必要なもの
 
 - Go
-- Ruby
-- Jekyll
+- ローカルで開発する場合 (Docker を使う場合は不要)
+  - Ruby
+  - Jekyll
 
 ## 開発方法
 
