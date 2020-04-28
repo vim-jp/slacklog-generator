@@ -14,12 +14,12 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
     <img class='slacklog-icon slacklog-trail' src='<< userIconUrl . >>'>
     <span class='slacklog-name slacklog-trail'><< username . >></span>
     <a class='slacklog-datetime' href='#ts-<< .Ts >>'><< datetime .Ts >></a>
-    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archive/<< $.channel.Id >>/p<< slackPermanentLink .Ts >>'>Slack</a>
+    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archive/<< $.channel.Id >>/p<< slackPermalink .Ts >>'>Slack</a>
     <<- else >>
     <img class='slacklog-icon' src='<< userIconUrl . >>'>
     <span class='slacklog-name'><< username . >></span>
     <a class='slacklog-datetime' href='#ts-<< .Ts >>'><< datetime .Ts >></a>
-    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archive/<< $.channel.Id >>/p<< slackPermanentLink .Ts >>'>Slack</a>
+    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archive/<< $.channel.Id >>/p<< slackPermalink .Ts >>'>Slack</a>
     <<- end >>
 
     <<- if and (ne .ThreadTs "") (ne .ThreadTs .Ts) >>

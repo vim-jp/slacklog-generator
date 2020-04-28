@@ -247,7 +247,7 @@ func genChannelPerMonthIndex(inDir, tmplFile string, channel *channel, msgPerMon
 			"datetime": func(ts string) string {
 				return ts2datetime(ts).Format("2日 15:04:05")
 			},
-			"slackPermanentLink": func(ts string) string {
+			"slackPermalink": func(ts string) string {
 				return strings.Replace(ts, ".", "", 1)
 			},
 			"username": func(msg *message) string {
