@@ -32,28 +32,54 @@ func NewHTMLGenerator(templateDir string, s *LogStore) *HTMLGenerator {
 func (g *HTMLGenerator) Generate(outDir string) error {
 	channels := g.s.GetChannels()
 
+	createdChannels := []Channel{}
 	for i := range channels {
-		if err := g.generateChannelDir(
+		isCreated, err := g.generateChannelDir(
 			filepath.Join(outDir, channels[i].ID),
 			channels[i],
-		); err != nil {
+		)
+		if err != nil {
 			return err
 		}
+		if isCreated {
+			createdChannels = append(createdChannels, channels[i])
+		}
 	}
+
+	if err := g.generateIndex(filepath.Join(outDir, "index.html"), createdChannels); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) error {
-	msgs, err := g.s.GetMessagesPerMonth(channel.ID)
+func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
+	params := make(map[string]interface{})
+	params["channels"] = channels
+	var out bytes.Buffer
+	tmplPath := filepath.Join(g.templateDir, "index.tmpl")
+	name := filepath.Base(tmplPath)
+	t, err := template.New(name).Delims("<<", ">>").ParseFiles(tmplPath)
 	if err != nil {
 		return err
 	}
+	if err = t.Execute(&out, params); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path, out.Bytes(), 0666)
+}
+
+func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, error) {
+	msgs, err := g.s.GetMessagesPerMonth(channel.ID)
+	if err != nil {
+		return false, err
+	}
 	if len(msgs) == 0 {
-		return nil
+		return false, nil
 	}
 
 	if err := mkdir(path); err != nil {
-		return fmt.Errorf("could not create %s directory: %s", path, err)
+		return false, fmt.Errorf("could not create %s directory: %s", path, err)
 	}
 
 	if err := g.generateChannelIndex(
@@ -61,7 +87,7 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) error {
 		msgs,
 		filepath.Join(path, "index.html"),
 	); err != nil {
-		return err
+		return true, err
 	}
 
 	for i := range msgs {
@@ -70,10 +96,10 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) error {
 			msgs[i],
 			filepath.Join(path, msgs[i].Year(), msgs[i].Month()),
 		); err != nil {
-			return err
+			return true, err
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func (g *HTMLGenerator) generateChannelIndex(channel Channel, msgs []MessagesPerMonth, path string) error {
@@ -99,13 +125,9 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, msgs MessagesPerMont
 		return fmt.Errorf("could not create %s directory: %s", path, err)
 	}
 
-	// TODO: impl
-	var threadMap map[string]Thread
-
 	params := make(map[string]interface{})
 	params["channel"] = channel
 	params["msgPerMonth"] = msgs
-	params["threadMap"] = threadMap
 	var out bytes.Buffer
 
 	// TODO check below subtypes work correctly
@@ -146,25 +168,25 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, msgs MessagesPerMont
 			"text":           g.generateMessageText,
 			"attachmentText": g.generateAttachmentText,
 			"threadMtime": func(ts string) string {
-				if t, ok := g.s.GetThread(ts); ok {
+				if t, ok := g.s.GetThread(channel.ID, ts); ok {
 					return t.LastReplyTime().Format("2日 15:04:05")
 				}
 				return ""
 			},
 			"threads": func(ts string) []Message {
-				if t, ok := g.s.GetThread(ts); ok {
+				if t, ok := g.s.GetThread(channel.ID, ts); ok {
 					return t.Replies()
 				}
 				return nil
 			},
 			"threadNum": func(ts string) int {
-				if t, ok := g.s.GetThread(ts); ok {
+				if t, ok := g.s.GetThread(channel.ID, ts); ok {
 					return t.ReplyNum()
 				}
 				return 0
 			},
 			"threadRootText": func(ts string) string {
-				thread, ok := g.s.GetThread(ts)
+				thread, ok := g.s.GetThread(channel.ID, ts)
 				if !ok {
 					return ""
 				}
@@ -176,10 +198,10 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, msgs MessagesPerMont
 				return g.c.escape(text)
 			},
 			"hasPrevMonth": func(msgs MessagesPerMonth) bool {
-				return g.s.HasPrevMonth(msgs)
+				return g.s.HasPrevMonth(channel.ID, msgs)
 			},
 			"hasNextMonth": func(msgs MessagesPerMonth) bool {
-				return g.s.HasNextMonth(msgs)
+				return g.s.HasNextMonth(channel.ID, msgs)
 			},
 		}).ParseFiles(tmplPath)
 	if err != nil {

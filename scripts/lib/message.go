@@ -13,16 +13,16 @@ import (
 )
 
 type MessageTable struct {
-	threadMap map[string]Thread
-	msgsMap   map[string]MessagesPerMonth
+	threadMap map[string]*Thread
+	msgsMap   map[string]*MessagesPerMonth
 	readDir   map[string]struct{}
 	readFile  map[string]struct{}
 }
 
 func NewMessageTable() *MessageTable {
 	return &MessageTable{
-		threadMap: map[string]Thread{},
-		msgsMap:   map[string]MessagesPerMonth{},
+		threadMap: map[string]*Thread{},
+		msgsMap:   map[string]*MessagesPerMonth{},
 		readDir:   map[string]struct{}{},
 		readFile:  map[string]struct{}{},
 	}
@@ -74,7 +74,7 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		if err != nil {
 			return err
 		}
-		msgPerMonth = MessagesPerMonth{year: y, month: m}
+		msgPerMonth = &MessagesPerMonth{year: y, month: m}
 	}
 
 	content, err := ioutil.ReadFile(path)
@@ -90,17 +90,20 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		if !msgs[i].IsVisible() {
 			continue
 		}
-		if msgs[i].ThreadTs == "" || msgs[i].IsRootOfThread() ||
+		threadTs := msgs[i].ThreadTs
+		if threadTs == "" || msgs[i].IsRootOfThread() ||
 			msgs[i].Subtype == "thread_broadcast" ||
 			msgs[i].Subtype == "bot_message" ||
 			msgs[i].Subtype == "slackbot_response" {
 			msgPerMonth.Messages = append(msgPerMonth.Messages, msgs[i])
 			m.msgsMap[key] = msgPerMonth
 		}
-		if msgs[i].ThreadTs != "" {
+		if threadTs != "" {
+			if m.threadMap[threadTs] == nil {
+				m.threadMap[threadTs] = &Thread{}
+			}
 			if msgs[i].IsRootOfThread() {
-				threadTs := msgs[i].ThreadTs
-				replies := m.threadMap[msgs[i].ThreadTs].msgs
+				replies := m.threadMap[threadTs].msgs
 				for j := 0; j < len(replies); { // remove root message(s)
 					if replies[j].Ts == threadTs {
 						replies = append(replies[:j], replies[j+1:]...)
@@ -108,11 +111,9 @@ func (m *MessageTable) ReadLogFile(path string) error {
 					}
 					j++
 				}
-				t := m.threadMap[msgs[i].ThreadTs]
-				t.msgs = append([]Message{msgs[i]}, replies...)
+				m.threadMap[threadTs].msgs = append([]Message{msgs[i]}, replies...)
 			} else {
-				t := m.threadMap[msgs[i].ThreadTs]
-				t.msgs = append(m.threadMap[msgs[i].ThreadTs].msgs, msgs[i])
+				m.threadMap[threadTs].msgs = append(m.threadMap[msgs[i].ThreadTs].msgs, msgs[i])
 			}
 		}
 	}

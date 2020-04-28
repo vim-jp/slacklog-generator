@@ -1,6 +1,7 @@
 package slacklog
 
 import (
+	"errors"
 	"path/filepath"
 )
 
@@ -9,7 +10,7 @@ type LogStore struct {
 	ut   *UserTable
 	ct   *ChannelTable
 	et   *EmojiTable
-	mt   *MessageTable
+	mts  map[string]*MessageTable
 }
 
 func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
@@ -25,14 +26,17 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 
 	et := NewEmojiTable(filepath.Join(dirPath, cfg.EmojiJson))
 
-	mt := NewMessageTable()
+	mts := make(map[string]*MessageTable, len(ct.m))
+	for channelID := range ct.m {
+		mts[channelID] = NewMessageTable()
+	}
 
 	return &LogStore{
 		path: dirPath,
 		ut:   ut,
 		ct:   ct,
 		et:   et,
-		mt:   mt,
+		mts:  mts,
 	}, nil
 }
 
@@ -40,26 +44,36 @@ func (s *LogStore) GetChannels() []Channel {
 	return s.ct.l
 }
 
-func (s *LogStore) HasNextMonth(msgsPerMonth MessagesPerMonth) bool {
-	_, ok := s.mt.msgsMap[msgsPerMonth.NextKey()]
-	return ok
+func (s *LogStore) HasNextMonth(channelID string, msgsPerMonth MessagesPerMonth) bool {
+	if mt, ok := s.mts[channelID]; ok && mt != nil {
+		_, ok := mt.msgsMap[msgsPerMonth.NextKey()]
+		return ok
+	}
+	return false
 }
 
-func (s *LogStore) HasPrevMonth(msgsPerMonth MessagesPerMonth) bool {
-	_, ok := s.mt.msgsMap[msgsPerMonth.PrevKey()]
-	return ok
+func (s *LogStore) HasPrevMonth(channelID string, msgsPerMonth MessagesPerMonth) bool {
+	if mt, ok := s.mts[channelID]; ok && mt != nil {
+		_, ok := mt.msgsMap[msgsPerMonth.PrevKey()]
+		return ok
+	}
+	return false
 }
 
 func (s *LogStore) GetMessagesPerMonth(channelID string) ([]MessagesPerMonth, error) {
-	if err := s.mt.ReadLogDir(filepath.Join(s.path, channelID)); err != nil {
+	mt, ok := s.mts[channelID]
+	if !ok {
+		return nil, errors.New("not found")
+	}
+	if err := mt.ReadLogDir(filepath.Join(s.path, channelID)); err != nil {
 		return nil, err
 	}
 
-	msgs := s.mt.msgsMap
+	msgs := mt.msgsMap
 	ret := make([]MessagesPerMonth, len(msgs))
 	i := 0
 	for _, msgsPerMonth := range msgs {
-		ret[i] = msgsPerMonth
+		ret[i] = *msgsPerMonth
 		i++
 	}
 
@@ -95,9 +109,13 @@ func (s *LogStore) GetEmojiMap() map[string]string {
 	return s.et.m
 }
 
-func (s *LogStore) GetThread(ts string) (*Thread, bool) {
-	if t, ok := s.mt.threadMap[ts]; ok {
-		return &t, true
+func (s *LogStore) GetThread(channelID, ts string) (*Thread, bool) {
+	mt, ok := s.mts[channelID]
+	if !ok {
+		return nil, false
+	}
+	if t, ok := mt.threadMap[ts]; ok {
+		return t, true
 	}
 	return nil, false
 }
