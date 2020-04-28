@@ -97,10 +97,10 @@ func (s *LogStore) GetDisplayNameByUserID(userID string) string {
 	return ""
 }
 
-func (s *LogStore) GetUserNameMap() map[string]string {
+func (s *LogStore) GetDisplayNameMap() map[string]string {
 	ret := make(map[string]string, len(s.ut.m))
 	for id, u := range s.ut.m {
-		ret[id] = u.Name
+		ret[id] = s.GetDisplayNameByUserID(u.ID)
 	}
 	return ret
 }

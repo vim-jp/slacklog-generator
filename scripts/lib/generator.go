@@ -18,7 +18,7 @@ type HTMLGenerator struct {
 }
 
 func NewHTMLGenerator(templateDir string, s *LogStore) *HTMLGenerator {
-	users := s.GetUserNameMap()
+	users := s.GetDisplayNameMap()
 	emojis := s.GetEmojiMap()
 	c := NewTextConverter(users, emojis)
 
