@@ -18,7 +18,7 @@ func NewEmojiTable(path string) *EmojiTable {
 		return emojis
 	}
 
-	json.Unmarshal(content, emojis)
+	json.Unmarshal(content, &emojis.m)
 
 	return emojis
 }
