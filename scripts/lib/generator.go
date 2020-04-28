@@ -6,6 +6,7 @@ import (
 	"html"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -103,6 +104,14 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 }
 
 func (g *HTMLGenerator) generateChannelIndex(channel Channel, msgs []MessagesPerMonth, path string) error {
+
+	sort.Slice(msgs, func(i, j int) bool {
+		if msgs[i].year < msgs[j].year {
+			return true
+		}
+		return msgs[i].month < msgs[j].month
+	})
+
 	params := make(map[string]interface{})
 	params["channel"] = channel
 	params["msgMap"] = msgs
