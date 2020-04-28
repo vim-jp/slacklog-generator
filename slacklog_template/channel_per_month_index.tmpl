@@ -181,7 +181,7 @@ permalink: /<< .channel.ID >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
 <<- end >>
 <<- end >>
 
-<<- if or (hasPrevMonth .msgPerMonth) (hasPrevMonth .msgPerMonth) >>
+<<- if or (hasPrevMonth .msgPerMonth) (hasNextMonth .msgPerMonth) >>
 <footer class='slacklog-footer'>
   <<- if hasPrevMonth .msgPerMonth >>
   <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.ID >>/<< .msgPerMonth.PrevYear >>/<< .msgPerMonth.PrevMonth >>/'>&lt;&lt;&nbsp;<< .msgPerMonth.PrevYear >>年<< .msgPerMonth.PrevMonth >>月</a>
