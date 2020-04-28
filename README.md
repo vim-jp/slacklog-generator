@@ -1,17 +1,57 @@
-# vim-jp.github.io/slacklog
+# slacklog
 
-## How to develop
+## 開発に必要なもの
+
+- Go
+- Ruby
+- Jekyll
+
+## 開発方法
+
+### Docker を使う場合
+
+```console
+./scripts/docker.sh
+```
+
+### ローカルで開発する場合
+
+#### HTML の生成
+
+ログを展開
+
+```console
+git fetch origin log-data
+git archive origin/log-data | tar x
+```
+
+Jekyll に必要な HTML を生成
+
+```console
+scripts/generate_html.sh
+```
+
+#### 添付ファイルと絵文字のダウンロード
 
 ```console
 export SLACK_TOKEN=xxxx
+scripts/download_emoji.sh
+scripts/download_files.sh
 ```
 
-Run scripts
+#### 開発サーバーの起動
+
+Jekyll のインストール(初回のみ)
 
 ```console
-./generate_html.sh
+bundle install
 ```
 
+開発サーバーの起動
+
+```console
+bundle exec jekyll serve -w
+```
 
 ## LICNESE
 
