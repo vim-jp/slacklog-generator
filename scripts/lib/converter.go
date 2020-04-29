@@ -72,7 +72,7 @@ func (c *TextConverter) bindEmoji(emojiExp string) string {
 		}
 		return emojiExp
 	}
-	for 6 <= len(extension) && extension[:6] == "alias:" {
+	for 7 <= len(extension) && extension[:6] == "alias:" {
 		name = extension[6:]
 		extension, ok = c.emojis[name]
 		if !ok {
