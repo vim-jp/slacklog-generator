@@ -1,5 +1,23 @@
 # slacklog
 
+## これは何
+
+vim-jp Slack のログを HTML 化するプロジェクトです。
+
+Slack 上では無料枠のため
+
+* 古いメッセージが見れない
+* ワークスペースに参加していない人には見えないため、ブログ等から引用などして参照したい
+* 知見が消えるのはもったいない
+
+といった問題があり、それらを解決するため作られました。
+
+## 開発に参加するには
+
+興味を持った方は vim-jp Slack や [@tyru](https://twitter.com/_tyru_), [@thinca](https://twitter.com/thinca) 等に声をかけて頂ければ GitHub の slacklog Team に招待します (Slack token などもその際共有します)。<br>
+vim-jp Slack への参加方法はこちらをどうぞ。<br>
+[vim-jp » vim-jpのチャットルームについて](https://vim-jp.org/docs/chat.html)
+
 ## 開発に必要なもの
 
 - Go
