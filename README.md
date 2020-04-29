@@ -24,6 +24,7 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 - ローカルで開発する場合 (Docker を使う場合は不要)
   - Ruby
   - Jekyll
+  - (あれば)GNU Make
 
 ## 開発方法
 
@@ -49,6 +50,8 @@ Jekyll に必要な HTML を生成
 ```console
 scripts/generate_html.sh
 ```
+
+GNU Makeがあれば`make`もしくは`gmake`を実行するだけで生成されます
 
 #### 添付ファイルと絵文字のダウンロード
 
