@@ -1,6 +1,6 @@
 # slacklog
 
-興味を持った方は vim-jp Slack や [slacklog の team discussions](https://github.com/orgs/vim-jp/teams/slacklog) で一言言って頂ければ GitHub の slacklog Team に招待します (Slack token などもその際共有します)。<br>
+興味を持った方は vim-jp Slack や [@tyru](https://twitter.com/_tyru_), [@thinca](https://twitter.com/thinca) 等に声をかけて頂ければ GitHub の slacklog Team に招待します (Slack token などもその際共有します)。<br>
 vim-jp Slack への参加方法はこちらをどうぞ。<br>
 [vim-jp » vim-jpのチャットルームについて](https://vim-jp.org/docs/chat.html)
 
