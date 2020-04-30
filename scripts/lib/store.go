@@ -81,12 +81,12 @@ func (s *LogStore) GetMessagesPerMonth(channelID string) ([]MessagesPerMonth, er
 }
 
 func (s *LogStore) GetUserByID(userID string) (*User, bool) {
-	u, ok := s.ut.m[userID]
+	u, ok := s.ut.userMap[userID]
 	return u, ok
 }
 
 func (s *LogStore) GetDisplayNameByUserID(userID string) string {
-	if user, ok := s.ut.m[userID]; ok {
+	if user, ok := s.ut.userMap[userID]; ok {
 		if user.Profile.RealName != "" {
 			return user.Profile.RealName
 		}
@@ -98,8 +98,8 @@ func (s *LogStore) GetDisplayNameByUserID(userID string) string {
 }
 
 func (s *LogStore) GetDisplayNameMap() map[string]string {
-	ret := make(map[string]string, len(s.ut.m))
-	for id, u := range s.ut.m {
+	ret := make(map[string]string, len(s.ut.userMap))
+	for id, u := range s.ut.userMap {
 		ret[id] = s.GetDisplayNameByUserID(u.ID)
 	}
 	return ret
