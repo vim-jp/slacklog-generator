@@ -5,14 +5,19 @@ import (
 	"path/filepath"
 )
 
+// LogStore : ログデータを各種テーブルを介して取得するための構造体。
+// MessageTableはチャンネル毎に用意しているためmtsはチャンネルIDをキーとするmap
+// となっている。
 type LogStore struct {
 	path string
 	ut   *UserTable
 	ct   *ChannelTable
 	et   *EmojiTable
-	mts  map[string]*MessageTable
+	// key: channel ID
+	mts map[string]*MessageTable
 }
 
+// NewLogStore : 各テーブルを生成して、LogStoreを生成する。
 func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 	ut, err := NewUserTable(filepath.Join(dirPath, "users.json"))
 	if err != nil {
