@@ -1,3 +1,10 @@
+/*
+リファクタリング中
+処理をslacklog packageに移動していく。
+一旦、必要な処理はすべてslacklog packageから一時的にエクスポートするか、このファ
+イル内で定義している。
+*/
+
 package subcmd
 
 import (
