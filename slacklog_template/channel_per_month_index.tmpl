@@ -80,8 +80,8 @@ permalink: /<< .channel.ID >>/<< .monthKey.Year >>/<< .monthKey.Month >>/index:o
           <<- if .Text >>
           <div class='slacklog-attachment-other-text'><< attachmentText . >></div>
           <<- end >>
-          <<- if .ThumbUrl >>
-          <div class='slacklog-attachment-other-thumb'><img src='<< .ThumbUrl >>' width='<< .ThumbWidth >>' height='<< .ThumbHeight >>' alt='<< html .Title >>'></div>
+          <<- if .ThumbURL >>
+          <div class='slacklog-attachment-other-thumb'><img src='<< .ThumbURL >>' width='<< .ThumbWidth >>' height='<< .ThumbHeight >>' alt='<< html .Title >>'></div>
           <<- end >>
         </span>
       <<- end >>
