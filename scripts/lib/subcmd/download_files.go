@@ -60,7 +60,7 @@ func doDownloadFiles() error {
 	}
 
 	for _, channel := range channels {
-		messages, err := slacklog.ReadAllMessages(filepath.Join(logDir, channel.ID))
+		messages, err := ReadAllMessages(filepath.Join(logDir, channel.ID))
 		if err != nil {
 			close(ch)
 			return err

@@ -19,16 +19,18 @@ func Run() error {
 
 	subCmdName := os.Args[1]
 	switch subCmdName {
+	case "convert_exported_logs":
+		return doConvertExportedLogs()
+	case "download_emoji":
+		return doDownloadEmoji()
+	case "download_files":
+		return doDownloadFiles()
 	case "generate_html":
 		args := []string{}
 		if len(os.Args) >= 3 {
 			args = os.Args[2:]
 		}
 		return GenerateHTML(args)
-	case "download_emoji":
-		return doDownloadEmoji()
-	case "download_files":
-		return doDownloadFiles()
 	}
 
 	return fmt.Errorf("Unknown subcmd: %s", subCmdName)
