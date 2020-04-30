@@ -263,6 +263,28 @@ func (m Message) IsRootOfThread() bool {
 	return m.Ts == m.ThreadTs
 }
 
+var reToken = regexp.MustCompile(`\?t=xoxe-[-a-f0-9]+$`)
+
+func (m *Message) RemoveTokenFromURLs() {
+	for i := range m.Files {
+		m.Files[i].URLPrivate = reToken.ReplaceAllLiteralString(m.Files[i].URLPrivate, "")
+		m.Files[i].URLPrivateDownload = reToken.ReplaceAllLiteralString(m.Files[i].URLPrivateDownload, "")
+		m.Files[i].Thumb64 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb64, "")
+		m.Files[i].Thumb80 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb80, "")
+		m.Files[i].Thumb160 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb160, "")
+		m.Files[i].Thumb360 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360, "")
+		m.Files[i].Thumb480 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480, "")
+		m.Files[i].Thumb720 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb720, "")
+		m.Files[i].Thumb800 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb800, "")
+		m.Files[i].Thumb960 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb960, "")
+		m.Files[i].Thumb1024 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb1024, "")
+		m.Files[i].Thumb360Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360Gif, "")
+		m.Files[i].Thumb480Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480Gif, "")
+		m.Files[i].DeanimateGif = reToken.ReplaceAllLiteralString(m.Files[i].DeanimateGif, "")
+		m.Files[i].ThumbVideo = reToken.ReplaceAllLiteralString(m.Files[i].ThumbVideo, "")
+	}
+}
+
 // MessageFile :
 // エクスポートしたYYYY-MM-DD.jsonの中身を保持する
 // https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
@@ -331,14 +353,14 @@ func (f *MessageFile) TopLevelMimetype() string {
 }
 
 func (f *MessageFile) OriginalFilePath() string {
-	suffix := f.downloadURLsAndSuffixes()[f.URLPrivate]
-	return f.ID + "/" + url.PathEscape(f.downloadFilename(f.URLPrivate, suffix))
+	suffix := f.DownloadURLsAndSuffixes()[f.URLPrivate]
+	return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.URLPrivate, suffix))
 }
 
 func (f *MessageFile) ThumbImagePath() string {
 	if f.Thumb1024 != "" {
-		suffix := f.downloadURLsAndSuffixes()[f.Thumb1024]
-		return f.ID + "/" + url.PathEscape(f.downloadFilename(f.Thumb1024, suffix))
+		suffix := f.DownloadURLsAndSuffixes()[f.Thumb1024]
+		return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.Thumb1024, suffix))
 	}
 	return f.OriginalFilePath()
 }
@@ -358,11 +380,11 @@ func (f *MessageFile) ThumbImageHeight() int64 {
 }
 
 func (f *MessageFile) ThumbVideoPath() string {
-	suffix := f.downloadURLsAndSuffixes()[f.ThumbVideo]
-	return f.ID + "/" + url.PathEscape(f.downloadFilename(f.ThumbVideo, suffix))
+	suffix := f.DownloadURLsAndSuffixes()[f.ThumbVideo]
+	return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.ThumbVideo, suffix))
 }
 
-func (f *MessageFile) downloadURLsAndSuffixes() map[string]string {
+func (f *MessageFile) DownloadURLsAndSuffixes() map[string]string {
 	return map[string]string{
 		f.URLPrivate:   "",
 		f.Thumb64:      "_64",
@@ -381,7 +403,7 @@ func (f *MessageFile) downloadURLsAndSuffixes() map[string]string {
 	}
 }
 
-func (f *MessageFile) downloadFilename(url, suffix string) string {
+func (f *MessageFile) DownloadFilename(url, suffix string) string {
 	ext := filepath.Ext(url)
 	nameExt := filepath.Ext(f.Name)
 	name := f.Name[:len(f.Name)-len(ext)]

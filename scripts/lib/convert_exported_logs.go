@@ -39,13 +39,13 @@ func doConvertExportedLogs() error {
 	}
 
 	for _, channel := range channels {
-		messages, err := readAllMessages(filepath.Join(inDir, channel.Name))
+		messages, err := ReadAllMessages(filepath.Join(inDir, channel.Name))
 		if err != nil {
 			return err
 		}
 		for _, message := range messages {
 			message.UserProfile = nil
-			message.removeTokenFromURLs()
+			message.RemoveTokenFromURLs()
 		}
 		channelDir := filepath.Join(outDir, channel.Id)
 		if err := Mkdir(channelDir); err != nil {
@@ -81,7 +81,7 @@ func copyFile(from string, to string) error {
 	return err
 }
 
-func readAllMessages(inDir string) ([]*message, error) {
+func ReadAllMessages(inDir string) ([]*Message, error) {
 	dir, err := os.Open(inDir)
 	if err != nil {
 		return nil, err
@@ -92,13 +92,13 @@ func readAllMessages(inDir string) ([]*message, error) {
 		return nil, err
 	}
 	sort.Strings(names)
-	var messages []*message
+	var messages []*Message
 	for i := range names {
 		content, err := ioutil.ReadFile(filepath.Join(inDir, names[i]))
 		if err != nil {
 			return nil, err
 		}
-		var msgs []*message
+		var msgs []*Message
 		err = json.Unmarshal(content, &msgs)
 		if err != nil {
 			return nil, err
@@ -108,8 +108,8 @@ func readAllMessages(inDir string) ([]*message, error) {
 	return messages, nil
 }
 
-func groupMessagesByDay(messages []*message) map[string][]*message {
-	messagesPerDay := map[string][]*message{}
+func groupMessagesByDay(messages []*Message) map[string][]*Message {
+	messagesPerDay := map[string][]*Message{}
 	for i := range messages {
 		time := TsToDateTime(messages[i].Ts).Format("2006-01-02")
 		messagesPerDay[time] = append(messagesPerDay[time], messages[i])
@@ -117,7 +117,7 @@ func groupMessagesByDay(messages []*message) map[string][]*message {
 	return messagesPerDay
 }
 
-func writeMessages(filename string, messages []*message) error {
+func writeMessages(filename string, messages []*Message) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
