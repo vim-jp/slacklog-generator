@@ -19,7 +19,7 @@ import (
 // loadedFilesはすでに読み込んだファイルパスを保持する。
 // loadedFilesは同じファイルを二度読むことを防ぐために用いている。
 type MessageTable struct {
-	// key: ts
+	// key: thread timestamp
 	threadMap map[string]*Thread
 	msgsMap   map[string]*MessagesPerMonth
 	// key: file path
