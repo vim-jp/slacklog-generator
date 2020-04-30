@@ -31,8 +31,8 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 
 	et := NewEmojiTable(filepath.Join(dirPath, cfg.EmojiJson))
 
-	mts := make(map[string]*MessageTable, len(ct.m))
-	for channelID := range ct.m {
+	mts := make(map[string]*MessageTable, len(ct.channelMap))
+	for channelID := range ct.channelMap {
 		mts[channelID] = NewMessageTable()
 	}
 
@@ -46,7 +46,7 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 }
 
 func (s *LogStore) GetChannels() []Channel {
-	return s.ct.l
+	return s.ct.channels
 }
 
 func (s *LogStore) HasNextMonth(channelID string, msgsPerMonth MessagesPerMonth) bool {

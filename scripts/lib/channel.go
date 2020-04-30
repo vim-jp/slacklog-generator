@@ -7,12 +7,12 @@ import (
 )
 
 // ChannelTable : チャンネルデータを保持する。
-// lもmも保持するチャンネルデータは同じで、mはチャンネルIDをキーとするmapとなっ
-// ている。
-// ユースケースに応じてlとmは使い分ける。
+// channelsもchannelMapも保持するチャンネルデータは同じで、channelMapはチャンネ
+// ルIDをキーとするmapとなっている。
+// ユースケースに応じてchannelsとchannelMapは使い分ける。
 type ChannelTable struct {
-	l []Channel
-	m map[string]*Channel
+	channels   []Channel
+	channelMap map[string]*Channel
 }
 
 // NewChannelTable : pathに指定したJSON形式のチャンネルデータを読み込み、
