@@ -21,8 +21,6 @@ func Run() error {
 	switch subCmdName {
 	case "convert_exported_logs":
 		return doConvertExportedLogs()
-	case "download_files":
-		return doDownloadFiles()
 	}
 
 	return fmt.Errorf("Unknown subcmd: %s", subCmdName)

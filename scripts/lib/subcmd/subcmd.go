@@ -27,6 +27,8 @@ func Run() error {
 		return GenerateHTML(args)
 	case "download_emoji":
 		return doDownloadEmoji()
+	case "download_files":
+		return doDownloadFiles()
 	}
 
 	return fmt.Errorf("Unknown subcmd: %s", subCmdName)
