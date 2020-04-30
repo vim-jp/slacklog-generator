@@ -24,7 +24,7 @@ func doConvertExportedLogs() error {
 		return fmt.Errorf("could not read channels.json: %s", err)
 	}
 
-	if err := mkdir(outDir); err != nil {
+	if err := Mkdir(outDir); err != nil {
 		return fmt.Errorf("could not create %s directory: %s", outDir, err)
 	}
 
@@ -48,7 +48,7 @@ func doConvertExportedLogs() error {
 			message.removeTokenFromURLs()
 		}
 		channelDir := filepath.Join(outDir, channel.Id)
-		if err := mkdir(channelDir); err != nil {
+		if err := Mkdir(channelDir); err != nil {
 			return fmt.Errorf("could not create %s directory: %s", channelDir, err)
 		}
 		messagesPerDay := groupMessagesByDay(messages)

@@ -33,7 +33,7 @@ func doDownloadFiles() error {
 		return fmt.Errorf("could not read channels.json: %s", err)
 	}
 
-	if err := mkdir(filesDir); err != nil {
+	if err := Mkdir(filesDir); err != nil {
 		return fmt.Errorf("could not create %s directory: %s", filesDir, err)
 	}
 
@@ -106,7 +106,7 @@ func (f *messageFile) downloadURLsAndSuffixes() map[string]string {
 
 func (f *messageFile) downloadAll(outDir string, slackToken string) []error {
 	fileBaseDir := path.Join(outDir, f.Id)
-	err := mkdir(fileBaseDir)
+	err := Mkdir(fileBaseDir)
 	if err != nil {
 		return []error{err}
 	}

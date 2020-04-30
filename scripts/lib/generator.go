@@ -93,7 +93,7 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 		return false, nil
 	}
 
-	if err := mkdir(path); err != nil {
+	if err := Mkdir(path); err != nil {
 		return false, fmt.Errorf("could not create %s directory: %s", path, err)
 	}
 
@@ -152,7 +152,7 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 }
 
 func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey, msgs []Message, path string) error {
-	if err := mkdir(path); err != nil {
+	if err := Mkdir(path); err != nil {
 		return fmt.Errorf("could not create %s directory: %s", path, err)
 	}
 
