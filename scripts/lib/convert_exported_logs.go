@@ -111,7 +111,7 @@ func readAllMessages(inDir string) ([]*message, error) {
 func groupMessagesByDay(messages []*message) map[string][]*message {
 	messagesPerDay := map[string][]*message{}
 	for i := range messages {
-		time := ts2datetime(messages[i].Ts).Format("2006-01-02")
+		time := TsToDateTime(messages[i].Ts).Format("2006-01-02")
 		messagesPerDay[time] = append(messagesPerDay[time], messages[i])
 	}
 	return messagesPerDay

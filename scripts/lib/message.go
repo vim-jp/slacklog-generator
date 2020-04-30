@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -59,6 +60,9 @@ func (m *MessageTable) ReadLogDir(path string) error {
 	}
 	return nil
 }
+
+// "{year}-{month}-{day}.json"
+var reMsgFilename = regexp.MustCompile(`^(\d{4})-(\d{2})-\d{2}\.json$`)
 
 // ReadLogFile : pathに指定したJSON形式のメッセージデータを読み込む。
 // すでにそのファイルが読み込み済みの場合は処理をスキップする。
