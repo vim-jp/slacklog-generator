@@ -103,17 +103,13 @@ func (m *MessageTable) ReadLogFile(path string) error {
 				m.threadMap[threadTs] = &Thread{}
 			}
 			if msgs[i].IsRootOfThread() {
-				replies := m.threadMap[threadTs].msgs
-				for j := 0; j < len(replies); { // remove root message(s)
-					if replies[j].Ts == threadTs {
-						replies = append(replies[:j], replies[j+1:]...)
-						continue
-					}
-					j++
-				}
-				m.threadMap[threadTs].msgs = append([]Message{msgs[i]}, replies...)
+				m.threadMap[threadTs].rootMsg = &msgs[i]
 			} else {
-				m.threadMap[threadTs].msgs = append(m.threadMap[msgs[i].ThreadTs].msgs, msgs[i])
+				if m.threadMap[threadTs].replies == nil {
+					m.threadMap[threadTs].replies = []Message{msgs[i]}
+				} else {
+					m.threadMap[threadTs].replies = append(m.threadMap[threadTs].replies, msgs[i])
+				}
 			}
 		}
 	}

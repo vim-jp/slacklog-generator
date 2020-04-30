@@ -4,22 +4,26 @@ import (
 	"time"
 )
 
+// Thread : スレッド
+// rootMsgはスレッドの先頭メッセージを表わす。
+// repliesにはそのスレッドへの返信メッセージが入る。先頭メッセージは含まない。
 type Thread struct {
-	msgs []Message
+	rootMsg *Message
+	replies []Message
 }
 
 func (t Thread) LastReplyTime() time.Time {
-	return TsToDateTime(t.msgs[len(t.msgs)-1].Ts)
+	return TsToDateTime(t.replies[len(t.replies)-1].Ts)
 }
 
-func (t Thread) ReplyNum() int {
-	return len(t.msgs) - 1
+func (t Thread) ReplyCount() int {
+	return len(t.replies)
 }
 
 func (t Thread) RootText() string {
-	return t.msgs[0].Text
+	return t.rootMsg.Text
 }
 
 func (t Thread) Replies() []Message {
-	return t.msgs[1:]
+	return t.replies
 }

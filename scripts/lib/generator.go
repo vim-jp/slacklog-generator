@@ -213,7 +213,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			},
 			"threadNum": func(ts string) int {
 				if t, ok := g.s.GetThread(channel.ID, ts); ok {
-					return t.ReplyNum()
+					return t.ReplyCount()
 				}
 				return 0
 			},
