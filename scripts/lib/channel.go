@@ -24,7 +24,9 @@ func NewChannelTable(path string, whitelist []string) (*ChannelTable, error) {
 		return nil, err
 	}
 	var channels []Channel
-	err = json.Unmarshal(content, &channels)
+	if err := json.Unmarshal(content, &channels); err != nil {
+		return nil, err
+	}
 	channels = FilterChannel(channels, whitelist)
 	sort.Slice(channels, func(i, j int) bool {
 		return channels[i].Name < channels[j].Name

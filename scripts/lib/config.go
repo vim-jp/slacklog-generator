@@ -19,6 +19,8 @@ func ReadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	err = json.Unmarshal(content, &cfg)
-	return &cfg, err
+	if err := json.Unmarshal(content, &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
 }

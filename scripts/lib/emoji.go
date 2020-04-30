@@ -13,16 +13,18 @@ type EmojiTable struct {
 
 // NewEmojiTable : pathに指定したJSON形式の絵文字データを読み込み、EmojiTableを
 // 生成する。
-func NewEmojiTable(path string) *EmojiTable {
+func NewEmojiTable(path string) (*EmojiTable, error) {
 	emojis := &EmojiTable{
 		urlMap: map[string]string{},
 	}
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		return emojis
+		return nil, err
 	}
 
-	json.Unmarshal(content, &emojis.urlMap)
+	if err := json.Unmarshal(content, &emojis.urlMap); err != nil {
+		return nil, err
+	}
 
-	return emojis
+	return emojis, nil
 }

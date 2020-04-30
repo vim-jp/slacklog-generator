@@ -2,6 +2,7 @@ package slacklog
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 )
 
@@ -29,7 +30,14 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 		return nil, err
 	}
 
-	et := NewEmojiTable(filepath.Join(dirPath, cfg.EmojiJson))
+	et, err := NewEmojiTable(filepath.Join(dirPath, cfg.EmojiJson))
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+		// EmojiTable is not required, so if the file just doesn't exist, continue
+		// processing.
+	}
 
 	mts := make(map[string]*MessageTable, len(ct.channelMap))
 	for channelID := range ct.channelMap {
