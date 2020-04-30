@@ -11,8 +11,8 @@ import (
 // ルIDをキーとするmapとなっている。
 // ユースケースに応じてchannelsとchannelMapは使い分ける。
 type ChannelTable struct {
-	channels   []Channel
-	channelMap map[string]*Channel
+	Channels   []Channel
+	ChannelMap map[string]*Channel
 }
 
 // NewChannelTable : pathに指定したJSON形式のチャンネルデータを読み込み、

@@ -6,13 +6,13 @@ import (
 )
 
 // UserTable : ユーザデータを保持する
-// usersもuserMapも保持するユーザデータは同じで、userMapはユーザIDをキーとする
+// UsersもUserMapも保持するユーザデータは同じで、UserMapはユーザIDをキーとする
 // mapとなっている。
-// ユースケースに応じてusersとuserMapは使い分ける。
+// ユースケースに応じてUsersとUserMapは使い分ける。
 type UserTable struct {
-	users []User
+	Users []User
 	// key: user ID
-	userMap map[string]*User
+	UserMap map[string]*User
 }
 
 // NewUserTable : pathに指定したJSON形式のユーザデータを読み込み、UserTableを生

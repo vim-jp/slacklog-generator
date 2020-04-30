@@ -14,15 +14,15 @@ import (
 )
 
 // MessageTable : メッセージデータを保持する
-// スレッドは投稿時刻からどのスレッドへの返信かが判断できるためthreadMapのキー
+// スレッドは投稿時刻からどのスレッドへの返信かが判断できるためThreadMapのキー
 // はtsである。
-// msgsMapは月毎にメッセージを保持する。そのためキーは投稿月である。
+// MsgsMapは月毎にメッセージを保持する。そのためキーは投稿月である。
 // loadedFilesはすでに読み込んだファイルパスを保持する。
 // loadedFilesは同じファイルを二度読むことを防ぐために用いている。
 type MessageTable struct {
 	// key: thread timestamp
-	threadMap map[string]*Thread
-	msgsMap   map[MessageMonthKey][]Message
+	ThreadMap map[string]*Thread
+	MsgsMap   map[MessageMonthKey][]Message
 	// key: file path
 	loadedFiles map[string]struct{}
 }
@@ -33,8 +33,8 @@ type MessageTable struct {
 // 実行時に読み込ませる。
 func NewMessageTable() *MessageTable {
 	return &MessageTable{
-		threadMap:   map[string]*Thread{},
-		msgsMap:     map[MessageMonthKey][]Message{},
+		ThreadMap:   map[string]*Thread{},
+		MsgsMap:     map[MessageMonthKey][]Message{},
 		loadedFiles: map[string]struct{}{},
 	}
 }
@@ -103,16 +103,16 @@ func (m *MessageTable) ReadLogFile(path string) error {
 			visibleMsgs = append(visibleMsgs, msgs[i])
 		}
 		if threadTs != "" {
-			if m.threadMap[threadTs] == nil {
-				m.threadMap[threadTs] = &Thread{}
+			if m.ThreadMap[threadTs] == nil {
+				m.ThreadMap[threadTs] = &Thread{}
 			}
 			if msgs[i].IsRootOfThread() {
-				m.threadMap[threadTs].rootMsg = &msgs[i]
+				m.ThreadMap[threadTs].rootMsg = &msgs[i]
 			} else {
-				if m.threadMap[threadTs].replies == nil {
-					m.threadMap[threadTs].replies = []Message{msgs[i]}
+				if m.ThreadMap[threadTs].replies == nil {
+					m.ThreadMap[threadTs].replies = []Message{msgs[i]}
 				} else {
-					m.threadMap[threadTs].replies = append(m.threadMap[threadTs].replies, msgs[i])
+					m.ThreadMap[threadTs].replies = append(m.ThreadMap[threadTs].replies, msgs[i])
 				}
 			}
 		}
@@ -123,19 +123,19 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		return err
 	}
 	if len(visibleMsgs) != 0 {
-		if _, ok := m.msgsMap[key]; !ok {
-			m.msgsMap[key] = visibleMsgs
+		if _, ok := m.MsgsMap[key]; !ok {
+			m.MsgsMap[key] = visibleMsgs
 		} else {
-			m.msgsMap[key] = append(m.msgsMap[key], visibleMsgs...)
+			m.MsgsMap[key] = append(m.MsgsMap[key], visibleMsgs...)
 		}
 	}
 
-	for key := range m.msgsMap {
-		sort.SliceStable(m.msgsMap[key], func(i, j int) bool {
+	for key := range m.MsgsMap {
+		sort.SliceStable(m.MsgsMap[key], func(i, j int) bool {
 			// must be the same digits, so no need to convert the timestamp to a number
-			return m.msgsMap[key][i].Ts < m.msgsMap[key][j].Ts
+			return m.MsgsMap[key][i].Ts < m.MsgsMap[key][j].Ts
 		})
-		ms := m.msgsMap[key]
+		ms := m.MsgsMap[key]
 		var lastUser string
 		for i := range ms {
 			if lastUser == ms[i].User {

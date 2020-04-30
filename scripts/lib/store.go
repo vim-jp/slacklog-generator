@@ -39,8 +39,8 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 		// processing.
 	}
 
-	mts := make(map[string]*MessageTable, len(ct.channelMap))
-	for channelID := range ct.channelMap {
+	mts := make(map[string]*MessageTable, len(ct.ChannelMap))
+	for channelID := range ct.ChannelMap {
 		mts[channelID] = NewMessageTable()
 	}
 
@@ -54,12 +54,12 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 }
 
 func (s *LogStore) GetChannels() []Channel {
-	return s.ct.channels
+	return s.ct.Channels
 }
 
 func (s *LogStore) HasNextMonth(channelID string, key MessageMonthKey) bool {
 	if mt, ok := s.mts[channelID]; ok && mt != nil {
-		_, ok := mt.msgsMap[key.Next()]
+		_, ok := mt.MsgsMap[key.Next()]
 		return ok
 	}
 	return false
@@ -67,7 +67,7 @@ func (s *LogStore) HasNextMonth(channelID string, key MessageMonthKey) bool {
 
 func (s *LogStore) HasPrevMonth(channelID string, key MessageMonthKey) bool {
 	if mt, ok := s.mts[channelID]; ok && mt != nil {
-		_, ok := mt.msgsMap[key.Prev()]
+		_, ok := mt.MsgsMap[key.Prev()]
 		return ok
 	}
 	return false
@@ -82,16 +82,16 @@ func (s *LogStore) GetMessagesPerMonth(channelID string) (map[MessageMonthKey][]
 		return nil, err
 	}
 
-	return mt.msgsMap, nil
+	return mt.MsgsMap, nil
 }
 
 func (s *LogStore) GetUserByID(userID string) (*User, bool) {
-	u, ok := s.ut.userMap[userID]
+	u, ok := s.ut.UserMap[userID]
 	return u, ok
 }
 
 func (s *LogStore) GetDisplayNameByUserID(userID string) string {
-	if user, ok := s.ut.userMap[userID]; ok {
+	if user, ok := s.ut.UserMap[userID]; ok {
 		if user.Profile.RealName != "" {
 			return user.Profile.RealName
 		}
@@ -103,15 +103,15 @@ func (s *LogStore) GetDisplayNameByUserID(userID string) string {
 }
 
 func (s *LogStore) GetDisplayNameMap() map[string]string {
-	ret := make(map[string]string, len(s.ut.userMap))
-	for id, u := range s.ut.userMap {
+	ret := make(map[string]string, len(s.ut.UserMap))
+	for id, u := range s.ut.UserMap {
 		ret[id] = s.GetDisplayNameByUserID(u.ID)
 	}
 	return ret
 }
 
 func (s *LogStore) GetEmojiMap() map[string]string {
-	return s.et.urlMap
+	return s.et.URLMap
 }
 
 func (s *LogStore) GetThread(channelID, ts string) (*Thread, bool) {
@@ -119,7 +119,7 @@ func (s *LogStore) GetThread(channelID, ts string) (*Thread, bool) {
 	if !ok {
 		return nil, false
 	}
-	if t, ok := mt.threadMap[ts]; ok {
+	if t, ok := mt.ThreadMap[ts]; ok {
 		return t, true
 	}
 	return nil, false
