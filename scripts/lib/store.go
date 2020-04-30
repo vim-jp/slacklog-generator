@@ -57,23 +57,23 @@ func (s *LogStore) GetChannels() []Channel {
 	return s.ct.channels
 }
 
-func (s *LogStore) HasNextMonth(channelID string, msgsPerMonth MessagesPerMonth) bool {
+func (s *LogStore) HasNextMonth(channelID string, key MessageMonthKey) bool {
 	if mt, ok := s.mts[channelID]; ok && mt != nil {
-		_, ok := mt.msgsMap[msgsPerMonth.NextKey()]
+		_, ok := mt.msgsMap[key.Next()]
 		return ok
 	}
 	return false
 }
 
-func (s *LogStore) HasPrevMonth(channelID string, msgsPerMonth MessagesPerMonth) bool {
+func (s *LogStore) HasPrevMonth(channelID string, key MessageMonthKey) bool {
 	if mt, ok := s.mts[channelID]; ok && mt != nil {
-		_, ok := mt.msgsMap[msgsPerMonth.PrevKey()]
+		_, ok := mt.msgsMap[key.Prev()]
 		return ok
 	}
 	return false
 }
 
-func (s *LogStore) GetMessagesPerMonth(channelID string) ([]MessagesPerMonth, error) {
+func (s *LogStore) GetMessagesPerMonth(channelID string) (map[MessageMonthKey][]Message, error) {
 	mt, ok := s.mts[channelID]
 	if !ok {
 		return nil, errors.New("not found")
@@ -82,15 +82,7 @@ func (s *LogStore) GetMessagesPerMonth(channelID string) ([]MessagesPerMonth, er
 		return nil, err
 	}
 
-	msgs := mt.msgsMap
-	ret := make([]MessagesPerMonth, len(msgs))
-	i := 0
-	for _, msgsPerMonth := range msgs {
-		ret[i] = *msgsPerMonth
-		i++
-	}
-
-	return ret, nil
+	return mt.msgsMap, nil
 }
 
 func (s *LogStore) GetUserByID(userID string) (*User, bool) {

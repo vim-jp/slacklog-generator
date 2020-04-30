@@ -21,7 +21,7 @@ import (
 type MessageTable struct {
 	// key: thread timestamp
 	threadMap map[string]*Thread
-	msgsMap   map[string]*MessagesPerMonth
+	msgsMap   map[MessageMonthKey][]Message
 	// key: file path
 	loadedFiles map[string]struct{}
 }
@@ -33,7 +33,7 @@ type MessageTable struct {
 func NewMessageTable() *MessageTable {
 	return &MessageTable{
 		threadMap:   map[string]*Thread{},
-		msgsMap:     map[string]*MessagesPerMonth{},
+		msgsMap:     map[MessageMonthKey][]Message{},
 		loadedFiles: map[string]struct{}{},
 	}
 }
@@ -76,25 +76,13 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		fmt.Fprintf(os.Stderr, "[warning] skipping %s ...\n", path)
 		return nil
 	}
-	key := match[1] + match[2]
-	msgPerMonth, ok := m.msgsMap[key]
-	if !ok {
-		y, err := strconv.Atoi(match[1])
-		if err != nil {
-			return err
-		}
-		m, err := strconv.Atoi(match[2])
-		if err != nil {
-			return err
-		}
-		msgPerMonth = &MessagesPerMonth{year: y, month: m}
-	}
 
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
 	var msgs []Message
+	var visibleMsgs []Message
 	err = json.Unmarshal(content, &msgs)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s: %s", path, err)
@@ -108,8 +96,7 @@ func (m *MessageTable) ReadLogFile(path string) error {
 			msgs[i].Subtype == "thread_broadcast" ||
 			msgs[i].Subtype == "bot_message" ||
 			msgs[i].Subtype == "slackbot_response" {
-			msgPerMonth.Messages = append(msgPerMonth.Messages, msgs[i])
-			m.msgsMap[key] = msgPerMonth
+			visibleMsgs = append(visibleMsgs, msgs[i])
 		}
 		if threadTs != "" {
 			if m.threadMap[threadTs] == nil {
@@ -130,16 +117,25 @@ func (m *MessageTable) ReadLogFile(path string) error {
 			}
 		}
 	}
-	for key := range m.msgsMap {
-		if len(m.msgsMap[key].Messages) == 0 {
-			delete(m.msgsMap, key)
-			continue
+
+	key, err := NewMessageMonthKey(match[1], match[2])
+	if err != nil {
+		return err
+	}
+	if len(visibleMsgs) != 0 {
+		if _, ok := m.msgsMap[key]; !ok {
+			m.msgsMap[key] = visibleMsgs
+		} else {
+			m.msgsMap[key] = append(m.msgsMap[key], visibleMsgs...)
 		}
-		sort.SliceStable(m.msgsMap[key].Messages, func(i, j int) bool {
+	}
+
+	for key := range m.msgsMap {
+		sort.SliceStable(m.msgsMap[key], func(i, j int) bool {
 			// must be the same digits, so no need to convert the timestamp to a number
-			return m.msgsMap[key].Messages[i].Ts < m.msgsMap[key].Messages[j].Ts
+			return m.msgsMap[key][i].Ts < m.msgsMap[key][j].Ts
 		})
-		ms := m.msgsMap[key].Messages
+		ms := m.msgsMap[key]
 		var lastUser string
 		for i := range ms {
 			if lastUser == ms[i].User {
@@ -150,69 +146,76 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		}
 	}
 
-	// read marker
+	// loaded marker
 	m.loadedFiles[path] = struct{}{}
 	return nil
 }
 
-type MessagesPerMonth struct {
-	year     int
-	month    int
-	Messages []Message
+type MessageMonthKey struct {
+	year  int
+	month int
 }
 
-func (m MessagesPerMonth) Year() string {
-	return fmt.Sprintf("%4d", m.year)
-}
-
-func (m MessagesPerMonth) Month() string {
-	return fmt.Sprintf("%02d", m.month)
-}
-
-func (m MessagesPerMonth) NextYear() string {
-	if m.month >= 12 {
-		return fmt.Sprintf("%4d", m.year+1)
+func NewMessageMonthKey(year, month string) (MessageMonthKey, error) {
+	y, err := strconv.Atoi(year)
+	if err != nil {
+		return MessageMonthKey{}, err
 	}
-	return fmt.Sprintf("%4d", m.year)
+	m, err := strconv.Atoi(month)
+	if err != nil {
+		return MessageMonthKey{}, err
+	}
+	return MessageMonthKey{year: y, month: m}, nil
 }
 
-func (m MessagesPerMonth) NextMonth() string {
-	if m.month >= 12 {
+func (k MessageMonthKey) Next() MessageMonthKey {
+	if k.month >= 12 {
+		return MessageMonthKey{year: k.year + 1, month: 1}
+	}
+	return MessageMonthKey{year: k.year, month: k.month + 1}
+}
+
+func (k MessageMonthKey) Prev() MessageMonthKey {
+	if k.month <= 1 {
+		return MessageMonthKey{year: k.year - 1, month: 12}
+	}
+	return MessageMonthKey{year: k.year, month: k.month - 1}
+}
+
+func (k MessageMonthKey) Year() string {
+	return fmt.Sprintf("%4d", k.year)
+}
+
+func (k MessageMonthKey) Month() string {
+	return fmt.Sprintf("%02d", k.month)
+}
+
+func (k MessageMonthKey) NextYear() string {
+	if k.month >= 12 {
+		return fmt.Sprintf("%4d", k.year+1)
+	}
+	return fmt.Sprintf("%4d", k.year)
+}
+
+func (k MessageMonthKey) NextMonth() string {
+	if k.month >= 12 {
 		return "01"
 	}
-	return fmt.Sprintf("%02d", m.month+1)
+	return fmt.Sprintf("%02d", k.month+1)
 }
 
-func (m MessagesPerMonth) PrevYear() string {
-	if m.month <= 1 {
-		return fmt.Sprintf("%4d", m.year-1)
+func (k MessageMonthKey) PrevYear() string {
+	if k.month <= 1 {
+		return fmt.Sprintf("%4d", k.year-1)
 	}
-	return fmt.Sprintf("%4d", m.year)
+	return fmt.Sprintf("%4d", k.year)
 }
 
-func (m MessagesPerMonth) PrevMonth() string {
-	if m.month <= 1 {
+func (k MessageMonthKey) PrevMonth() string {
+	if k.month <= 1 {
 		return "12"
 	}
-	return fmt.Sprintf("%02d", m.month-1)
-}
-
-func (m MessagesPerMonth) Key() string {
-	return fmt.Sprintf("%4d%02d", m.year, m.month)
-}
-
-func (m MessagesPerMonth) NextKey() string {
-	if m.month >= 12 {
-		return fmt.Sprintf("%4d%02d", m.year+1, 1)
-	}
-	return fmt.Sprintf("%4d%02d", m.year, m.month+1)
-}
-
-func (m MessagesPerMonth) PrevKey() string {
-	if m.month <= 1 {
-		return fmt.Sprintf("%4d%02d", m.year-1, 12)
-	}
-	return fmt.Sprintf("%4d%02d", m.year, m.month-1)
+	return fmt.Sprintf("%02d", k.month-1)
 }
 
 // Message : メッセージ

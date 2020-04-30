@@ -85,11 +85,11 @@ func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
 }
 
 func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, error) {
-	msgs, err := g.s.GetMessagesPerMonth(channel.ID)
+	msgsMap, err := g.s.GetMessagesPerMonth(channel.ID)
 	if err != nil {
 		return false, err
 	}
-	if len(msgs) == 0 {
+	if len(msgsMap) == 0 {
 		return false, nil
 	}
 
@@ -97,19 +97,27 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 		return false, fmt.Errorf("could not create %s directory: %s", path, err)
 	}
 
+	keys := make([]MessageMonthKey, len(msgsMap))
+	i := 0
+	for key := range msgsMap {
+		keys[i] = key
+		i++
+	}
+
 	if err := g.generateChannelIndex(
 		channel,
-		msgs,
+		keys,
 		filepath.Join(path, "index.html"),
 	); err != nil {
 		return true, err
 	}
 
-	for i := range msgs {
+	for key := range msgsMap {
 		if err := g.generateMessageDir(
 			channel,
-			msgs[i],
-			filepath.Join(path, msgs[i].Year(), msgs[i].Month()),
+			key,
+			msgsMap[key],
+			filepath.Join(path, key.Year(), key.Month()),
 		); err != nil {
 			return true, err
 		}
@@ -117,18 +125,18 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 	return true, nil
 }
 
-func (g *HTMLGenerator) generateChannelIndex(channel Channel, msgs []MessagesPerMonth, path string) error {
+func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMonthKey, path string) error {
 
-	sort.Slice(msgs, func(i, j int) bool {
-		if msgs[i].year < msgs[j].year {
+	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].year < keys[j].year {
 			return true
 		}
-		return msgs[i].month < msgs[j].month
+		return keys[i].month < keys[j].month
 	})
 
 	params := make(map[string]interface{})
 	params["channel"] = channel
-	params["msgMap"] = msgs
+	params["keys"] = keys
 	var out bytes.Buffer
 
 	tempPath := filepath.Join(g.templateDir, "channel_index.tmpl")
@@ -143,14 +151,15 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, msgs []MessagesPer
 	return ioutil.WriteFile(path, out.Bytes(), 0666)
 }
 
-func (g *HTMLGenerator) generateMessageDir(channel Channel, msgs MessagesPerMonth, path string) error {
+func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey, msgs []Message, path string) error {
 	if err := mkdir(path); err != nil {
 		return fmt.Errorf("could not create %s directory: %s", path, err)
 	}
 
 	params := make(map[string]interface{})
 	params["channel"] = channel
-	params["msgPerMonth"] = msgs
+	params["monthKey"] = key
+	params["msgs"] = msgs
 	var out bytes.Buffer
 
 	// TODO check below subtypes work correctly
@@ -220,11 +229,11 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, msgs MessagesPerMont
 				}
 				return g.c.escape(text)
 			},
-			"hasPrevMonth": func(msgs MessagesPerMonth) bool {
-				return g.s.HasPrevMonth(channel.ID, msgs)
+			"hasPrevMonth": func(key MessageMonthKey) bool {
+				return g.s.HasPrevMonth(channel.ID, key)
 			},
-			"hasNextMonth": func(msgs MessagesPerMonth) bool {
-				return g.s.HasNextMonth(channel.ID, msgs)
+			"hasNextMonth": func(key MessageMonthKey) bool {
+				return g.s.HasNextMonth(channel.ID, key)
 			},
 		}).ParseFiles(tmplPath)
 	if err != nil {
