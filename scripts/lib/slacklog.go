@@ -23,8 +23,6 @@ func Run() error {
 		return doConvertExportedLogs()
 	case "download_files":
 		return doDownloadFiles()
-	case "download_emoji":
-		return doDownloadEmoji()
 	}
 
 	return fmt.Errorf("Unknown subcmd: %s", subCmdName)

@@ -1,4 +1,4 @@
-package slacklog
+package subcmd
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/slack-go/slack"
+	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func doDownloadEmoji() error {
@@ -32,7 +33,7 @@ func doDownloadEmoji() error {
 		return err
 	}
 
-	err = mkdir(emojisDir)
+	err = slacklog.Mkdir(emojisDir)
 	if err != nil {
 		return err
 	}
