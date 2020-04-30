@@ -5,11 +5,17 @@ import (
 	"io/ioutil"
 )
 
+// UserTable : ユーザデータを保持する
+// lもmも保持するユーザデータは同じで、mはユーザIDをキーとするmapとなっている。
+// ユースケースに応じてlとmは使い分ける。
 type UserTable struct {
 	l []User
+	// key: user ID
 	m map[string]*User
 }
 
+// NewUserTable : pathに指定したJSON形式のユーザデータを読み込み、UserTableを生
+// 成する。
 func NewUserTable(path string) (*UserTable, error) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -27,6 +33,10 @@ func NewUserTable(path string) (*UserTable, error) {
 	return &UserTable{users, userMap}, err
 }
 
+// User : ユーザ
+// エクスポートしたuser.jsonの中身を保持する。
+// 公式の情報は以下だがuser.jsonの解説までは書かれていない。
+// https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
 type User struct {
 	ID                string      `json:"id"`
 	TeamID            string      `json:"team_id"`
@@ -48,6 +58,10 @@ type User struct {
 	Updated           int64       `json:"updated"`
 }
 
+// UserProfile : ユーザのプロファイル情報
+// エクスポートしたuser.jsonの中身を保持する
+// 公式の情報は以下だがuser.jsonの解説までは書かれていない。
+// https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
 type UserProfile struct {
 	Title                 string      `json:"title"`
 	Phone                 string      `json:"phone"`

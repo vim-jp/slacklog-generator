@@ -6,19 +6,26 @@ import (
 	"sort"
 )
 
+// ChannelTable : チャンネルデータを保持する。
+// lもmも保持するチャンネルデータは同じで、mはチャンネルIDをキーとするmapとなっ
+// ている。
+// ユースケースに応じてlとmは使い分ける。
 type ChannelTable struct {
 	l []Channel
 	m map[string]*Channel
 }
 
-func NewChannelTable(path string, cfg []string) (*ChannelTable, error) {
+// NewChannelTable : pathに指定したJSON形式のチャンネルデータを読み込み、
+// ChannelTable を生成する。
+// whitelistに指定したチャンネル名のみを読み込む。
+func NewChannelTable(path string, whitelist []string) (*ChannelTable, error) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 	var channels []Channel
 	err = json.Unmarshal(content, &channels)
-	channels = FilterChannel(channels, cfg)
+	channels = FilterChannel(channels, whitelist)
 	sort.Slice(channels, func(i, j int) bool {
 		return channels[i].Name < channels[j].Name
 	})
@@ -29,14 +36,17 @@ func NewChannelTable(path string, cfg []string) (*ChannelTable, error) {
 	return &ChannelTable{channels, channelMap}, err
 }
 
-func FilterChannel(channels []Channel, cfg []string) []Channel {
+// FilterChannel : whitelistに指定したチャンネル名に該当するチャンネルのみを返
+// す。
+// whitelistに'*'が含まれる場合はchannelをそのまま返す。
+func FilterChannel(channels []Channel, whitelist []string) []Channel {
 	newChannels := make([]Channel, 0, len(channels))
-	for i := range cfg {
-		if cfg[i] == "*" {
+	for i := range whitelist {
+		if whitelist[i] == "*" {
 			return channels
 		}
 		for j := range channels {
-			if cfg[i] == channels[j].Name {
+			if whitelist[i] == channels[j].Name {
 				newChannels = append(newChannels, channels[j])
 				break
 			}

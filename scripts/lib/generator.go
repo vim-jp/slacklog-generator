@@ -11,13 +11,18 @@ import (
 	"text/template"
 )
 
+// HTMLGenerator : ログデータからHTMLを生成するための構造体。
 type HTMLGenerator struct {
+	// text/template形式のテンプレートが置いてあるディレクトリ
 	templateDir string
-	s           *LogStore
-	c           *TextConverter
-	cfg         Config
+	// ログデータを取得するためのLogStore
+	s *LogStore
+	// markdown形式のテキストを変換するためのTextConverter
+	c   *TextConverter
+	cfg Config
 }
 
+// NewHTMLGenerator : HTMLGeneratorを生成する。
 func NewHTMLGenerator(templateDir string, s *LogStore) *HTMLGenerator {
 	users := s.GetDisplayNameMap()
 	emojis := s.GetEmojiMap()
@@ -30,6 +35,15 @@ func NewHTMLGenerator(templateDir string, s *LogStore) *HTMLGenerator {
 	}
 }
 
+// Generate はoutDirにログデータの変換結果を生成する。
+// 目標とする構造は以下となる:
+//   - outDir/
+//     - index.html // generateIndex()
+//     - ${channel_id}/ // generateChannelDir()
+//       - index.html // generateChannelIndex()
+//       - ${YYYY}/
+//         - ${MM}/
+//           - index.html // generateMessageDir()
 func (g *HTMLGenerator) Generate(outDir string) error {
 	channels := g.s.GetChannels()
 

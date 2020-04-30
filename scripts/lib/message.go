@@ -12,13 +12,27 @@ import (
 	"strings"
 )
 
+// MessageTable : メッセージデータを保持する
+// スレッドは投稿時刻からどのスレッドへの返信かが判断できるためthreadMapのキー
+// はtsである。
+// msgsMapは月毎にメッセージを保持する。そのためキーは投稿月である。
+// readDirはすでに読み込んだディレクトリパスを保持する。
+// readPathはすでに読み込んだファイルパスを保持する。
+// readDirとreadPathは同じファイルを二度読むことを防ぐために用いている。
 type MessageTable struct {
+	// key: ts
 	threadMap map[string]*Thread
 	msgsMap   map[string]*MessagesPerMonth
-	readDir   map[string]struct{}
-	readFile  map[string]struct{}
+	// key: directory path
+	readDir map[string]struct{}
+	// key: file path
+	readFile map[string]struct{}
 }
 
+// NewMessageTable : MessageTableを生成する。
+// 他のテーブルと違い、メッセージファイルは量が多いため、NewMessageTable()実行
+// 時には読み込まず、(*MessageTable).ReadLogDir()/(*MessageTable).ReadLogFile()
+// 実行時に読み込ませる。
 func NewMessageTable() *MessageTable {
 	return &MessageTable{
 		threadMap: map[string]*Thread{},
@@ -28,6 +42,9 @@ func NewMessageTable() *MessageTable {
 	}
 }
 
+// ReadLogDir : pathに指定したディレクトリに存在するJSON形式のメッセージデータ
+// を読み込む。
+// すでにそのディレクトリが読み込み済みの場合は処理をスキップする。
 func (m *MessageTable) ReadLogDir(path string) error {
 	if _, ok := m.readDir[path]; ok {
 		return nil
@@ -53,6 +70,8 @@ func (m *MessageTable) ReadLogDir(path string) error {
 	return nil
 }
 
+// ReadLogFile : pathに指定したJSON形式のメッセージデータを読み込む。
+// すでにそのファイルが読み込み済みの場合は処理をスキップする。
 func (m *MessageTable) ReadLogFile(path string) error {
 	if _, ok := m.readFile[path]; ok {
 		return nil
@@ -202,6 +221,9 @@ func (m MessagesPerMonth) PrevKey() string {
 	return fmt.Sprintf("%4d%02d", m.year, m.month-1)
 }
 
+// Message : メッセージ
+// エクスポートしたYYYY-MM-DD.jsonの中身を保持する。
+// https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
 type Message struct {
 	ClientMsgID  string              `json:"client_msg_id,omitempty"`
 	Typ          string              `json:"type"`
@@ -230,6 +252,8 @@ type Message struct {
 	Trail bool `json:"-"`
 }
 
+// IsVisible : 表示すべきメッセージ種別かを判定する。
+// 例えばchannel_joinなどは投稿された出力する必要がないため、falseを返す。
 func (m Message) IsVisible() bool {
 	return m.Subtype == "" ||
 		m.Subtype == "bot_message" ||
@@ -237,10 +261,14 @@ func (m Message) IsVisible() bool {
 		m.Subtype == "thread_broadcast"
 }
 
+// IsRootOfThread : メッセージがスレッドの最初のメッセージであるかを判定する。
 func (m Message) IsRootOfThread() bool {
 	return m.Ts == m.ThreadTs
 }
 
+// MessageFile :
+// エクスポートしたYYYY-MM-DD.jsonの中身を保持する
+// https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
 type MessageFile struct {
 	ID                 string `json:"id"`
 	Created            int64  `json:"created"`

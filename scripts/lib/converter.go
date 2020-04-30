@@ -9,12 +9,18 @@ import (
 	"github.com/kyokomi/emoji"
 )
 
+// TextConverter : markdown形式のテキストをHTMLに変換するための構造体。
 type TextConverter struct {
+	// key: emoji name
+	// value: emoji URL
 	emojis map[string]string
-	users  map[string]string
-	re     regexps
+	// key: user ID
+	// value: display name
+	users map[string]string
+	re    regexps
 }
 
+// NewTextConverter : TextConverter を生成する
 func NewTextConverter(users, emojis map[string]string) *TextConverter {
 	re := regexps{}
 	// TODO tokenize/parse message.Text
@@ -92,6 +98,7 @@ func (c *TextConverter) bindChannel(channelExp string) string {
 	return "<a href='{{ site.baseurl }}/" + channelId + "/'>#" + channelName + "</a>"
 }
 
+// ToHTML : markdown形式のtextをHTMLに変換する
 func (c *TextConverter) ToHTML(text string) string {
 	text = c.escapeSpecialChars(text)
 	text = c.re.newLine.ReplaceAllString(text, "<br>")

@@ -7,6 +7,7 @@ import (
 	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
+// GenerateHTML : SlackからエクスポートしたデータをHTMLに変換して出力する。
 func GenerateHTML(args []string) error {
 	if len(args) < 4 {
 		fmt.Println("Usage: go run scripts/main.go generate_html {config.json} {templatedir} {indir} {outdir}")

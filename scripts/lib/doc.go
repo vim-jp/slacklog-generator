@@ -1,0 +1,16 @@
+/*
+slacklogパッケージはSlackからエクスポートされた各チャンネルのログの取得、HTMLへ
+の変換を行なうためのパッケージである。
+
+LogStoreはログデータの取得方法を規定し、必要に応じて各種ログテーブルからデータ
+を取得する。
+
+ChannelTable/MessageTable/UserTable/EmojiTableはSlackからエクスポートされたJSON
+形式のログファイルを読み込み、LogStoreが処理しやすい形でデータを保持する。
+
+TextConverterはログが保持しているテキストのエスケープやHTMLへの変換を行なう。
+
+HTMLGeneratorはLogStoreから取得し、TextConverterで変換したデータを、
+text/templateパッケージを用いてHTMLとして出力する。
+*/
+package slacklog
