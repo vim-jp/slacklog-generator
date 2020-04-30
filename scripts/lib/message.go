@@ -16,15 +16,12 @@ import (
 // スレッドは投稿時刻からどのスレッドへの返信かが判断できるためthreadMapのキー
 // はtsである。
 // msgsMapは月毎にメッセージを保持する。そのためキーは投稿月である。
-// loadedDirsはすでに読み込んだディレクトリパスを保持する。
 // loadedFilesはすでに読み込んだファイルパスを保持する。
-// loadedDirsとloadedFilesは同じファイルを二度読むことを防ぐために用いている。
+// loadedFilesは同じファイルを二度読むことを防ぐために用いている。
 type MessageTable struct {
 	// key: ts
 	threadMap map[string]*Thread
 	msgsMap   map[string]*MessagesPerMonth
-	// key: directory path
-	loadedDirs map[string]struct{}
 	// key: file path
 	loadedFiles map[string]struct{}
 }
@@ -37,7 +34,6 @@ func NewMessageTable() *MessageTable {
 	return &MessageTable{
 		threadMap:   map[string]*Thread{},
 		msgsMap:     map[string]*MessagesPerMonth{},
-		loadedDirs:  map[string]struct{}{},
 		loadedFiles: map[string]struct{}{},
 	}
 }
@@ -46,10 +42,6 @@ func NewMessageTable() *MessageTable {
 // を読み込む。
 // すでにそのディレクトリが読み込み済みの場合は処理をスキップする。
 func (m *MessageTable) ReadLogDir(path string) error {
-	if _, ok := m.loadedDirs[path]; ok {
-		return nil
-	}
-
 	dir, err := os.Open(path)
 	if err != nil {
 		return err
@@ -65,14 +57,16 @@ func (m *MessageTable) ReadLogDir(path string) error {
 			return err
 		}
 	}
-	// read marker
-	m.loadedDirs[path] = struct{}{}
 	return nil
 }
 
 // ReadLogFile : pathに指定したJSON形式のメッセージデータを読み込む。
 // すでにそのファイルが読み込み済みの場合は処理をスキップする。
 func (m *MessageTable) ReadLogFile(path string) error {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
 	if _, ok := m.loadedFiles[path]; ok {
 		return nil
 	}
