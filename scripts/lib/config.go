@@ -9,7 +9,7 @@ import (
 type Config struct {
 	EditedSuffix string   `json:"edited_suffix"`
 	Channels     []string `json:"channels"`
-	EmojiJson    string   `json:"emoji_json"`
+	EmojiJSON    string   `json:"emoji_json"`
 }
 
 // ReadConfig : pathに指定したファイルからコンフィグを読み込む。
