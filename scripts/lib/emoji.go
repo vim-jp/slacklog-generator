@@ -1,8 +1,6 @@
 package slacklog
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"os"
 )
 
@@ -25,12 +23,7 @@ func NewEmojiTable(path string) (*EmojiTable, error) {
 		return nil, os.ErrNotExist
 	}
 
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(content, &emojis.URLMap); err != nil {
+	if err := ReadFileAsJSON(path, &emojis.URLMap); err != nil {
 		return nil, err
 	}
 

@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -91,12 +90,8 @@ func copyFile(from string, to string) error {
 }
 
 func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Channel, map[string]*slacklog.Channel, error) {
-	content, err := ioutil.ReadFile(channelsJsonPath)
-	if err != nil {
-		return nil, nil, err
-	}
 	var channels []slacklog.Channel
-	err = json.Unmarshal(content, &channels)
+	err := slacklog.ReadFileAsJSON(channelsJsonPath, &channels)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -124,12 +119,8 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 	sort.Strings(names)
 	var messages []*slacklog.Message
 	for i := range names {
-		content, err := ioutil.ReadFile(filepath.Join(inDir, names[i]))
-		if err != nil {
-			return nil, err
-		}
 		var msgs []*slacklog.Message
-		err = json.Unmarshal(content, &msgs)
+		err := slacklog.ReadFileAsJSON(filepath.Join(inDir, names[i]), &msgs)
 		if err != nil {
 			return nil, err
 		}

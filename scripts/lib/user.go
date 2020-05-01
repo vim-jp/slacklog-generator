@@ -1,10 +1,5 @@
 package slacklog
 
-import (
-	"encoding/json"
-	"io/ioutil"
-)
-
 // UserTable : ユーザデータを保持する
 // UsersもUserMapも保持するユーザデータは同じで、UserMapはユーザIDをキーとする
 // mapとなっている。
@@ -18,12 +13,8 @@ type UserTable struct {
 // NewUserTable : pathに指定したJSON形式のユーザデータを読み込み、UserTableを生
 // 成する。
 func NewUserTable(path string) (*UserTable, error) {
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
 	var users []User
-	err = json.Unmarshal(content, &users)
+	err := ReadFileAsJSON(path, &users)
 	if err != nil {
 		return nil, err
 	}

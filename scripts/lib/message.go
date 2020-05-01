@@ -1,9 +1,7 @@
 package slacklog
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -81,13 +79,9 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		return nil
 	}
 
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
 	var msgs []Message
 	var visibleMsgs []Message
-	err = json.Unmarshal(content, &msgs)
+	err = ReadFileAsJSON(path, &msgs)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}
