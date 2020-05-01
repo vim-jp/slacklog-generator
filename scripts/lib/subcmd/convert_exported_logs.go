@@ -19,14 +19,14 @@ import (
 	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
-func doConvertExportedLogs() error {
-	if len(os.Args) < 4 {
+func ConvertExportedLogs(args []string) error {
+	if len(args) < 2 {
 		fmt.Println("Usage: go run scripts/main.go convert_exported_logs {indir} {outdir}")
 		return nil
 	}
 
-	inDir := filepath.Clean(os.Args[2])
-	outDir := filepath.Clean(os.Args[3])
+	inDir := filepath.Clean(args[0])
+	outDir := filepath.Clean(args[1])
 
 	channels, _, err := readChannels(filepath.Join(inDir, "channels.json"), []string{"*"})
 	if err != nil {

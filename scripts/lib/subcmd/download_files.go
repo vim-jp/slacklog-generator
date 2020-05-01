@@ -23,19 +23,19 @@ import (
 
 const downloadWorkerNum = 8
 
-func doDownloadFiles() error {
+func DownloadFiles(args []string) error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		return fmt.Errorf("$SLACK_TOKEN required")
 	}
 
-	if len(os.Args) < 4 {
+	if len(args) < 2 {
 		fmt.Println("Usage: go run scripts/main.go download_files {log-dir} {files-dir}")
 		return nil
 	}
 
-	logDir := filepath.Clean(os.Args[2])
-	filesDir := filepath.Clean(os.Args[3])
+	logDir := filepath.Clean(args[0])
+	filesDir := filepath.Clean(args[1])
 
 	s, err := slacklog.NewLogStore(logDir, &slacklog.Config{Channels: []string{"*"}})
 	if err != nil {
