@@ -53,12 +53,14 @@ func DownloadEmoji(args []string) error {
 		emojis[name] = filepath.Ext(emojis[name])
 	}
 
-	emojisJson, err := json.Marshal(emojis)
+	// write `emojis` to a file as JSON, using with json.Encoder. this saves
+	// memory to marshal JSON.
+	f, err := os.Create(filepath.Join(emojisDir, "emoji.json"))
 	if err != nil {
 		return err
 	}
-
-	err = ioutil.WriteFile(filepath.Join(emojisDir, "emoji.json"), emojisJson, 0666)
+	defer f.Close()
+	err = json.NewEncoder(f).Encode(emojis)
 	if err != nil {
 		return err
 	}
