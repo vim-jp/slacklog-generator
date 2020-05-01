@@ -1,4 +1,11 @@
-package slacklog
+/*
+リファクタリング中
+処理をslacklog packageに移動していく。
+一旦、必要な処理はすべてslacklog packageから一時的にエクスポートするか、このファ
+イル内で定義している。
+*/
+
+package subcmd
 
 import (
 	"encoding/json"
@@ -10,6 +17,7 @@ import (
 	"path/filepath"
 
 	"github.com/slack-go/slack"
+	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func doDownloadEmoji() error {
@@ -32,7 +40,7 @@ func doDownloadEmoji() error {
 		return err
 	}
 
-	err = mkdir(emojisDir)
+	err = slacklog.Mkdir(emojisDir)
 	if err != nil {
 		return err
 	}

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog/lib/subcmd"
 )
 
 func main() {
-	if err := slacklog.Run(); err != nil {
+	if err := subcmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "[error] %s\n", err)
 		os.Exit(1)
 	}

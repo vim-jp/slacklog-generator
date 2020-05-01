@@ -1,4 +1,4 @@
-package slacklog
+package subcmd
 
 import (
 	"fmt"
@@ -21,12 +21,16 @@ func Run() error {
 	switch subCmdName {
 	case "convert_exported_logs":
 		return doConvertExportedLogs()
-	case "download_files":
-		return doDownloadFiles()
 	case "download_emoji":
 		return doDownloadEmoji()
+	case "download_files":
+		return doDownloadFiles()
 	case "generate_html":
-		return doGenerateHTML()
+		args := []string{}
+		if len(os.Args) >= 3 {
+			args = os.Args[2:]
+		}
+		return GenerateHTML(args)
 	}
 
 	return fmt.Errorf("Unknown subcmd: %s", subCmdName)

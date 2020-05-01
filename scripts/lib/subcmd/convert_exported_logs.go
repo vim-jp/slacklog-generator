@@ -1,4 +1,11 @@
-package slacklog
+/*
+リファクタリング中
+処理をslacklog packageに移動していく。
+一旦、必要な処理はすべてslacklog packageから一時的にエクスポートするか、このファ
+イル内で定義している。
+*/
+
+package subcmd
 
 import (
 	"encoding/json"
@@ -8,6 +15,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func doConvertExportedLogs() error {
@@ -24,7 +33,7 @@ func doConvertExportedLogs() error {
 		return fmt.Errorf("could not read channels.json: %s", err)
 	}
 
-	if err := mkdir(outDir); err != nil {
+	if err := slacklog.Mkdir(outDir); err != nil {
 		return fmt.Errorf("could not create %s directory: %s", outDir, err)
 	}
 
@@ -39,16 +48,16 @@ func doConvertExportedLogs() error {
 	}
 
 	for _, channel := range channels {
-		messages, err := readAllMessages(filepath.Join(inDir, channel.Name))
+		messages, err := ReadAllMessages(filepath.Join(inDir, channel.Name))
 		if err != nil {
 			return err
 		}
 		for _, message := range messages {
 			message.UserProfile = nil
-			message.removeTokenFromURLs()
+			message.RemoveTokenFromURLs()
 		}
-		channelDir := filepath.Join(outDir, channel.Id)
-		if err := mkdir(channelDir); err != nil {
+		channelDir := filepath.Join(outDir, channel.ID)
+		if err := slacklog.Mkdir(channelDir); err != nil {
 			return fmt.Errorf("could not create %s directory: %s", channelDir, err)
 		}
 		messagesPerDay := groupMessagesByDay(messages)
@@ -81,7 +90,25 @@ func copyFile(from string, to string) error {
 	return err
 }
 
-func readAllMessages(inDir string) ([]*message, error) {
+func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Channel, map[string]*slacklog.Channel, error) {
+	content, err := ioutil.ReadFile(channelsJsonPath)
+	if err != nil {
+		return nil, nil, err
+	}
+	var channels []slacklog.Channel
+	err = json.Unmarshal(content, &channels)
+	channels = slacklog.FilterChannel(channels, cfgChannels)
+	sort.SliceStable(channels, func(i, j int) bool {
+		return channels[i].Name < channels[j].Name
+	})
+	channelMap := make(map[string]*slacklog.Channel, len(channels))
+	for i := range channels {
+		channelMap[channels[i].ID] = &channels[i]
+	}
+	return channels, channelMap, err
+}
+
+func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 	dir, err := os.Open(inDir)
 	if err != nil {
 		return nil, err
@@ -92,13 +119,13 @@ func readAllMessages(inDir string) ([]*message, error) {
 		return nil, err
 	}
 	sort.Strings(names)
-	var messages []*message
+	var messages []*slacklog.Message
 	for i := range names {
 		content, err := ioutil.ReadFile(filepath.Join(inDir, names[i]))
 		if err != nil {
 			return nil, err
 		}
-		var msgs []*message
+		var msgs []*slacklog.Message
 		err = json.Unmarshal(content, &msgs)
 		if err != nil {
 			return nil, err
@@ -108,16 +135,16 @@ func readAllMessages(inDir string) ([]*message, error) {
 	return messages, nil
 }
 
-func groupMessagesByDay(messages []*message) map[string][]*message {
-	messagesPerDay := map[string][]*message{}
+func groupMessagesByDay(messages []*slacklog.Message) map[string][]*slacklog.Message {
+	messagesPerDay := map[string][]*slacklog.Message{}
 	for i := range messages {
-		time := ts2datetime(messages[i].Ts).Format("2006-01-02")
+		time := slacklog.TsToDateTime(messages[i].Ts).Format("2006-01-02")
 		messagesPerDay[time] = append(messagesPerDay[time], messages[i])
 	}
 	return messagesPerDay
 }
 
-func writeMessages(filename string, messages []*message) error {
+func writeMessages(filename string, messages []*slacklog.Message) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

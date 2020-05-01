@@ -1,37 +1,37 @@
 ---
 # vim:set ts=2 sts=2 sw=2 et:
 layout: slacklog
-title: vim-jp.slack.com log - &#35<< .channel.Name >> - << .msgPerMonth.Year >>年<< .msgPerMonth.Month >>月
-permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/index:output_ext
+title: vim-jp.slack.com log - &#35<< .channel.Name >> - << .monthKey.Year >>年<< .monthKey.Month >>月
+permalink: /<< .channel.ID >>/<< .monthKey.Year >>/<< .monthKey.Month >>/index:output_ext
 ---
 <div>
 
-<<- if or .msgPerMonth.HasPrev .msgPerMonth.HasNext >>
+<<- if or (hasPrevMonth .monthKey) (hasNextMonth .monthKey) >>
 <header class='slacklog-header'>
-  <<- if .msgPerMonth.HasPrev >>
-  <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.PrevYear >>/<< .msgPerMonth.PrevMonth >>/'>&lt;&lt;&nbsp;<< .msgPerMonth.PrevYear >>年<< .msgPerMonth.PrevMonth >>月</a>
+  <<- if hasPrevMonth .monthKey >>
+  <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.ID >>/<< .monthKey.PrevYear >>/<< .monthKey.PrevMonth >>/'>&lt;&lt;&nbsp;<< .monthKey.PrevYear >>年<< .monthKey.PrevMonth >>月</a>
   <<- end >>
-  <<- if .msgPerMonth.HasNext >>
-  <a class='slacklog-next-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.NextYear >>/<< .msgPerMonth.NextMonth >>/'><< .msgPerMonth.NextYear >>年<< .msgPerMonth.NextMonth >>月&nbsp;&gt;&gt;</a>
+  <<- if hasNextMonth .monthKey >>
+  <a class='slacklog-next-month' href='{{ site.baseurl }}/<< .channel.ID >>/<< .monthKey.NextYear >>/<< .monthKey.NextMonth >>/'><< .monthKey.NextYear >>年<< .monthKey.NextMonth >>月&nbsp;&gt;&gt;</a>
   <<- end >>
 </header>
 <<- end >>
 
-<h2><a href='{{ site.baseurl }}/'>vim-jp.slack.com log</a> - <a href='{{ site.baseurl }}/<< .channel.Id >>/'>&#35<< .channel.Name >></a> - << .msgPerMonth.Year >>年<< .msgPerMonth.Month >>月</h2>
+<h2><a href='{{ site.baseurl }}/'>vim-jp.slack.com log</a> - <a href='{{ site.baseurl }}/<< .channel.ID >>/'>&#35<< .channel.Name >></a> - << .monthKey.Year >>年<< .monthKey.Month >>月</h2>
 
-<<- range .msgPerMonth.Messages >>
+<<- range .msgs >>
 <<- if visible . >>
   <span class='slacklog-message' id='ts-<< .Ts >>'>
     <<- if .Trail >>
     <img class='slacklog-icon slacklog-trail' src='<< userIconUrl . >>'>
     <span class='slacklog-name slacklog-trail'><< username . >></span>
     <a class='slacklog-datetime slacklog-trail' href='#ts-<< .Ts >>'><< datetime .Ts >></a>
-    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archives/<< $.channel.Id >>/p<< slackPermalink .Ts >>'>Slack</a>
+    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archives/<< $.channel.ID >>/p<< slackPermalink .Ts >>'>Slack</a>
     <<- else >>
     <img class='slacklog-icon' src='<< userIconUrl . >>'>
     <span class='slacklog-name'><< username . >></span>
     <a class='slacklog-datetime' href='#ts-<< .Ts >>'><< datetime .Ts >></a>
-    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archives/<< $.channel.Id >>/p<< slackPermalink .Ts >>'>Slack</a>
+    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archives/<< $.channel.ID >>/p<< slackPermalink .Ts >>'>Slack</a>
     <<- end >>
 
     <<- if and (ne .ThreadTs "") (ne .ThreadTs .Ts) >>
@@ -60,8 +60,8 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
           <span class='slacklog-attachment-twitter-text'><< attachmentText . >></span>
           <span class='slacklog-attachment-twitter-footericon'><img src='<< .FooterIcon >>'></span>
           <span class='slacklog-attachment-twitter-footer'><< html .Footer >></span>
-          <<- if .VideoHtml >>
-          <span class='slacklog-attachment-twitter-video'><< .VideoHtml >></span>
+          <<- if .VideoHTML >>
+          <span class='slacklog-attachment-twitter-video'><< .VideoHTML >></span>
           <<- end >>
         </span>
       <<- else if or .Title .Text >>
@@ -80,8 +80,8 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
           <<- if .Text >>
           <div class='slacklog-attachment-other-text'><< attachmentText . >></div>
           <<- end >>
-          <<- if .ThumbUrl >>
-          <div class='slacklog-attachment-other-thumb'><img src='<< .ThumbUrl >>' width='<< .ThumbWidth >>' height='<< .ThumbHeight >>' alt='<< html .Title >>'></div>
+          <<- if .ThumbURL >>
+          <div class='slacklog-attachment-other-thumb'><img src='<< .ThumbURL >>' width='<< .ThumbWidth >>' height='<< .ThumbHeight >>' alt='<< html .Title >>'></div>
           <<- end >>
         </span>
       <<- end >>
@@ -145,8 +145,8 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
               <span class='slacklog-attachment-twitter-text'><< attachmentText . >></span>
               <span class='slacklog-attachment-twitter-footericon'><img src='<< .FooterIcon >>'></span>
               <span class='slacklog-attachment-twitter-footer'><< html .Footer >></span>
-              <<- if .VideoHtml >>
-              <span class='slacklog-attachment-twitter-video'><< .VideoHtml >></span>
+              <<- if .VideoHTML >>
+              <span class='slacklog-attachment-twitter-video'><< .VideoHTML >></span>
               <<- end >>
             </span>
           <<- else if or .Title .Text >>
@@ -181,13 +181,13 @@ permalink: /<< .channel.Id >>/<< .msgPerMonth.Year >>/<< .msgPerMonth.Month >>/i
 <<- end >>
 <<- end >>
 
-<<- if or .msgPerMonth.HasPrev .msgPerMonth.HasNext >>
+<<- if or (hasPrevMonth .monthKey) (hasNextMonth .monthKey) >>
 <footer class='slacklog-footer'>
-  <<- if .msgPerMonth.HasPrev >>
-  <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.PrevYear >>/<< .msgPerMonth.PrevMonth >>/'>&lt;&lt;&nbsp;<< .msgPerMonth.PrevYear >>年<< .msgPerMonth.PrevMonth >>月</a>
+  <<- if hasPrevMonth .monthKey >>
+  <a class='slacklog-prev-month' href='{{ site.baseurl }}/<< .channel.ID >>/<< .monthKey.PrevYear >>/<< .monthKey.PrevMonth >>/'>&lt;&lt;&nbsp;<< .monthKey.PrevYear >>年<< .monthKey.PrevMonth >>月</a>
   <<- end >>
-  <<- if .msgPerMonth.HasNext >>
-  <a class='slacklog-next-month' href='{{ site.baseurl }}/<< .channel.Id >>/<< .msgPerMonth.NextYear >>/<< .msgPerMonth.NextMonth >>/'><< .msgPerMonth.NextYear >>年<< .msgPerMonth.NextMonth >>月&nbsp;&gt;&gt;</a>
+  <<- if hasNextMonth .monthKey >>
+  <a class='slacklog-next-month' href='{{ site.baseurl }}/<< .channel.ID >>/<< .monthKey.NextYear >>/<< .monthKey.NextMonth >>/'><< .monthKey.NextYear >>年<< .monthKey.NextMonth >>月&nbsp;&gt;&gt;</a>
   <<- end >>
 </footer>
 <<- end >>
