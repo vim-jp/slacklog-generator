@@ -20,7 +20,7 @@ func GenerateHTML(args []string) error {
 
 	cfg, err := slacklog.ReadConfig(configJSONPath)
 	if err != nil {
-		return fmt.Errorf("could not read config: %s", err)
+		return fmt.Errorf("could not read config: %w", err)
 	}
 
 	s, err := slacklog.NewLogStore(inDir, cfg)

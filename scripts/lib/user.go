@@ -24,6 +24,9 @@ func NewUserTable(path string) (*UserTable, error) {
 	}
 	var users []User
 	err = json.Unmarshal(content, &users)
+	if err != nil {
+		return nil, err
+	}
 	userMap := make(map[string]*User, len(users))
 	for i := range users {
 		userMap[users[i].ID] = &users[i]
@@ -31,7 +34,7 @@ func NewUserTable(path string) (*UserTable, error) {
 			userMap[users[i].Profile.BotID] = &users[i]
 		}
 	}
-	return &UserTable{users, userMap}, err
+	return &UserTable{users, userMap}, nil
 }
 
 // User : ユーザ

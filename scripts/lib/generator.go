@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -93,8 +94,8 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 		return false, nil
 	}
 
-	if err := Mkdir(path); err != nil {
-		return false, fmt.Errorf("could not create %s directory: %s", path, err)
+	if err := os.MkdirAll(path, 0777); err != nil {
+		return false, fmt.Errorf("could not create %s directory: %w", path, err)
 	}
 
 	keys := make([]MessageMonthKey, len(msgsMap))
@@ -152,8 +153,8 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 }
 
 func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey, msgs []Message, path string) error {
-	if err := Mkdir(path); err != nil {
-		return fmt.Errorf("could not create %s directory: %s", path, err)
+	if err := os.MkdirAll(path, 0777); err != nil {
+		return fmt.Errorf("could not create %s directory: %w", path, err)
 	}
 
 	params := make(map[string]interface{})
