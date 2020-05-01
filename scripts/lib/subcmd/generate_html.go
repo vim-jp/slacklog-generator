@@ -11,6 +11,7 @@ import (
 func GenerateHTML(args []string) error {
 	if len(args) < 4 {
 		fmt.Println("Usage: go run scripts/main.go generate_html {config.json} {templatedir} {indir} {outdir}")
+		return nil
 	}
 	configJSONPath := filepath.Clean(args[0])
 	templateDir := filepath.Clean(args[1])

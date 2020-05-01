@@ -20,18 +20,18 @@ import (
 	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
-func doDownloadEmoji() error {
+func DownloadEmoji(args []string) error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		return fmt.Errorf("$SLACK_TOKEN required")
 	}
 
-	if len(os.Args) < 4 {
+	if len(args) < 1 {
 		fmt.Println("Usage: go run scripts/main.go download_emoji {emojis-dir}")
 		return nil
 	}
 
-	emojisDir := filepath.Clean(os.Args[2])
+	emojisDir := filepath.Clean(args[0])
 
 	api := slack.New(slackToken)
 
