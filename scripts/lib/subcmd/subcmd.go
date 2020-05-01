@@ -26,11 +26,7 @@ func Run() error {
 	case "download_files":
 		return doDownloadFiles()
 	case "generate_html":
-		args := []string{}
-		if len(os.Args) >= 3 {
-			args = os.Args[2:]
-		}
-		return GenerateHTML(args)
+		return GenerateHTML(os.Args[2:])
 	}
 
 	return fmt.Errorf("Unknown subcmd: %s", subCmdName)
