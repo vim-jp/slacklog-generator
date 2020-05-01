@@ -26,6 +26,11 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
   - Jekyll
   - (あれば)GNU Make
 
+## 環境変数
+
+`scripts/.env.template` からコピーして `scripts/.env` ファイルを作成してください。
+(各環境変数の説明はファイルを参照)
+
 ## 開発方法
 
 ### Docker を使う場合
@@ -56,7 +61,6 @@ GNU Makeがあれば`make`もしくは`gmake`を実行するだけで生成さ�
 #### 添付ファイルと絵文字のダウンロード
 
 ```console
-export SLACK_TOKEN=xxxx
 scripts/download_emoji.sh
 scripts/download_files.sh
 ```

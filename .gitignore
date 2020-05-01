@@ -9,3 +9,4 @@ Gemfile.lock
 /slacklog_pages/
 /files/
 /emojis/
+/scripts/.env
