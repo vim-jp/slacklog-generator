@@ -1,10 +1,8 @@
 package slacklog
 
 import (
-	"bytes"
 	"fmt"
 	"html"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -72,17 +70,16 @@ func (g *HTMLGenerator) Generate(outDir string) error {
 func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
 	params := make(map[string]interface{})
 	params["channels"] = channels
-	var out bytes.Buffer
 	tmplPath := filepath.Join(g.templateDir, "index.tmpl")
 	name := filepath.Base(tmplPath)
 	t, err := template.New(name).Delims("<<", ">>").ParseFiles(tmplPath)
 	if err != nil {
 		return err
 	}
-	if err = t.Execute(&out, params); err != nil {
+	if err := executeAndWrite(t, params, path); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, out.Bytes(), 0666)
+	return nil
 }
 
 func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, error) {
@@ -138,7 +135,6 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 	params := make(map[string]interface{})
 	params["channel"] = channel
 	params["keys"] = keys
-	var out bytes.Buffer
 
 	tempPath := filepath.Join(g.templateDir, "channel_index.tmpl")
 	name := filepath.Base(tempPath)
@@ -146,10 +142,10 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 	if err != nil {
 		return err
 	}
-	if err := t.Execute(&out, params); err != nil {
+	if err := executeAndWrite(t, params, path); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, out.Bytes(), 0666)
+	return nil
 }
 
 func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey, msgs []Message, path string) error {
@@ -161,7 +157,6 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 	params["channel"] = channel
 	params["monthKey"] = key
 	params["msgs"] = msgs
-	var out bytes.Buffer
 
 	// TODO check below subtypes work correctly
 	// TODO support more subtypes
@@ -240,10 +235,11 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 	if err != nil {
 		return err
 	}
-	if err := t.Execute(&out, params); err != nil {
+	err = executeAndWrite(t, params, filepath.Join(path, "index.html"))
+	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(path, "index.html"), out.Bytes(), 0666)
+	return nil
 }
 
 func (g *HTMLGenerator) isVisibleMessage(msg Message) bool {
@@ -260,4 +256,18 @@ func (g *HTMLGenerator) generateMessageText(msg Message) string {
 
 func (g *HTMLGenerator) generateAttachmentText(attachment MessageAttachment) string {
 	return g.c.ToHTML(attachment.Text)
+}
+
+// executeAndWrite executes a template and writes contents to a file.
+func executeAndWrite(tmpl *template.Template, data interface{}, filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	err = tmpl.Execute(f, data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
