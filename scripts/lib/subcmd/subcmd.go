@@ -10,23 +10,23 @@ func Run() error {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: go run scripts/main.go {subcmd}")
 		fmt.Println("  Subcmd:")
-		fmt.Println("    convert_exported_logs")
-		fmt.Println("    download_emoji")
-		fmt.Println("    download_files")
-		fmt.Println("    generate_html")
+		fmt.Println("    convert-exported-logs")
+		fmt.Println("    download-emoji")
+		fmt.Println("    download-files")
+		fmt.Println("    generate-html")
 		return nil
 	}
 
 	args := os.Args[2:]
 	subCmdName := os.Args[1]
 	switch subCmdName {
-	case "convert_exported_logs":
+	case "convert-exported-logs":
 		return ConvertExportedLogs(args)
-	case "download_emoji":
+	case "download-emoji":
 		return DownloadEmoji(args)
-	case "download_files":
+	case "download-files":
 		return DownloadFiles(args)
-	case "generate_html":
+	case "generate-html":
 		return GenerateHTML(args)
 	}
 
