@@ -8,12 +8,12 @@ import (
 func Run() error {
 	fmt.Println(os.Args)
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run scripts/main.go {subcmd}")
-		fmt.Println("  Subcmd:")
-		fmt.Println("    convert-exported-logs")
-		fmt.Println("    download-emoji")
-		fmt.Println("    download-files")
-		fmt.Println("    generate-html")
+		fmt.Println(`Usage: go run scripts/main.go {subcmd}
+  Subcmd:
+    convert-exported-logs
+    download-emoji
+    download-files
+    generate-html`)
 		return nil
 	}
 
@@ -30,5 +30,5 @@ func Run() error {
 		return GenerateHTML(args)
 	}
 
-	return fmt.Errorf("Unknown subcmd: %s", subCmdName)
+	return fmt.Errorf("unknown subcmd: %s", subCmdName)
 }
