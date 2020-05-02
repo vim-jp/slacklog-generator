@@ -3,5 +3,5 @@
   "channels": [
     "*"
   ],
-  "emoji_json": "../slacklog_data/emoji.json"
+  "emoji_json_path": "../slacklog_data/emoji.json"
 }
