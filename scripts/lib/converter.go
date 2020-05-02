@@ -103,18 +103,19 @@ func (c *TextConverter) ToHTML(text string) string {
 	text = c.escapeSpecialChars(text)
 	text = c.re.newLine.ReplaceAllString(text, "<br>")
 	chunks := c.re.code.Split(text, -1)
-	for i := range chunks {
+	for i, s := range chunks {
 		if i%2 == 0 {
-			chunks[i] = c.re.linkWithTitle.ReplaceAllString(chunks[i], "<a href='${1}'>${2}</a>")
-			chunks[i] = c.re.link.ReplaceAllString(chunks[i], "<a href='${1}'>${1}</a>")
-			chunks[i] = c.re.codeShort.ReplaceAllString(chunks[i], "<code>${1}</code>")
-			chunks[i] = c.re.del.ReplaceAllString(chunks[i], "<del>${1}</del>")
-			chunks[i] = c.re.emoji.ReplaceAllStringFunc(chunks[i], c.bindEmoji)
-			chunks[i] = c.re.mention.ReplaceAllStringFunc(chunks[i], c.bindUser)
-			chunks[i] = c.re.channel.ReplaceAllStringFunc(chunks[i], c.bindChannel)
+			s = c.re.linkWithTitle.ReplaceAllString(s, "<a href='${1}'>${2}</a>")
+			s = c.re.link.ReplaceAllString(s, "<a href='${1}'>${1}</a>")
+			s = c.re.codeShort.ReplaceAllString(s, "<code>${1}</code>")
+			s = c.re.del.ReplaceAllString(s, "<del>${1}</del>")
+			s = c.re.emoji.ReplaceAllStringFunc(s, c.bindEmoji)
+			s = c.re.mention.ReplaceAllStringFunc(s, c.bindUser)
+			s = c.re.channel.ReplaceAllStringFunc(s, c.bindChannel)
 		} else {
-			chunks[i] = "<pre>" + chunks[i] + "</pre>"
+			s = "<pre>" + s + "</pre>"
 		}
+		chunks[i] = s
 	}
 	return strings.Join(chunks, "")
 }

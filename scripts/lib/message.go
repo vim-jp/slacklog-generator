@@ -51,8 +51,8 @@ func (m *MessageTable) ReadLogDir(path string) error {
 		return err
 	}
 	sort.Strings(names)
-	for i := range names {
-		if err := m.ReadLogFile(filepath.Join(path, names[i])); err != nil {
+	for _, name := range names {
+		if err := m.ReadLogFile(filepath.Join(path, name)); err != nil {
 			return err
 		}
 	}
@@ -85,28 +85,28 @@ func (m *MessageTable) ReadLogFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}
-	for i := range msgs {
-		if !msgs[i].IsVisible() {
+	for i, msg := range msgs {
+		if !msg.IsVisible() {
 			continue
 		}
-		threadTs := msgs[i].ThreadTs
-		if threadTs == "" || msgs[i].IsRootOfThread() ||
-			msgs[i].Subtype == "thread_broadcast" ||
-			msgs[i].Subtype == "bot_message" ||
-			msgs[i].Subtype == "slackbot_response" {
-			visibleMsgs = append(visibleMsgs, msgs[i])
+		threadTs := msg.ThreadTs
+		if threadTs == "" || msg.IsRootOfThread() ||
+			msg.Subtype == "thread_broadcast" ||
+			msg.Subtype == "bot_message" ||
+			msg.Subtype == "slackbot_response" {
+			visibleMsgs = append(visibleMsgs, msg)
 		}
 		if threadTs != "" {
 			if m.ThreadMap[threadTs] == nil {
 				m.ThreadMap[threadTs] = &Thread{}
 			}
-			if msgs[i].IsRootOfThread() {
+			if msg.IsRootOfThread() {
 				m.ThreadMap[threadTs].rootMsg = &msgs[i]
 			} else {
 				if m.ThreadMap[threadTs].replies == nil {
-					m.ThreadMap[threadTs].replies = []Message{msgs[i]}
+					m.ThreadMap[threadTs].replies = []Message{msg}
 				} else {
-					m.ThreadMap[threadTs].replies = append(m.ThreadMap[threadTs].replies, msgs[i])
+					m.ThreadMap[threadTs].replies = append(m.ThreadMap[threadTs].replies, msg)
 				}
 			}
 		}
@@ -124,18 +124,17 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		}
 	}
 
-	for key := range m.MsgsMap {
+	for key, msgs := range m.MsgsMap {
 		sort.SliceStable(m.MsgsMap[key], func(i, j int) bool {
 			// must be the same digits, so no need to convert the timestamp to a number
 			return m.MsgsMap[key][i].Ts < m.MsgsMap[key][j].Ts
 		})
-		ms := m.MsgsMap[key]
 		var lastUser string
-		for i := range ms {
-			if lastUser == ms[i].User {
-				(&ms[i]).Trail = true
+		for i, msg := range msgs {
+			if lastUser == msg.User {
+				(&msgs[i]).Trail = true
 			} else {
-				lastUser = ms[i].User
+				lastUser = msg.User
 			}
 		}
 	}
@@ -259,23 +258,28 @@ func (m Message) IsRootOfThread() bool {
 
 var reToken = regexp.MustCompile(`\?t=xoxe-[-a-f0-9]+$`)
 
+func removeToken(s string) string {
+	return reToken.ReplaceAllLiteralString(s, "")
+}
+
 func (m *Message) RemoveTokenFromURLs() {
-	for i := range m.Files {
-		m.Files[i].URLPrivate = reToken.ReplaceAllLiteralString(m.Files[i].URLPrivate, "")
-		m.Files[i].URLPrivateDownload = reToken.ReplaceAllLiteralString(m.Files[i].URLPrivateDownload, "")
-		m.Files[i].Thumb64 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb64, "")
-		m.Files[i].Thumb80 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb80, "")
-		m.Files[i].Thumb160 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb160, "")
-		m.Files[i].Thumb360 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360, "")
-		m.Files[i].Thumb480 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480, "")
-		m.Files[i].Thumb720 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb720, "")
-		m.Files[i].Thumb800 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb800, "")
-		m.Files[i].Thumb960 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb960, "")
-		m.Files[i].Thumb1024 = reToken.ReplaceAllLiteralString(m.Files[i].Thumb1024, "")
-		m.Files[i].Thumb360Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb360Gif, "")
-		m.Files[i].Thumb480Gif = reToken.ReplaceAllLiteralString(m.Files[i].Thumb480Gif, "")
-		m.Files[i].DeanimateGif = reToken.ReplaceAllLiteralString(m.Files[i].DeanimateGif, "")
-		m.Files[i].ThumbVideo = reToken.ReplaceAllLiteralString(m.Files[i].ThumbVideo, "")
+	for i, f := range m.Files {
+		f.URLPrivate = removeToken(f.URLPrivate)
+		f.URLPrivateDownload = removeToken(f.URLPrivateDownload)
+		f.Thumb64 = removeToken(f.Thumb64)
+		f.Thumb80 = removeToken(f.Thumb80)
+		f.Thumb160 = removeToken(f.Thumb160)
+		f.Thumb360 = removeToken(f.Thumb360)
+		f.Thumb480 = removeToken(f.Thumb480)
+		f.Thumb720 = removeToken(f.Thumb720)
+		f.Thumb800 = removeToken(f.Thumb800)
+		f.Thumb960 = removeToken(f.Thumb960)
+		f.Thumb1024 = removeToken(f.Thumb1024)
+		f.Thumb360Gif = removeToken(f.Thumb360Gif)
+		f.Thumb480Gif = removeToken(f.Thumb480Gif)
+		f.DeanimateGif = removeToken(f.DeanimateGif)
+		f.ThumbVideo = removeToken(f.ThumbVideo)
+		m.Files[i] = f
 	}
 }
 

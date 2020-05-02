@@ -13,7 +13,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sort"
 
 	slacklog "github.com/vim-jp/slacklog/lib"
 )
@@ -60,8 +59,8 @@ func ConvertExportedLogs(args []string) error {
 			return fmt.Errorf("could not create %s directory: %w", channelDir, err)
 		}
 		messagesPerDay := groupMessagesByDay(messages)
-		for key := range messagesPerDay {
-			err = writeMessages(filepath.Join(channelDir, key+".json"), messagesPerDay[key])
+		for key, msgs := range messagesPerDay {
+			err = writeMessages(filepath.Join(channelDir, key+".json"), msgs)
 			if err != nil {
 				return err
 			}
@@ -98,8 +97,8 @@ func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Cha
 	channels = slacklog.FilterChannel(channels, cfgChannels)
 	slacklog.SortChannel(channels)
 	channelMap := make(map[string]*slacklog.Channel, len(channels))
-	for i := range channels {
-		channelMap[channels[i].ID] = &channels[i]
+	for i, ch := range channels {
+		channelMap[ch.ID] = &channels[i]
 	}
 	return channels, channelMap, err
 }
@@ -114,11 +113,10 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	sort.Strings(names)
 	var messages []*slacklog.Message
-	for i := range names {
+	for _, name := range names {
 		var msgs []*slacklog.Message
-		err := slacklog.ReadFileAsJSON(filepath.Join(inDir, names[i]), &msgs)
+		err := slacklog.ReadFileAsJSON(filepath.Join(inDir, name), &msgs)
 		if err != nil {
 			return nil, err
 		}
@@ -129,9 +127,9 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 
 func groupMessagesByDay(messages []*slacklog.Message) map[string][]*slacklog.Message {
 	messagesPerDay := map[string][]*slacklog.Message{}
-	for i := range messages {
-		time := slacklog.TsToDateTime(messages[i].Ts).Format("2006-01-02")
-		messagesPerDay[time] = append(messagesPerDay[time], messages[i])
+	for _, msg := range messages {
+		time := slacklog.TsToDateTime(msg.Ts).Format("2006-01-02")
+		messagesPerDay[time] = append(messagesPerDay[time], msg)
 	}
 	return messagesPerDay
 }
