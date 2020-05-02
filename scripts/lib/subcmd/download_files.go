@@ -44,8 +44,8 @@ func DownloadFiles(args []string) error {
 
 	channels := s.GetChannels()
 
-	if err := slacklog.Mkdir(filesDir); err != nil {
-		return fmt.Errorf("could not create %s directory: %s", filesDir, err)
+	if err := os.MkdirAll(filesDir, 0777); err != nil {
+		return fmt.Errorf("could not create %s directory: %w", filesDir, err)
 	}
 
 	ch := make(chan *slacklog.MessageFile, downloadWorkerNum)
@@ -98,7 +98,7 @@ func urlToFilename(url string) string {
 
 func downloadAll(f *slacklog.MessageFile, outDir string, slackToken string) []error {
 	fileBaseDir := path.Join(outDir, f.ID)
-	err := slacklog.Mkdir(fileBaseDir)
+	err := os.MkdirAll(fileBaseDir, 0777)
 	if err != nil {
 		return []error{err}
 	}
@@ -123,9 +123,15 @@ func downloadFile(f *slacklog.MessageFile, outDir, url, suffix, slackToken strin
 	filename := f.DownloadFilename(url, suffix)
 
 	destFile := filepath.Join(outDir, filename)
-	if _, err := os.Stat(destFile); err == nil {
+	_, err := os.Stat(destFile)
+	if err == nil {
 		// Just skip already downloaded file
 		return nil
+	}
+	// `err != nil` has two cases at here. first is "not exist" as expected.
+	// and second is I/O error as unexpected.
+	if !os.IsNotExist(err) {
+		return err
 	}
 
 	fmt.Printf("Downloading: %s/%s [%s]\n", f.ID, filename, f.PrettyType)

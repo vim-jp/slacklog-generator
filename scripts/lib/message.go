@@ -89,7 +89,7 @@ func (m *MessageTable) ReadLogFile(path string) error {
 	var visibleMsgs []Message
 	err = json.Unmarshal(content, &msgs)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal %s: %s", path, err)
+		return fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}
 	for i := range msgs {
 		if !msgs[i].IsVisible() {

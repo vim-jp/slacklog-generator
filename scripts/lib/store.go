@@ -1,7 +1,7 @@
 package slacklog
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -76,7 +76,7 @@ func (s *LogStore) HasPrevMonth(channelID string, key MessageMonthKey) bool {
 func (s *LogStore) GetMessagesPerMonth(channelID string) (map[MessageMonthKey][]Message, error) {
 	mt, ok := s.mts[channelID]
 	if !ok {
-		return nil, errors.New("not found")
+		return nil, fmt.Errorf("not found channel: id=%s", channelID)
 	}
 	if err := mt.ReadLogDir(filepath.Join(s.path, channelID)); err != nil {
 		return nil, err

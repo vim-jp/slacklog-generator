@@ -16,7 +16,6 @@ import (
 	"path/filepath"
 
 	"github.com/slack-go/slack"
-	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func DownloadEmoji(args []string) error {
@@ -39,7 +38,7 @@ func DownloadEmoji(args []string) error {
 		return err
 	}
 
-	err = slacklog.Mkdir(emojisDir)
+	err = os.MkdirAll(emojisDir, 0777)
 	if err != nil {
 		return err
 	}

@@ -35,7 +35,7 @@ func NewChannelTable(path string, whitelist []string) (*ChannelTable, error) {
 	for i := range channels {
 		channelMap[channels[i].ID] = &channels[i]
 	}
-	return &ChannelTable{channels, channelMap}, err
+	return &ChannelTable{channels, channelMap}, nil
 }
 
 // FilterChannel : whitelistに指定したチャンネル名に該当するチャンネルのみを返
