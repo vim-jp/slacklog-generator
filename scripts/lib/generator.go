@@ -90,6 +90,7 @@ func (g *HTMLGenerator) Generate(outDir string) error {
 
 func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
 	params := make(map[string]interface{})
+	SortChannel(channels)
 	params["channels"] = channels
 	tmplPath := filepath.Join(g.templateDir, "index.tmpl")
 	name := filepath.Base(tmplPath)

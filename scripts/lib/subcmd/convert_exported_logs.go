@@ -96,9 +96,7 @@ func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Cha
 		return nil, nil, err
 	}
 	channels = slacklog.FilterChannel(channels, cfgChannels)
-	sort.SliceStable(channels, func(i, j int) bool {
-		return channels[i].Name < channels[j].Name
-	})
+	slacklog.SortChannel(channels)
 	channelMap := make(map[string]*slacklog.Channel, len(channels))
 	for i := range channels {
 		channelMap[channels[i].ID] = &channels[i]

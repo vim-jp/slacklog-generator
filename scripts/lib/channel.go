@@ -51,6 +51,13 @@ func FilterChannel(channels []Channel, whitelist []string) []Channel {
 	return newChannels
 }
 
+// SortChannel sorts []Channel by name. It modify original slice.
+func SortChannel(channels []Channel) {
+	sort.SliceStable(channels, func(i, j int) bool {
+		return channels[i].Name < channels[j].Name
+	})
+}
+
 type Channel struct {
 	ID         string         `json:"id"`
 	Name       string         `json:"name"`
