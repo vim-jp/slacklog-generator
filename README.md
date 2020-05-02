@@ -79,6 +79,37 @@ bundle install
 bundle exec jekyll serve -w
 ```
 
+### geneate-html 差分コマンドの出力の差分の確認方法
+
+以下のコマンドで自分が変更した結果として変化した generate-html の出力内容の差分
+を確認できます。
+
+```console
+$ ./scripts/pages_diff.sh
+```
+
+`pages_diff.sh` では現在のHEADでの generate-html の結果と merge-base での
+geneate-html の結果の diff を取得しています。
+出力先は `./tmp/pages_diff/current/` および
+`./tmp/pages_diff/{merge-base-commit-id}/` ディレクトリとなっています。
+
+merge-base の出力結果はキャッシュし再利用します。このキャッシュを無視して強制的
+に再出力するには `-f` オプションを使ってください。
+
+```console
+$ ./scripts/pages_diff.sh -f
+```
+
+全てのキャッシュを破棄したい場合には `-c` オプションを使ってください。`-c` オプ
+ションでは `./tmp/pages_diff/` ディレクトリを消すだけで差分の出力は行いません。
+
+```console
+$ ./scripts/pages_diff.sh -c
+```
+
+注意事項: `./scripts/pages_diff.sh` は未コミットな変更を stash を用いて保存・復
+帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
+
 ## LICNESE
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="クリエイティブ・コモンズ・ライセンス" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />この 作品 は <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">クリエイティブ・コモンズ 表示 4.0 国際 ライセンス</a>の下に提供されています。
