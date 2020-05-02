@@ -1,8 +1,6 @@
 package slacklog
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"sort"
 )
 
@@ -19,12 +17,8 @@ type ChannelTable struct {
 // ChannelTable を生成する。
 // whitelistに指定したチャンネル名のみを読み込む。
 func NewChannelTable(path string, whitelist []string) (*ChannelTable, error) {
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
 	var channels []Channel
-	if err := json.Unmarshal(content, &channels); err != nil {
+	if err := ReadFileAsJSON(path, &channels); err != nil {
 		return nil, err
 	}
 	channels = FilterChannel(channels, whitelist)
