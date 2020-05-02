@@ -3,10 +3,12 @@ package slacklog
 import (
 	"fmt"
 	"html"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 )
 
@@ -47,17 +49,36 @@ func (g *HTMLGenerator) Generate(outDir string) error {
 	channels := g.s.GetChannels()
 
 	createdChannels := []Channel{}
+	var (
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		errs []error
+	)
 	for i := range channels {
-		isCreated, err := g.generateChannelDir(
-			filepath.Join(outDir, channels[i].ID),
-			channels[i],
-		)
-		if err != nil {
-			return err
-		}
-		if isCreated {
-			createdChannels = append(createdChannels, channels[i])
-		}
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			isCreated, err := g.generateChannelDir(
+				filepath.Join(outDir, channels[i].ID),
+				channels[i],
+			)
+			if err != nil {
+				log.Printf("generateChannelDir(%s) failed: %s", channels[i].ID, err)
+				mu.Lock()
+				errs = append(errs, err)
+				mu.Unlock()
+				return
+			}
+			if isCreated {
+				mu.Lock()
+				createdChannels = append(createdChannels, channels[i])
+				mu.Unlock()
+			}
+		}(i)
+	}
+	wg.Wait()
+	if len(errs) > 0 {
+		return errs[0]
 	}
 
 	if err := g.generateIndex(filepath.Join(outDir, "index.html"), createdChannels); err != nil {
