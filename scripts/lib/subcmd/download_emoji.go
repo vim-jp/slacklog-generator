@@ -30,6 +30,10 @@ func DownloadEmoji(args []string) error {
 	}
 
 	emojisDir := filepath.Clean(args[0])
+	emojiJSONPath := filepath.Join(emojisDir, "emoji.json")
+	if 1 < len(args) {
+		emojiJSONPath = filepath.Clean(args[1])
+	}
 
 	api := slack.New(slackToken)
 
@@ -53,7 +57,7 @@ func DownloadEmoji(args []string) error {
 
 	// write `emojis` to a file as JSON, using with json.Encoder. this saves
 	// memory to marshal JSON.
-	f, err := os.Create(filepath.Join(emojisDir, "emoji.json"))
+	f, err := os.Create(emojiJSONPath)
 	if err != nil {
 		return err
 	}

@@ -30,7 +30,7 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 		return nil, err
 	}
 
-	et, err := NewEmojiTable(filepath.Join(dirPath, cfg.EmojiJSON))
+	et, err := NewEmojiTable(filepath.Join(dirPath, cfg.EmojiJSONPath))
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err

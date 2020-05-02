@@ -2,9 +2,9 @@ package slacklog
 
 // Config : ログ出力時の設定を保持する。
 type Config struct {
-	EditedSuffix string   `json:"edited_suffix"`
-	Channels     []string `json:"channels"`
-	EmojiJSON    string   `json:"emoji_json"`
+	EditedSuffix  string   `json:"edited_suffix"`
+	Channels      []string `json:"channels"`
+	EmojiJSONPath string   `json:"emoji_json_path"`
 }
 
 // ReadConfig : pathに指定したファイルからコンフィグを読み込む。
