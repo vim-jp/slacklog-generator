@@ -24,8 +24,6 @@ generate_html() {
 }
 
 outrootdir=../tmp/pages_diff
-base_commit=$(git show-branch --merge-base master HEAD)
-base_pages=${outrootdir}/${base_commit}
 current_pages=${outrootdir}/current
 
 if [ $clean -ne 0 ] ; then
@@ -33,6 +31,11 @@ if [ $clean -ne 0 ] ; then
   rm -rf $outrootdir
   exit 0
 fi
+
+echo "catching up origin/master" 1>&2
+git fetch -q origin master
+base_commit=$(git show-branch --merge-base origin/master HEAD)
+base_pages=${outrootdir}/${base_commit}
 
 generate_html ${current_pages}
 
