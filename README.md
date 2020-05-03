@@ -93,8 +93,14 @@ geneate-html の結果の diff を取得しています。
 出力先は `./tmp/pages_diff/current/` および
 `./tmp/pages_diff/{merge-base-commit-id}/` ディレクトリとなっています。
 
-merge-base の出力結果はキャッシュし再利用します。このキャッシュを無視して強制的
-に再出力するには `-f` オプションを使ってください。
+merge-base の算出基準はローカルの origin/master です。そのため origin/master が
+リモート(GitHub)の物よりも古いと出力内容が異なり、差分も異なる場合があります。
+`-u` オプションを使うと merge-base の算出前にローカルの origin/master を更新し
+ます。変更がなくても更新にそれなりに時間がかかるため、デフォルトではオフになっ
+ており明示的に指定するようにしています。
+
+merge-base の出力結果はキャッシュし再利用しています。このキャッシュを無視して強
+制的に再出力するには `-f` オプションを使ってください。
 
 ```console
 $ ./scripts/pages_diff.sh -f

@@ -4,15 +4,21 @@ set -eu
 
 force=0
 clean=0
+update=0
 
-while getopts fc OPT ; do
+while getopts fcu OPT ; do
   case $OPT in
     f) force=1 ;;
     c) clean=1 ;;
+    u) update=1 ;;
   esac
 done
 
 cd "$(dirname "$0")" || exit "$?"
+
+outrootdir=../tmp/pages_diff
+current_pages=${outrootdir}/current
+cmd=${outrootdir}/slacklog-tools
 
 # generate-html サブコマンドを実行して指定ディレクトリに出力する
 generate_html() {
@@ -20,11 +26,11 @@ generate_html() {
   rm -rf $outdir
   echo "generate_html to: $outdir" 1>&2
   mkdir -p $outdir
-  go run ./main.go generate-html ./config.json ../slacklog_template/ ../slacklog_data/ ${outdir} > ${outdir}.generate-html.log 2>&1
+  go build -o ${cmd} ./main.go
+  ${cmd} generate-html ./config.json ../slacklog_template/ ../slacklog_data/ ${outdir} > ${outdir}.generate-html.log 2>&1
+  rm -f ${cmd}
 }
 
-outrootdir=../tmp/pages_diff
-current_pages=${outrootdir}/current
 
 if [ $clean -ne 0 ] ; then
   echo "clean up $outrootdir" 1>&2
@@ -32,12 +38,15 @@ if [ $clean -ne 0 ] ; then
   exit 0
 fi
 
-echo "catching up origin/master" 1>&2
-git fetch -q origin master
+generate_html ${current_pages}
+
+if [ $update -ne 0 ] ; then
+  echo "catching up origin/master" 1>&2
+  git fetch -q origin master
+fi
+
 base_commit=$(git show-branch --merge-base origin/master HEAD)
 base_pages=${outrootdir}/${base_commit}
-
-generate_html ${current_pages}
 
 if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
   echo "base commit: $base_commit" 1>&2
