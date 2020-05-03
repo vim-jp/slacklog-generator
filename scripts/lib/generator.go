@@ -117,11 +117,9 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 		return false, fmt.Errorf("could not create %s directory: %w", path, err)
 	}
 
-	keys := make([]MessageMonthKey, len(msgsMap))
-	i := 0
+	keys := make([]MessageMonthKey, 0, len(msgsMap))
 	for key := range msgsMap {
-		keys[i] = key
-		i++
+		keys = append(keys, key)
 	}
 
 	if err := g.generateChannelIndex(
@@ -132,11 +130,11 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 		return true, err
 	}
 
-	for key := range msgsMap {
+	for key, mm := range msgsMap {
 		if err := g.generateMessageDir(
 			channel,
 			key,
-			msgsMap[key],
+			mm,
 			filepath.Join(path, key.Year(), key.Month()),
 		); err != nil {
 			return true, err

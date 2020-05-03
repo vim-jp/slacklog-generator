@@ -42,30 +42,32 @@ func DownloadFiles(args []string) error {
 		return err
 	}
 
-	channels := s.GetChannels()
-
 	if err := os.MkdirAll(filesDir, 0777); err != nil {
 		return fmt.Errorf("could not create %s directory: %w", filesDir, err)
 	}
 
+	// start download workers.
 	ch := make(chan *slacklog.MessageFile, downloadWorkerNum)
 	wg := new(sync.WaitGroup)
 	failed := false
-
 	for i := 0; i < cap(ch); i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for m := range ch {
 				errs := downloadAll(m, filesDir, slackToken)
-				for i := range errs {
+				if len(errs) > 0 {
 					failed = true
-					fmt.Fprintf(os.Stderr, "[error] Download failed: %s\n", errs[i])
+					for i := range errs {
+						fmt.Fprintf(os.Stderr, "[error] Download failed: %s\n", errs[i])
+					}
 				}
 			}
 		}()
 	}
 
+	// request to download files in messages.
+	channels := s.GetChannels()
 	for _, channel := range channels {
 		messages, err := ReadAllMessages(filepath.Join(logDir, channel.ID))
 		if err != nil {

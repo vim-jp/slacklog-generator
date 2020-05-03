@@ -39,9 +39,9 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 		// processing.
 	}
 
-	mts := make(map[string]*MessageTable, len(ct.ChannelMap))
-	for channelID := range ct.ChannelMap {
-		mts[channelID] = NewMessageTable()
+	mts := make(map[string]*MessageTable, len(ct.Channels))
+	for _, ch := range ct.Channels {
+		mts[ch.ID] = NewMessageTable()
 	}
 
 	return &LogStore{

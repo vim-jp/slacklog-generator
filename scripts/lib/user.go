@@ -19,10 +19,11 @@ func NewUserTable(path string) (*UserTable, error) {
 		return nil, err
 	}
 	userMap := make(map[string]*User, len(users))
-	for i := range users {
-		userMap[users[i].ID] = &users[i]
-		if users[i].Profile.BotID != "" {
-			userMap[users[i].Profile.BotID] = &users[i]
+	for i, u := range users {
+		pu := &users[i]
+		userMap[u.ID] = pu
+		if u.Profile.BotID != "" {
+			userMap[u.Profile.BotID] = pu
 		}
 	}
 	return &UserTable{users, userMap}, nil

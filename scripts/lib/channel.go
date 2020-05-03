@@ -26,26 +26,34 @@ func NewChannelTable(path string, whitelist []string) (*ChannelTable, error) {
 		return channels[i].Name < channels[j].Name
 	})
 	channelMap := make(map[string]*Channel, len(channels))
-	for i := range channels {
-		channelMap[channels[i].ID] = &channels[i]
+	for i, ch := range channels {
+		channelMap[ch.ID] = &channels[i]
 	}
-	return &ChannelTable{channels, channelMap}, nil
+	return &ChannelTable{
+		Channels:   channels,
+		ChannelMap: channelMap,
+	}, nil
 }
 
 // FilterChannel : whitelistに指定したチャンネル名に該当するチャンネルのみを返
 // す。
 // whitelistに'*'が含まれる場合はchannelをそのまま返す。
 func FilterChannel(channels []Channel, whitelist []string) []Channel {
-	newChannels := make([]Channel, 0, len(channels))
-	for i := range whitelist {
-		if whitelist[i] == "*" {
+	if len(whitelist) == 0 {
+		return []Channel{}
+	}
+	allowed := map[string]struct{}{}
+	for _, s := range whitelist {
+		if s == "*" {
 			return channels
 		}
-		for j := range channels {
-			if whitelist[i] == channels[j].Name {
-				newChannels = append(newChannels, channels[j])
-				break
-			}
+		allowed[s] = struct{}{}
+	}
+	newChannels := make([]Channel, 0, len(whitelist))
+	for _, ch := range channels {
+		_, ok := allowed[ch.Name]
+		if ok {
+			newChannels = append(newChannels, ch)
 		}
 	}
 	return newChannels
