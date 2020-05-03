@@ -110,6 +110,21 @@ $ ./scripts/pages_diff.sh -c
 注意事項: `./scripts/pages_diff.sh` は未コミットな変更を stash を用いて保存・復
 帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
 
+## log-data の更新手順
+
+log-data ブランチにはSlackからエクスポートしたデータを格納し、それを本番の生成
+に利用しています。log-data ブランチの更新手順は以下の通りです。
+
+1. Slack からログをエクスポート(今はできる人が限られてる)
+2. ログをワーキングスペースに展開する
+3. `convert-exported-logs` サブコマンドを実行する
+
+    ```console
+    $ cd scripts && go run ./main.go convert-exported-logs {indir} {outdir}
+    ```
+
+4. 更新内容を log-data ブランチに `commit --amend` して `push -f`
+
 ## LICNESE
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="クリエイティブ・コモンズ・ライセンス" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />この 作品 は <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">クリエイティブ・コモンズ 表示 4.0 国際 ライセンス</a>の下に提供されています。
