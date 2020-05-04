@@ -25,8 +25,9 @@ func ConvertExportedLogs(args []string) error {
 
 	inDir := filepath.Clean(args[0])
 	outDir := filepath.Clean(args[1])
+	inChannelsFile := filepath.Join(inDir, "channels.json")
 
-	channels, _, err := readChannels(filepath.Join(inDir, "channels.json"), []string{"*"})
+	channels, _, err := readChannels(inChannelsFile, []string{"*"})
 	if err != nil {
 		return fmt.Errorf("could not read channels.json: %w", err)
 	}
@@ -50,14 +51,17 @@ func ConvertExportedLogs(args []string) error {
 		if err != nil {
 			return err
 		}
+
 		for _, message := range messages {
 			message.UserProfile = nil
 			message.RemoveTokenFromURLs()
 		}
+
 		channelDir := filepath.Join(outDir, channel.ID)
 		if err := os.MkdirAll(channelDir, 0777); err != nil {
 			return fmt.Errorf("could not create %s directory: %w", channelDir, err)
 		}
+
 		messagesPerDay := groupMessagesByDay(messages)
 		for key, msgs := range messagesPerDay {
 			err = writeMessages(filepath.Join(channelDir, key+".json"), msgs)
@@ -94,6 +98,7 @@ func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Cha
 	if err != nil {
 		return nil, nil, err
 	}
+
 	channels = slacklog.FilterChannel(channels, cfgChannels)
 	slacklog.SortChannel(channels)
 	channelMap := make(map[string]*slacklog.Channel, len(channels))
@@ -109,10 +114,12 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 		return nil, err
 	}
 	defer dir.Close()
+
 	names, err := dir.Readdirnames(0)
 	if err != nil {
 		return nil, err
 	}
+
 	var messages []*slacklog.Message
 	for _, name := range names {
 		var msgs []*slacklog.Message
@@ -122,6 +129,7 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 		}
 		messages = append(messages, msgs...)
 	}
+
 	return messages, nil
 }
 
