@@ -111,7 +111,7 @@ func (s *LogStore) GetDisplayNameMap() map[string]string {
 }
 
 func (s *LogStore) GetEmojiMap() map[string]string {
-	return s.et.URLMap
+	return s.et.ExtMap
 }
 
 func (s *LogStore) GetThread(channelID, ts string) (*Thread, bool) {
