@@ -11,7 +11,7 @@ if which make > /dev/null 2>&1; then
   make
 else
   if [[ ! -d slacklog_data ]]; then
-    git archive origin/log-data | tar x
+    curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
   fi
   ./scripts/generate_html.sh
 fi
