@@ -92,6 +92,9 @@ merge-base での `jekyll build` の結果の diff を取得しています。
 出力先は `./tmp/site_diff/current/` および
 `./tmp/site_diff/{merge-base-commit-id}/` ディレクトリとなっています。
 
+デフォルトではローカルにインストールした jekyll を使います。dockerのjekyllを使
+用する場合には `-d` オプションを指定してください。
+
 merge-base の算出基準はローカルの origin/master です。そのため origin/master が
 リモート(GitHub)の物よりも古いと出力内容が異なり、差分も異なる場合があります。
 `-u` オプションを使うと merge-base の算出前にローカルの origin/master を更新し
