@@ -198,6 +198,9 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"datetime": func(ts string) string {
 				return TsToDateTime(ts).Format("2日 15:04:05")
 			},
+			"threadMessageTime": func(msgTs, threadTs string) string {
+				return LevelOfDetailTime(TsToDateTime(msgTs), TsToDateTime(threadTs))
+			},
 			"slackPermalink": func(ts string) string {
 				return strings.Replace(ts, ".", "", 1)
 			},
@@ -226,7 +229,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"attachmentText": g.generateAttachmentText,
 			"threadMtime": func(ts string) string {
 				if t, ok := g.s.GetThread(channel.ID, ts); ok {
-					return t.LastReplyTime().Format("2日 15:04:05")
+					return LevelOfDetailTime(t.LastReplyTime(), TsToDateTime(ts))
 				}
 				return ""
 			},
