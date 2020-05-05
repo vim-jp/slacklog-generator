@@ -31,3 +31,19 @@ func TsToDateTime(ts string) time.Time {
 	}
 	return time.Unix(sec, nsec).In(japan)
 }
+
+// LevelOfDetailTime returns a label string which represents time.  The
+// resolution of the string is determined by differece from base time in 4
+// levels.
+func LevelOfDetailTime(target, base time.Time) string {
+	if target.Year() != base.Year() {
+		return target.Format("2006年1月2日 15:04:05")
+	}
+	if target.Month() != base.Month() {
+		return target.Format("1月2日 15:04:05")
+	}
+	if target.Day() != base.Day() {
+		return target.Format("2日 15:04:05")
+	}
+	return target.Format("15:04:05")
+}

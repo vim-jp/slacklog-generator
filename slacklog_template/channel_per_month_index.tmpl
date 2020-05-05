@@ -124,7 +124,7 @@ permalink: /{{ .channel.ID }}/{{ .monthKey.Year }}/{{ .monthKey.Month }}/index:o
       {{- end }}
         <img class='slacklog-icon' src='{{ userIconUrl . }}'>
         <span class='slacklog-name'>{{ username . }}</span>
-        <a class='slacklog-datetime' href='#ts-{{ .Ts }}'>{{ datetime .Ts }}</a>
+        <a class='slacklog-datetime' href='#ts-{{ .Ts }}'>{{ threadMessageTime .Ts .ThreadTs }}</a>
         <span class='slacklog-text'>{{ text . }}</span>
 
         {{- if .Attachments }}
