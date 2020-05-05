@@ -5,15 +5,15 @@ title: vim-jp.slack.com log
 permalink: /index:output_ext
 ---
 <div>
-<h2><a href='{{ post.url }}'>{{ page.title }}</a></h2>
+<h2><a href='{{ jekyll_through "post.url" }}'>{{ jekyll_through "page.title" }}</a></h2>
 
 <p>参加方法、各チャンネルの概要等は以下を参照して下さい。<br>
 <a href='/docs/chat.html'>vim-jpのチャットルームについて</a></p>
 
 <ul>
-<<- range .channels >>
-<li><a href='{{ site.baseurl }}/<< .ID >>/'>#<< .Name >></a></li>
-<<- end >>
+{{- range .channels }}
+<li><a href='{{ jekyll_through "site.baseurl" }}/{{ .ID }}/'>#{{ .Name }}</a></li>
+{{- end }}
 </ul>
 
 </div>
