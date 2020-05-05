@@ -5,18 +5,18 @@ import (
 )
 
 // EmojiTable : 絵文字データを保持する。
-// ExtMapは絵文字名をキーとし、画像の拡張子が値である。
-// 絵文字は事前に全てダウンロードしている、という前提であり、そのため拡張子のみ
-// を保持している。
 type EmojiTable struct {
-	ExtMap map[string]string
+	// NameToExtは絵文字名をキーとし、画像の拡張子が値である。
+	// 絵文字は事前に全てダウンロードしている、という前提であり、そのため拡張子のみ
+	// を保持している。
+	NameToExt map[string]string
 }
 
 // NewEmojiTable : pathに指定したJSON形式の絵文字データを読み込み、EmojiTableを
 // 生成する。
 func NewEmojiTable(path string) (*EmojiTable, error) {
 	emojis := &EmojiTable{
-		ExtMap: map[string]string{},
+		NameToExt: map[string]string{},
 	}
 
 	if info, err := os.Stat(path); err != nil || info.IsDir() {
@@ -25,7 +25,7 @@ func NewEmojiTable(path string) (*EmojiTable, error) {
 		return nil, os.ErrNotExist
 	}
 
-	if err := ReadFileAsJSON(path, &emojis.ExtMap); err != nil {
+	if err := ReadFileAsJSON(path, &emojis.NameToExt); err != nil {
 		return nil, err
 	}
 
