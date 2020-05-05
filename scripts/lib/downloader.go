@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -31,6 +32,45 @@ func NewDownloader(token string) *Downloader {
 type DownloadTarget struct {
 	URL        string
 	OutputPath string
+}
+
+func GenerateMessageFileTargets(s *LogStore, outputDir string) <-chan DownloadTarget {
+	targetCh := make(chan DownloadTarget)
+
+	go func() {
+		defer close(targetCh)
+		channels := s.GetChannels()
+		for _, channel := range channels {
+			msgs, err := s.GetAllMessages(channel.ID)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to get messages on %s channel: %s", channel.Name, err)
+				return
+			}
+
+			for _, msg := range msgs {
+				for _, f := range msg.Files {
+					targetDir := filepath.Join(outputDir, f.ID)
+					err := os.MkdirAll(targetDir, 0777)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "failed to create %s directory: %s", targetDir, err)
+						return
+					}
+
+					for url, suffix := range f.DownloadURLsAndSuffixes() {
+						if url == "" {
+							continue
+						}
+						targetCh <- DownloadTarget{
+							URL:        url,
+							OutputPath: filepath.Join(targetDir, f.DownloadFilename(url, suffix)),
+						}
+					}
+				}
+			}
+		}
+	}()
+
+	return targetCh
 }
 
 var downloadWorkerNum = 8
