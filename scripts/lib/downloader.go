@@ -38,6 +38,9 @@ type DownloadTarget struct {
 	OutputPath string
 }
 
+// GenerateEmojiFileTargets : 絵文字ファイルのダウンロードURLと保存先パスを
+// Slack APIの実行結果から生成してchanに流す。
+// summaryOutputPathへは絵文字名と拡張子のmapをJSON形式で保存する。
 func GenerateEmojiFileTargets(api *slack.Client, outputDir, summaryOutputPath string) <-chan DownloadTarget {
 	targetCh := make(chan DownloadTarget)
 	var emojisMu sync.Mutex
@@ -86,6 +89,8 @@ func GenerateEmojiFileTargets(api *slack.Client, outputDir, summaryOutputPath st
 	return targetCh
 }
 
+// GenerateMessageFileTargets : メッセージに保存されたファイルのダウンロードURL
+// と保存先パスをLogStoreから生成してchanに流す。
 func GenerateMessageFileTargets(s *LogStore, outputDir string) <-chan DownloadTarget {
 	targetCh := make(chan DownloadTarget)
 
