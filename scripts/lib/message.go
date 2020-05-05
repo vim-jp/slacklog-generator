@@ -118,6 +118,7 @@ func (m *MessageTable) ReadLogFile(path string, visibleOnly bool) error {
 		}
 		threadTs := msg.ThreadTs
 		if !visibleOnly {
+			visibleMsgs = append(visibleMsgs, msg)
 		} else if threadTs == "" || msg.IsRootOfThread() ||
 			msg.Subtype == "thread_broadcast" ||
 			msg.Subtype == "bot_message" ||
