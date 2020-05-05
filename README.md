@@ -46,8 +46,7 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 ログを展開
 
 ```console
-git fetch origin log-data
-git archive origin/log-data | tar x
+curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
 ```
 
 Jekyll に必要な HTML を生成

@@ -3,8 +3,7 @@ slacklog_pages: slacklog_data $(wildcard scripts/**) $(wildcard slacklog_templat
 	touch -c slacklog_pages
 
 slacklog_data:
-	git fetch origin log-data
-	git archive origin/log-data | tar x
+	curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
 
 .phony: clean
 clean:
