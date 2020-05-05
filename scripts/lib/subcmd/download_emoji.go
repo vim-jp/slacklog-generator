@@ -8,14 +8,12 @@
 package subcmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/slack-go/slack"
+	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func DownloadEmoji(args []string) error {
@@ -36,66 +34,11 @@ func DownloadEmoji(args []string) error {
 	}
 
 	api := slack.New(slackToken)
-
-	emojis, err := api.GetEmoji()
+	targetCh := slacklog.GenerateEmojiFileTargets(api, emojisDir, emojiJSONPath)
+	d := slacklog.NewDownloader(slackToken)
+	err := d.DownloadAll(targetCh, false)
 	if err != nil {
 		return err
 	}
-
-	err = os.MkdirAll(emojisDir, 0777)
-	if err != nil {
-		return err
-	}
-
-	for name, url := range emojis {
-		if url[:6] == "alias:" {
-			continue
-		}
-		downloadEmojiToFile(url, name, emojisDir)
-		emojis[name] = filepath.Ext(emojis[name])
-	}
-
-	// write `emojis` to a file as JSON, using with json.Encoder. this saves
-	// memory to marshal JSON.
-	f, err := os.Create(emojiJSONPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	err = json.NewEncoder(f).Encode(emojis)
-	if err != nil {
-		return err
-	}
-
 	return nil
-}
-
-func downloadEmojiToFile(url, name, basePath string) error {
-	extension := filepath.Ext(url)
-	destFile := filepath.Join(basePath, name+extension)
-	if _, err := os.Stat(destFile); err == nil {
-		return nil
-	}
-
-	fmt.Printf("Downloading: :%s:\n", name)
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode/100 != 2 {
-		return fmt.Errorf("[%s]: %s", resp.Status, url)
-	}
-
-	w, err := os.Create(destFile)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	_, err = io.Copy(w, resp.Body)
-
-	return err
 }

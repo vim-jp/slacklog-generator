@@ -1,12 +1,16 @@
 package slacklog
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
+
+	"github.com/slack-go/slack"
 )
 
 // Downloader : slack.Client/LogStoreを用いてダウンロードURLを生成し、そこから
@@ -32,6 +36,54 @@ func NewDownloader(token string) *Downloader {
 type DownloadTarget struct {
 	URL        string
 	OutputPath string
+}
+
+func GenerateEmojiFileTargets(api *slack.Client, outputDir, summaryOutputPath string) <-chan DownloadTarget {
+	targetCh := make(chan DownloadTarget)
+	var emojisMu sync.Mutex
+
+	go func() {
+		defer close(targetCh)
+		emojis, err := api.GetEmoji()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to get emojis: %s", err)
+			return
+		}
+		err = os.MkdirAll(outputDir, 0777)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to create %s: %s", outputDir, err)
+			return
+		}
+
+		for name, url := range emojis {
+			if strings.HasPrefix(url, "alias:") {
+				continue
+			}
+			ext := filepath.Ext(url)
+			path := filepath.Join(outputDir, name+ext)
+			targetCh <- DownloadTarget{
+				URL:        url,
+				OutputPath: path,
+			}
+			emojisMu.Lock()
+			emojis[name] = ext
+			emojisMu.Unlock()
+		}
+
+		f, err := os.Create(summaryOutputPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to output summary: %s", err)
+			return
+		}
+		defer f.Close()
+		err = json.NewEncoder(f).Encode(emojis)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to output summary: %s", err)
+			return
+		}
+	}()
+
+	return targetCh
 }
 
 func GenerateMessageFileTargets(s *LogStore, outputDir string) <-chan DownloadTarget {
