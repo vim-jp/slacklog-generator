@@ -1,11 +1,14 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+    - '**'
 
 jobs:
 
-  gotool:
-    name: 'scripts/main.go'
+  biuld-tool:
+    name: 'Build and Compile the Tool'
     runs-on: 'ubuntu-latest'
 
     steps:
