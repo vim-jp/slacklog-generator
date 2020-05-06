@@ -1,13 +1,14 @@
 ---
-# vim:set ts=2 sts=2 sw=2 noet:
+# vim:set ts=2 sts=2 sw=2 et:
 ---
 <!doctype html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>vim-jp &raquo; {{ page.title }}</title>
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/site.css" type="text/css" />
-<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/slacklog.css" type="text/css" />
+<link rel="stylesheet" href="https://unpkg.com/@primer/css/dist/primer.css" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="RSS" href="//vim-jp.org/rss.xml" />
 <link rel="canonical" href="{{ site.baseurl }}{{ page.url }}" />
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -16,18 +17,30 @@
 <script src="{{ site.baseurl }}/assets/javascripts/slacklog.js"></script>
 </head>
 <body>
-	<div class="header">
-		<h1><a href="/">vim-jp &raquo; Vimのユーザーと開発者を結ぶコミュニティサイト</a></h1>
-	</div>
-	<div class="body">
-		<div id="content">
-			<div>
-			{{ content }}
-			</div>
-		</div>
-		<br class="clear" />
-		<div id="footer">
-			<p>Powered by <a href="https://github.com/">github</a>. vim-jp.org is licensed under a <a href="https://creativecommons.org/licenses/by/2.1/jp/">Creative Commons License</a>.
-		</div>
-	</div>
+  <div class="body">
+    <div id="content">
+      <!-- header -->
+      <div class="pagehead ml-3">
+        <h1>
+          <span class="author">
+            <a href="//vim-jp.org" class="url fn" >vim-jp</a>
+          </span>
+          <span class="path-divider">/</span>
+          <a href="{{ site.baseurl }}">slacklog</a>
+        </h1>
+      </div>
+      <!-- /header -->
+      <div>
+        {{ content }}
+      </div>
+    </div>
+    <!-- footer -->
+    <div class="clearfix"></div>
+    <div id="footer">
+      <p>
+        Powered by <a href="https://github.com/">GitHub</a>
+      </p>
+    </div>
+    <!-- /footer -->
+  </div>
 </body>

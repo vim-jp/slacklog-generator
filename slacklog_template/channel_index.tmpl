@@ -4,16 +4,11 @@ layout: slacklog
 title: vim-jp.slack.com log - &#35{{ .channel.Name }}
 permalink: /{{ .channel.ID }}/index:output_ext
 ---
-<div>
-<h2><a href='{{ jekyll_through "site.baseurl" }}/'>vim-jp.slack.com log</a> - &#35{{ .channel.Name }}</h2>
-
-<p>参加方法、各チャンネルの概要等は以下を参照して下さい。<br>
-<a href='/docs/chat.html'>vim-jpのチャットルームについて</a></p>
-
-<ul>
-{{- range .keys }}
-<li><a href='{{ jekyll_through "site.baseurl" }}/{{ $.channel.ID }}/{{ .Year }}/{{ .Month }}/index.html'>{{ .Year }}年{{ .Month }}月</a></li>
-{{- end }}
-</ul>
-
+<div class="m-3">
+  <h4 class="text-gray pb-2 border-bottom">&#35{{ $.channel.Name }}</h4>
+  <nav class="SideNav bg-white">
+    {{- range .keys }}
+      <a class="SideNav-item" href="{{ J "site.baseurl" }}/{{ $.channel.ID }}/{{ .Year }}/{{ .Month }}/index.html">{{ .Year }}年{{ .Month }}月</a>
+    {{- end }}
+  </nav>
 </div>
