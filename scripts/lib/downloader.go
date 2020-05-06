@@ -10,10 +10,9 @@ import (
 	"time"
 )
 
-// Downloader : slack.Client/LogStoreを用いてダウンロードURLを生成し、そこから
-// ファイルを並行にダウンロードするための構造体。
-// 並行処理時に発生したエラーはerrsに蓄えられ、然るべき後に戻り値として返される。
-// errsにerrorを加える際はスレッドセーフにするためerrsMuでロックを取る。
+// Downloader : ダウンロード処理をするワーカを管理するための構造体。
+// TODO: 今のところ、ダウンロード処理中にエラーが発生してもキューに積まれたタス
+// クが全て完了するまでは分からない(Wait()の返り値として見るまでは)。
 type Downloader struct {
 	token string
 
@@ -21,7 +20,8 @@ type Downloader struct {
 	targetCh   chan downloadTarget
 	workerWg   sync.WaitGroup
 
-	errs   []error
+	errs []error
+	// errsに値を入れる際には必ずerrsMuでロックを取る
 	errsMu sync.Mutex
 }
 
@@ -72,6 +72,7 @@ func NewDownloader(token string) *Downloader {
 	return d
 }
 
+// QueueDownloadRequest : ダウンロード処理をqueueに積む
 func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool) {
 	d.targetCh <- downloadTarget{
 		url:        url,
@@ -80,6 +81,8 @@ func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool
 	}
 }
 
+// Wait : ワーカが全て実行終了するまで待つ。
+// ダウンロード処理中にエラーが発生していた場合はその先頭を返す。
 func (d *Downloader) Wait() error {
 	d.workerWg.Wait()
 	if len(d.errs) != 0 {
@@ -88,6 +91,10 @@ func (d *Downloader) Wait() error {
 	return nil
 }
 
+// CloseQueue : ダウンロードキューへの追加が完了したことをDownloaderに通知する
+// ために実行する。
+// TODO: 2回実行するとpanicしてしまうのを修正する。Downloaderに状態でも持たせる
+// とよいだろうか。
 func (d *Downloader) CloseQueue() {
 	close(d.targetCh)
 }
