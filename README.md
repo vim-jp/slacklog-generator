@@ -178,6 +178,26 @@ log-data ブランチにはSlackからエクスポートしたデータを格納
 
 4. 更新内容を log-data ブランチに `commit --amend` して `push -f`
 
+## Pull Request の影響の確認の方法
+
+以下の手順で Pull Request への `pages_diff.sh` と `site_diff.sh` の実行結果を
+Artifacts として Web から取得できます。レビューの際に利用してください。
+
+1. Pull Request の <b>Checks</b> タブを開く
+2. <b>CI</b> ワークフロー(右側)を選択
+3. <b>Compare Pages and Site</b> ジョブ(右側)を選択
+4. <b>Artifacts</b> ドロワー(左側)を選択
+5. `diffs-{数値}` アーティファクトをダウンロード
+
+以下のスクリーンショットは、上記の選択個所をマーキングしたものです。
+
+![](https://raw.githubusercontent.com/wiki/vim-jp/slacklog-generator/images/where-are-artifacts.png)
+
+Artifacts はそれぞれ zip としてダウンロードできます。
+`diffs-*.zip` には `pages_diff.sh` と `site_diff.sh` の両方の差分が含まれています。
+`log-*.zip` はそれぞれの動作ログが含まれていますが、こちらはCIの動作デバッグ目的のものです。
+末尾の数値は [`${{ github.run_id }}`](https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context) 由来です。
+
 ## LICNESE
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="クリエイティブ・コモンズ・ライセンス" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />この 作品 は <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">クリエイティブ・コモンズ 表示 4.0 国際 ライセンス</a>の下に提供されています。
