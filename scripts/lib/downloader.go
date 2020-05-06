@@ -15,7 +15,7 @@ import (
 type Downloader struct {
 	token string
 
-	targetCh chan DownloadTarget
+	targetCh chan downloadTarget
 	workerWg sync.WaitGroup
 
 	errs   []error
@@ -27,7 +27,7 @@ var downloadWorkerNum = 8
 func NewDownloader(token string) *Downloader {
 	d := &Downloader{
 		token:    token,
-		targetCh: make(chan DownloadTarget),
+		targetCh: make(chan downloadTarget),
 		errs:     []error{},
 	}
 
@@ -43,10 +43,10 @@ func NewDownloader(token string) *Downloader {
 }
 
 func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool) {
-	d.targetCh <- DownloadTarget{
-		URL:        url,
-		OutputPath: outputPath,
-		WithToken:  withToken,
+	d.targetCh <- downloadTarget{
+		url:        url,
+		outputPath: outputPath,
+		withToken:  withToken,
 	}
 }
 
@@ -73,19 +73,19 @@ func (d *Downloader) runWorker() {
 	}
 }
 
-// DownloadTarget : ダウンロードするURLとダウンロード先パスOutputPathのペア
-// Downloaderにダウンロードする対象を指定するために使う
-type DownloadTarget struct {
-	URL        string
-	OutputPath string
-	WithToken  bool
+// downloadTarget : Downloaderにダウンロードする対象を指定するために使う。
+type downloadTarget struct {
+	url        string
+	outputPath string
+	// ダウンロード時にSlack API tokenを利用するかどうかを指定する
+	withToken bool
 }
 
-func (d *Downloader) Download(t DownloadTarget) error {
-	_, err := os.Stat(t.OutputPath)
+func (d *Downloader) Download(t downloadTarget) error {
+	_, err := os.Stat(t.outputPath)
 	if err == nil {
 		// Just skip already downloaded file
-		fmt.Printf("already exist: %s\n", t.OutputPath)
+		fmt.Printf("already exist: %s\n", t.outputPath)
 		return nil
 	}
 	// `err != nil` has two cases at here. first is "not exist" as expected.
@@ -93,18 +93,18 @@ func (d *Downloader) Download(t DownloadTarget) error {
 	if !os.IsNotExist(err) {
 		return err
 	}
-	fmt.Printf("Downloading: %s\n", t.OutputPath)
+	fmt.Printf("Downloading: %s\n", t.outputPath)
 	httpClient := &http.Client{}
 	httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
 
-	req, err := http.NewRequest("GET", t.URL, nil)
+	req, err := http.NewRequest("GET", t.url, nil)
 	if err != nil {
 		return err
 	}
 
-	if t.WithToken {
+	if t.withToken {
 		req.Header.Add("Authorization", "Bearer "+d.token)
 	}
 
@@ -115,10 +115,10 @@ func (d *Downloader) Download(t DownloadTarget) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode/100 != 2 {
-		return fmt.Errorf("[%s]: %s", resp.Status, t.URL)
+		return fmt.Errorf("[%s]: %s", resp.Status, t.url)
 	}
 
-	w, err := os.Create(t.OutputPath)
+	w, err := os.Create(t.outputPath)
 	if err != nil {
 		return err
 	}
