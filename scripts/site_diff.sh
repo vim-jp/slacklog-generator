@@ -6,13 +6,15 @@ force=0
 clean=0
 update=0
 docker=0
+outdiff=""
 
-while getopts fcud OPT ; do
+while getopts fcudo: OPT ; do
   case $OPT in
     f) force=1 ;;
     c) clean=1 ;;
     u) update=1 ;;
     d) docker=1 ;;
+    o) outdiff="$OPTARG" ;;
   esac
 done
 
@@ -86,5 +88,9 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
 fi
 
 # 差分を出力
-echo "" 1>&2
-diff -uNr -x sitemap.xml ${base_pages} ${current_pages} || true
+if [ x"$outdiff" = x ] ; then
+  echo "" 1>&2
+  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} || true
+else
+  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} > "$outdiff" || true
+fi

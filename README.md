@@ -115,6 +115,10 @@ $ ./scripts/site_diff.sh -f
 $ ./scripts/site_diff.sh -c
 ```
 
+差分だけを特定のファイルに出力するには `-o {filename}` オプションを使ってくださ
+い。リダイレクト (` > filename`) では差分以外の動作ログも含まれる場合がありま
+す。
+
 注意事項: `./scripts/site_diff.sh` は未コミットな変更を stash を用いて保存・復
 帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
 
@@ -151,6 +155,10 @@ $ ./scripts/pages_diff.sh -f
 ```console
 $ ./scripts/pages_diff.sh -c
 ```
+
+差分だけを特定のファイルに出力するには `-o {filename}` オプションを使ってくださ
+い。リダイレクト (` > filename`) では差分以外の動作ログも含まれる場合がありま
+す。
 
 注意事項: `./scripts/pages_diff.sh` は未コミットな変更を stash を用いて保存・復
 帰しているため staged な変更が unstaged に巻き戻ることに留意してください。

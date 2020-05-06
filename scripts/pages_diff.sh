@@ -5,32 +5,40 @@ set -eu
 force=0
 clean=0
 update=0
+outdiff=""
 
-while getopts fcu OPT ; do
+while getopts fcuo: OPT ; do
   case $OPT in
     f) force=1 ;;
     c) clean=1 ;;
     u) update=1 ;;
+    o) outdiff="$OPTARG" ;;
   esac
 done
 
-cd "$(dirname "$0")" || exit "$?"
+cd "$(dirname "$0")/.." || exit "$?"
 
-outrootdir=../tmp/pages_diff
+outrootdir=tmp/pages_diff
 current_pages=${outrootdir}/current
 cmd=${outrootdir}/slacklog-tools
 
-# generate-html サブコマンドを実行して指定ディレクトリに出力する
-generate_html() {
-  outdir=$1 ; shift
-  rm -rf $outdir
-  echo "generate_html to: $outdir" 1>&2
-  mkdir -p $outdir
-  go build -o ${cmd} ./main.go 1>&2
-  ${cmd} generate-html ./config.json ../slacklog_template/ ../slacklog_data/ ${outdir} > ${outdir}.generate-html.log 2>&1
-  rm -f ${cmd}
+build_tool() {
+  cd scripts
+  go build -o ../${cmd} ./main.go 1>&2
+  cd ..
 }
 
+# generate-html サブコマンドを実行して指定ディレクトリに出力する
+generate_html() {
+  id=$1 ; shift
+  outdir=${outrootdir}/${id}
+  echo "generate_html to: $outdir" 1>&2
+  rm -rf $outdir
+  mkdir -p $outdir
+  build_tool
+  ${cmd} generate-html scripts/config.json slacklog_template/ slacklog_data/ ${outdir} > ${outdir}.generate-html.log 2>&1
+  rm -f ${cmd}
+}
 
 if [ $clean -ne 0 ] ; then
   echo "clean up $outrootdir" 1>&2
@@ -38,7 +46,7 @@ if [ $clean -ne 0 ] ; then
   exit 0
 fi
 
-generate_html ${current_pages}
+generate_html "current"
 
 if [ $update -ne 0 ] ; then
   echo "catching up origin/master" 1>&2
@@ -61,7 +69,7 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
   # merge-base に巻き戻し generate-html を実行する
   git reset -q --hard ${base_commit}
   echo "move to base: $(git rev-parse HEAD)" 1>&2
-  generate_html ${base_pages}
+  generate_html ${base_commit}
 
   # 退避したHEADと変更を復帰する
   git reset -q --hard ${current_commit}
@@ -73,5 +81,9 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
 fi
 
 # 差分を出力
-echo "" 1>&2
-diff -uNr ${base_pages} ${current_pages} || true
+if [ x"$outdiff" = x ] ; then
+  echo "" 1>&2
+  diff -uNr ${base_pages} ${current_pages} || true
+else
+  diff -uNr ${base_pages} ${current_pages} > "$outdiff" || true
+fi
