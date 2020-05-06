@@ -47,4 +47,9 @@ pre {
  background-color: black;
  padding: 0.5em;
 }
+
+.slacklog-emoji {
+  height: 1.0em;
+}
+
 /* vim:set ts=8 sts=2 sw=2 noet: */
