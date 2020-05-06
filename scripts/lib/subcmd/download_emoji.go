@@ -34,9 +34,9 @@ func DownloadEmoji(args []string) error {
 	}
 
 	api := slack.New(slackToken)
-	targetCh := slacklog.GenerateEmojiFileTargets(api, emojisDir, emojiJSONPath)
 	d := slacklog.NewDownloader(slackToken)
-	err := d.DownloadAll(targetCh, false)
+	go slacklog.GenerateEmojiFileTargets(d, api, emojisDir, emojiJSONPath)
+	err := d.DownloadAll(false)
 	if err != nil {
 		return err
 	}
