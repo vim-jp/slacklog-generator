@@ -3,9 +3,11 @@ package slacklog
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"sync"
+	"time"
 )
 
 // Downloader : slack.Client/LogStoreを用いてダウンロードURLを生成し、そこから
@@ -15,8 +17,9 @@ import (
 type Downloader struct {
 	token string
 
-	targetCh chan downloadTarget
-	workerWg sync.WaitGroup
+	httpClient *http.Client
+	targetCh   chan downloadTarget
+	workerWg   sync.WaitGroup
 
 	errs   []error
 	errsMu sync.Mutex
@@ -25,10 +28,37 @@ type Downloader struct {
 var downloadWorkerNum = 8
 
 func NewDownloader(token string) *Downloader {
+	// http.DefaultTransportの値からMaxConnsPerHostのみ修正
+	t := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2: true,
+		MaxIdleConns:      100,
+		// ワーカ起動のロジックにバグがあったとしてもこのhttp.Transportを利用してい
+		// る限りは多量のリクエストが飛ばないように念の為downloadWorkerNumでコネク
+		// ション数を制限しておく
+		MaxConnsPerHost:       downloadWorkerNum,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	cli := &http.Client{Transport: t}
+	// 無効なSlack API tokenを食わせても、リダイレクトされ、200が返ってきてエラー
+	// かどうか判別できないためリダイレクトをしないように制御しておく
+	cli.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+
 	d := &Downloader{
-		token:    token,
-		targetCh: make(chan downloadTarget),
-		errs:     []error{},
+		token:      token,
+		httpClient: &http.Client{Transport: t},
+		targetCh:   make(chan downloadTarget),
+		errs:       []error{},
 	}
 
 	for i := 0; i < downloadWorkerNum; i++ {
@@ -93,11 +123,8 @@ func (d *Downloader) download(t downloadTarget) error {
 	if !os.IsNotExist(err) {
 		return err
 	}
+
 	fmt.Printf("Downloading: %s\n", t.outputPath)
-	httpClient := &http.Client{}
-	httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
 
 	req, err := http.NewRequest("GET", t.url, nil)
 	if err != nil {
@@ -108,7 +135,7 @@ func (d *Downloader) download(t downloadTarget) error {
 		req.Header.Add("Authorization", "Bearer "+d.token)
 	}
 
-	resp, err := httpClient.Do(req)
+	resp, err := d.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
