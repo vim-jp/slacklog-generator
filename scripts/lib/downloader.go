@@ -21,16 +21,30 @@ type Downloader struct {
 	token string
 
 	targetCh chan DownloadTarget
-	errs     []error
-	errsMu   sync.Mutex
+	workerWg sync.WaitGroup
+
+	errs   []error
+	errsMu sync.Mutex
 }
 
+var downloadWorkerNum = 8
+
 func NewDownloader(token string) *Downloader {
-	return &Downloader{
+	d := &Downloader{
 		token:    token,
 		targetCh: make(chan DownloadTarget),
 		errs:     []error{},
 	}
+
+	for i := 0; i < downloadWorkerNum; i++ {
+		d.workerWg.Add(1)
+		go func() {
+			defer d.workerWg.Done()
+			d.runWorker()
+		}()
+	}
+
+	return d
 }
 
 func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool) {
@@ -41,8 +55,27 @@ func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool
 	}
 }
 
+func (d *Downloader) Wait() error {
+	d.workerWg.Wait()
+	if len(d.errs) != 0 {
+		return d.errs[0]
+	}
+	return nil
+}
+
 func (d *Downloader) CloseQueue() {
 	close(d.targetCh)
+}
+
+func (d *Downloader) runWorker() {
+	for t := range d.targetCh {
+		err := d.Download(t)
+		if err != nil {
+			d.errsMu.Lock()
+			d.errs = append(d.errs, err)
+			d.errsMu.Unlock()
+		}
+	}
 }
 
 // DownloadTarget : ダウンロードするURLとダウンロード先パスOutputPathのペア
@@ -130,40 +163,6 @@ func GenerateMessageFileTargets(d *Downloader, s *LogStore, outputDir string) {
 			}
 		}
 	}
-}
-
-var downloadWorkerNum = 8
-
-// DownloadAll : targetChに届いたDownloadTargetを並行にダウンロードする。
-// withTokenはHTTPリクエストにSlack API tokenを用いるかを指定する。
-// 同時ダウンロード数をlimitChによりdownloadWorkerNumだけに制限している。
-func (d *Downloader) DownloadAll() error {
-	limitCh := make(chan struct{}, downloadWorkerNum)
-	var wg sync.WaitGroup
-	for target := range d.targetCh {
-		wg.Add(1)
-		go func(t DownloadTarget) {
-			limitCh <- struct{}{}
-			defer func() {
-				wg.Done()
-				<-limitCh
-			}()
-
-			err := d.Download(t)
-			if err != nil {
-				d.errsMu.Lock()
-				d.errs = append(d.errs, err)
-				d.errsMu.Unlock()
-			}
-		}(target)
-	}
-
-	wg.Wait()
-
-	if len(d.errs) > 0 {
-		return d.errs[0]
-	}
-	return nil
 }
 
 func (d *Downloader) Download(t DownloadTarget) error {
