@@ -33,10 +33,11 @@ func NewDownloader(token string) *Downloader {
 	}
 }
 
-func (d *Downloader) QueueDownloadRequest(url, outputPath string) {
+func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool) {
 	d.targetCh <- DownloadTarget{
 		URL:        url,
 		OutputPath: outputPath,
+		WithToken:  withToken,
 	}
 }
 
@@ -49,6 +50,7 @@ func (d *Downloader) CloseQueue() {
 type DownloadTarget struct {
 	URL        string
 	OutputPath string
+	WithToken  bool
 }
 
 // GenerateEmojiFileTargets : 絵文字ファイルのダウンロードURLと保存先パスを
@@ -75,7 +77,7 @@ func GenerateEmojiFileTargets(d *Downloader, api *slack.Client, outputDir, summa
 		}
 		ext := filepath.Ext(url)
 		path := filepath.Join(outputDir, name+ext)
-		d.QueueDownloadRequest(url, path)
+		d.QueueDownloadRequest(url, path, false)
 		emojisMu.Lock()
 		emojis[name] = ext
 		emojisMu.Unlock()
@@ -122,6 +124,7 @@ func GenerateMessageFileTargets(d *Downloader, s *LogStore, outputDir string) {
 					d.QueueDownloadRequest(
 						url,
 						filepath.Join(targetDir, f.DownloadFilename(url, suffix)),
+						true,
 					)
 				}
 			}
@@ -134,7 +137,7 @@ var downloadWorkerNum = 8
 // DownloadAll : targetChに届いたDownloadTargetを並行にダウンロードする。
 // withTokenはHTTPリクエストにSlack API tokenを用いるかを指定する。
 // 同時ダウンロード数をlimitChによりdownloadWorkerNumだけに制限している。
-func (d *Downloader) DownloadAll(withToken bool) error {
+func (d *Downloader) DownloadAll() error {
 	limitCh := make(chan struct{}, downloadWorkerNum)
 	var wg sync.WaitGroup
 	for target := range d.targetCh {
@@ -146,7 +149,7 @@ func (d *Downloader) DownloadAll(withToken bool) error {
 				<-limitCh
 			}()
 
-			err := d.Download(t, withToken)
+			err := d.Download(t)
 			if err != nil {
 				d.errsMu.Lock()
 				d.errs = append(d.errs, err)
@@ -163,7 +166,7 @@ func (d *Downloader) DownloadAll(withToken bool) error {
 	return nil
 }
 
-func (d *Downloader) Download(t DownloadTarget, withToken bool) error {
+func (d *Downloader) Download(t DownloadTarget) error {
 	_, err := os.Stat(t.OutputPath)
 	if err == nil {
 		// Just skip already downloaded file
@@ -186,7 +189,7 @@ func (d *Downloader) Download(t DownloadTarget, withToken bool) error {
 		return err
 	}
 
-	if withToken {
+	if t.WithToken {
 		req.Header.Add("Authorization", "Bearer "+d.token)
 	}
 

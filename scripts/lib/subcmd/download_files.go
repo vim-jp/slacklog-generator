@@ -37,7 +37,7 @@ func DownloadFiles(args []string) error {
 	d := slacklog.NewDownloader(slackToken)
 
 	go slacklog.GenerateMessageFileTargets(d, s, filesDir)
-	err = d.DownloadAll(true)
+	err = d.DownloadAll()
 	if err != nil {
 		return err
 	}
