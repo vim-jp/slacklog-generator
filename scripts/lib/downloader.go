@@ -64,7 +64,7 @@ func (d *Downloader) CloseQueue() {
 
 func (d *Downloader) runWorker() {
 	for t := range d.targetCh {
-		err := d.Download(t)
+		err := d.download(t)
 		if err != nil {
 			d.errsMu.Lock()
 			d.errs = append(d.errs, err)
@@ -81,7 +81,7 @@ type downloadTarget struct {
 	withToken bool
 }
 
-func (d *Downloader) Download(t downloadTarget) error {
+func (d *Downloader) download(t downloadTarget) error {
 	_, err := os.Stat(t.outputPath)
 	if err == nil {
 		// Just skip already downloaded file
