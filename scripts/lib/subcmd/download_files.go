@@ -36,11 +36,45 @@ func DownloadFiles(args []string) error {
 
 	d := slacklog.NewDownloader(slackToken)
 
-	go slacklog.GenerateMessageFileTargets(d, s, filesDir)
+	go generateMessageFileTargets(d, s, filesDir)
 
 	err = d.Wait()
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func generateMessageFileTargets(d *slacklog.Downloader, s *slacklog.LogStore, outputDir string) {
+	defer d.CloseQueue()
+	channels := s.GetChannels()
+	for _, channel := range channels {
+		msgs, err := s.GetAllMessages(channel.ID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to get messages on %s channel: %s", channel.Name, err)
+			return
+		}
+
+		for _, msg := range msgs {
+			for _, f := range msg.Files {
+				targetDir := filepath.Join(outputDir, f.ID)
+				err := os.MkdirAll(targetDir, 0777)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "failed to create %s directory: %s", targetDir, err)
+					return
+				}
+
+				for url, suffix := range f.DownloadURLsAndSuffixes() {
+					if url == "" {
+						continue
+					}
+					d.QueueDownloadRequest(
+						url,
+						filepath.Join(targetDir, f.DownloadFilename(url, suffix)),
+						true,
+					)
+				}
+			}
+		}
+	}
 }

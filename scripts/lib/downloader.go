@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sync"
 )
 
@@ -80,42 +79,6 @@ type DownloadTarget struct {
 	URL        string
 	OutputPath string
 	WithToken  bool
-}
-
-// GenerateMessageFileTargets : メッセージに保存されたファイルのダウンロードURL
-// と保存先パスをLogStoreから生成してchanに流す。
-func GenerateMessageFileTargets(d *Downloader, s *LogStore, outputDir string) {
-	defer d.CloseQueue()
-	channels := s.GetChannels()
-	for _, channel := range channels {
-		msgs, err := s.GetAllMessages(channel.ID)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to get messages on %s channel: %s", channel.Name, err)
-			return
-		}
-
-		for _, msg := range msgs {
-			for _, f := range msg.Files {
-				targetDir := filepath.Join(outputDir, f.ID)
-				err := os.MkdirAll(targetDir, 0777)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to create %s directory: %s", targetDir, err)
-					return
-				}
-
-				for url, suffix := range f.DownloadURLsAndSuffixes() {
-					if url == "" {
-						continue
-					}
-					d.QueueDownloadRequest(
-						url,
-						filepath.Join(targetDir, f.DownloadFilename(url, suffix)),
-						true,
-					)
-				}
-			}
-		}
-	}
 }
 
 func (d *Downloader) Download(t DownloadTarget) error {
