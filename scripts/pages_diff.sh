@@ -26,7 +26,7 @@ generate_html() {
   rm -rf $outdir
   echo "generate_html to: $outdir" 1>&2
   mkdir -p $outdir
-  go build -o ${cmd} ./main.go
+  go build -o ${cmd} ./main.go 1>&2
   ${cmd} generate-html ./config.json ../slacklog_template/ ../slacklog_data/ ${outdir} > ${outdir}.generate-html.log 2>&1
   rm -f ${cmd}
 }
@@ -60,7 +60,7 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
 
   # merge-base に巻き戻し generate-html を実行する
   git reset -q --hard ${base_commit}
-  echo "move to base: $(git rev-parse HEAD)" 2>&1
+  echo "move to base: $(git rev-parse HEAD)" 1>&2
   generate_html ${base_pages}
 
   # 退避したHEADと変更を復帰する
@@ -69,8 +69,9 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
     git stash pop -q
   fi
 
-  echo "return to current: $(git rev-parse HEAD)" 2>&1
+  echo "return to current: $(git rev-parse HEAD)" 1>&2
 fi
 
 # 差分を出力
-diff -uNr ${base_pages} ${current_pages}
+echo "" 1>&2
+diff -uNr ${base_pages} ${current_pages} || true

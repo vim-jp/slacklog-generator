@@ -2,9 +2,6 @@ name: CI
 
 on: [push, pull_request]
 
-env:
-  GOPATH: ${{ github.workspace }}/..
-
 jobs:
 
   gotool:
@@ -25,3 +22,31 @@ jobs:
 
     - name: Test
       run: cd scripts && go test ./...
+
+  diff:
+    name: 'Compare Generated Pages'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - name: 'Check out target branch (commit)'
+      uses: 'actions/checkout@v2'
+      with:
+        # FIXME: 全部取るのはやりすぎ。必要最小限(mereg-base origin/master
+        # HEAD)までだけ取れたら良いのだが…
+        fetch-depth: 0
+
+    - name: 'Preparations'
+      run: |
+        # origin/master の ref が比較のために要る
+        git fetch origin master
+
+        # log-data の取得と展開
+        curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
+
+        # 出力用のディレクトリ
+        mkdir -p tmp
+
+    - name: 'Compare pages'
+      run: |
+        mkdir -p tmp
+        ./scripts/pages_diff.sh | tee tmp/pages.diff | head -n 1000
