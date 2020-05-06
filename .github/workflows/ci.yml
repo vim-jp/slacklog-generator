@@ -27,7 +27,7 @@ jobs:
       run: cd scripts && go test ./...
 
   diff:
-    name: 'Compare Generated Pages'
+    name: 'Compare Pages and Site'
     runs-on: 'ubuntu-latest'
 
     steps:
@@ -46,10 +46,19 @@ jobs:
         # log-data の取得と展開
         curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
 
-        # 出力用のディレクトリ
+        # 出力用のディレクトリ。docker から書くのに a+wx が必要だった
         mkdir -p tmp
+        chmod a+wx tmp
+
+        # jekyll on docker をセットアップするのに必要
+        touch Gemfile.lock
+        chmod a+w Gemfile.lock
 
     - name: 'Compare pages'
       run: |
-        mkdir -p tmp
-        ./scripts/pages_diff.sh | tee tmp/pages.diff | head -n 1000
+        ./scripts/pages_diff.sh
+
+    - name: 'Compare site'
+      run: |
+        umask 000
+        ./scripts/site_diff.sh -d
