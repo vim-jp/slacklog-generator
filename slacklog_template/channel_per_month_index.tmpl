@@ -4,192 +4,259 @@ layout: slacklog
 title: vim-jp.slack.com log - &#35{{ .channel.Name }} - {{ .monthKey.Year }}年{{ .monthKey.Month }}月
 permalink: /{{ .channel.ID }}/{{ .monthKey.Year }}/{{ .monthKey.Month }}/index:output_ext
 ---
-<div>
-
-{{- if or (hasPrevMonth .monthKey) (hasNextMonth .monthKey) }}
-<header class='slacklog-header'>
-  {{- if hasPrevMonth .monthKey }}
-  <a class='slacklog-prev-month' href='{{ jekyll_through "site.baseurl" }}/{{ .channel.ID }}/{{ .monthKey.PrevYear }}/{{ .monthKey.PrevMonth }}/'>&lt;&lt;&nbsp;{{ .monthKey.PrevYear }}年{{ .monthKey.PrevMonth }}月</a>
-  {{- end }}
-  {{- if hasNextMonth .monthKey }}
-  <a class='slacklog-next-month' href='{{ jekyll_through "site.baseurl" }}/{{ .channel.ID }}/{{ .monthKey.NextYear }}/{{ .monthKey.NextMonth }}/'>{{ .monthKey.NextYear }}年{{ .monthKey.NextMonth }}月&nbsp;&gt;&gt;</a>
-  {{- end }}
-</header>
-{{- end }}
-
-<h2><a href='{{ jekyll_through "site.baseurl" }}/'>vim-jp.slack.com log</a> - <a href='{{ jekyll_through "site.baseurl" }}/{{ .channel.ID }}/'>&#35{{ .channel.Name }}</a> - {{ .monthKey.Year }}年{{ .monthKey.Month }}月</h2>
+<div class="m-3">
+  <nav aria-label="Breadcrumb">
+    <ol>
+      <li class="breadcrumb-item f4"><a href="{{ J "site.baseurl" }}/{{ .channel.ID }}/">&#35{{ .channel.Name }}</a></li>
+      <li class="breadcrumb-item f4" aria-current="page">{{ .monthKey.Year }}年{{ .monthKey.Month }}月</li>
+    </ol>
+  </nav>
+  <h4 class="text-gray pb-2 border-bottom"></h4>
+</div>
 
 {{- range .msgs }}
 {{- if visible . }}
-  <span class='slacklog-message' id='ts-{{ .Ts }}'>
-    {{- if .Trail }}
-    <img class='slacklog-icon slacklog-trail' src='{{ userIconUrl . }}'>
-    <span class='slacklog-name slacklog-trail'>{{ username . }}</span>
-    <a class='slacklog-datetime slacklog-trail' href='#ts-{{ .Ts }}'>{{ datetime .Ts }}</a>
-    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Ts }}'>Slack</a>
-    {{- else }}
-    <img class='slacklog-icon' src='{{ userIconUrl . }}'>
-    <span class='slacklog-name'>{{ username . }}</span>
-    <a class='slacklog-datetime' href='#ts-{{ .Ts }}'>{{ datetime .Ts }}</a>
-    <a class='slacklog-slack-link' href='https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Ts }}'>Slack</a>
-    {{- end }}
+<div class="clearfix m-3" id="ts-{{ .Ts }}">
+  <div class="border-bottom">
+    <div class="float-left mr-2">
+      <img class="avatar" width="36" height="36" src="{{ userIconUrl . }}" />
+    </div>
+    <div>
+      <span class="text-bold mr-1">{{ username . }}</span>
+      <a href="#ts-{{ .Ts }}">{{ datetime .Ts }}</a>
+      <span class="Label Label--outline">
+        <a href="https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Ts }}">Slack</a>
+      </span>
+    </div>
+    <div class="overflow-hidden mb-3">
+      <div class="pt-1 pb-1">
+        {{ text . }}
+      </div>
 
     {{- if and (ne .ThreadTs "") (ne .ThreadTs .Ts) }}
-    <span class='slacklog-thread-broadcast-link'>
-      このスレッドに返信しました : <a href='#ts-{{- .ThreadTs }}'>{{- threadRootText .ThreadTs }}</a>
+    <span class="f6 text-gray-light">
+      このスレッドに返信しました : <a href="#ts-{{- .ThreadTs }}">{{- threadRootText .ThreadTs }}</a>
     </span>
     {{- end }}
 
-    <span class='slacklog-text'>{{ text . }}</span>
-
-    {{- if .Attachments }}
-    <span class='slacklog-attachments'>
+      {{- if .Attachments }}
+      <div class="mt-2 border p-2" id="ts-{{ .Ts }}">
       {{- range .Attachments }}
-      {{- if eq .ServiceName "GitHub" }}
-        <span class='slacklog-attachment slacklog-attachment-github'>
-          <span class='slacklog-attachment-github-serviceicon'><img src='{{ .ServiceIcon }}'></span>
-          <span class='slacklog-attachment-github-servicename'>{{ html .ServiceName }}</span>
-          <span class='slacklog-attachment-github-title'><a href='{{ .TitleLink }}'>{{ html .Title }}</a></span>
-          <span class='slacklog-attachment-github-text'>{{ attachmentText . }}</span>
-        </span>
-      {{- else if eq .ServiceName "twitter" }}
-        <span class='slacklog-attachment slacklog-attachment-twitter'>
-          <span class='slacklog-attachment-twitter-authoricon'><img src='{{ .AuthorIcon }}'></span>
-          <span class='slacklog-attachment-twitter-authorname'>{{ .AuthorName }}</span>
-          <span class='slacklog-attachment-twitter-authorsubname'>{{ .AuthorSubname }}</span>
-          <span class='slacklog-attachment-twitter-text'>{{ attachmentText . }}</span>
-          <span class='slacklog-attachment-twitter-footericon'><img src='{{ .FooterIcon }}'></span>
-          <span class='slacklog-attachment-twitter-footer'>{{ html .Footer }}</span>
+        {{- if eq .ServiceName "GitHub" }}
+          <div class="d-flex">
+            <div>
+              <img class="avatar avatar-small" width="32" height="32" src="{{ .ServiceIcon }}" alt="{{ html .ServiceName }}" />
+            </div>
+            <div class="flex-self-baseline f4 ml-2">
+              <span class="Label Label--outline">
+                <a href="{{ .TitleLink }}">{{ html .Title }}</a>
+              </span>
+            </div>
+          </div>
+          <div class="d-flex pl-2 mb-2">
+            <div class="mt-2">{{ attachmentText . }}</div>
+          </div>
+        {{- else if eq .ServiceName "twitter" }}
+          <div class="d-flex">
+            <div>
+              <img class="avatar avatar-small" width="32" height="32" src="{{ .AuthorIcon }}" alt="{{ html .ServiceName }}" />
+            </div>
+            <div class="flex-self-baseline f4 ml-2">
+              <span class="f6 text-gray-light">{{ .AuthorName }} {{ .AuthorSubname }}</span>
+            </div>
+          </div>
+          <div class="d-flex">
+            <div class="mt-2">{{ attachmentText . }}</div>
+          </div>
+          <div class="d-flex">
+            <div>
+              <img class="avatar avatar-small" width="20" height="20" src="{{ .FooterIcon }}" />
+            </div>
+            <div class="flex-self-baseline f5 ml-2">
+              {{ html .Footer }}
+            </div>
+          </div>
           {{- if .VideoHTML }}
-          <span class='slacklog-attachment-twitter-video'>{{ .VideoHTML }}</span>
-          {{- end }}
-        </span>
-      {{- else if or .Title .Text }}
-        <span class='slacklog-attachment slacklog-attachment-other'>
-          {{- if and .ServiceIcon .ServiceName }}
-          <div>
-            <span class='slacklog-attachment-other-serviceicon'><img src='{{ .ServiceIcon }}'></span>
-            <span class='slacklog-attachment-other-servicename'>{{ html .ServiceName }}</span>
+          <div class="d-flex mt-1">
+            {{ .VideoHTML }}
           </div>
           {{- end }}
-          {{- if and .Title .TitleLink }}
-          <div class='slacklog-attachment-other-title'><a href='{{ .TitleLink }}'>{{ html .Title }}</a></div>
-          {{- else if .Title }}
-          <div class='slacklog-attachment-other-title'>{{ html .Title }}</div>
-          {{- end }}
+        {{- else if eq .ServiceName "Gyazo" }}
+            <div class="d-flex">
+              <div>
+                <!-- Gyazo -->
+                <a href="{{ .Fallback }}">{{ .Fallback }}</a>
+              </div>
+            </div>
+        {{- else if or .Title .Text }}
+          <div class="d-flex">
+            {{- if and .Title .TitleLink }}
+              {{- if and .ServiceIcon .ServiceName }}
+              <div>
+                <img class="avatar avatar-small" width="32" height="32" src="{{ .ServiceIcon }}" alt="{{ html .ServiceName }}" />
+              </div>
+              {{- end }}
+              <div class="flex-self-baseline f4 ml-2">
+                <span class="Label Label--outline">
+                  <a href="{{ .TitleLink }}">{{ html .Title }}</a>
+                </span>
+              </div>
+            {{- else if .Title }}
+              <div>{{ html .Title }}</div>
+            {{- end }}
+          </div>
           {{- if .Text }}
-          <div class='slacklog-attachment-other-text'>{{ attachmentText . }}</div>
+            <div class="d-flex">
+              <div class="mt-2">{{ attachmentText . }}</div>
+            </div>
           {{- end }}
+
           {{- if .ThumbURL }}
-          <div class='slacklog-attachment-other-thumb'><img src='{{ .ThumbURL }}' width='{{ .ThumbWidth }}' height='{{ .ThumbHeight }}' alt='{{ html .Title }}'></div>
+            <div class="d-flex">
+              <div class="mt-2">
+                <img src="{{ .ThumbURL }}" width="{{ .ThumbWidth }}" height="{{ .ThumbHeight }}" alt="{{ html .Title }}" />
+              </div>
+            </div>
           {{- end }}
-        </span>
+        {{- end }}
       {{- end }}
-      {{- end }}
-    </span>
+    </div>
     {{- end }}
 
     {{- if .Files }}
-    <span class='slacklog-files'>
-      {{- range .Files }}
-      <div>
-        <a href="{{ jekyll_through "site.baseurl" }}/files/{{ .OriginalFilePath }}">
-        {{- if eq .TopLevelMimetype "image" }}
-        <img src="{{ jekyll_through "site.baseurl" }}/files/{{ .ThumbImagePath }}" width="{{ .ThumbImageWidth }}" height="{{ .ThumbImageHeight }}" alt="{{ .Title }}">
-        {{- else if eq .TopLevelMimetype "video" }}
-        <video src="{{ jekyll_through "site.baseurl" }}/files/{{ .OriginalFilePath }}" poster="{{ jekyll_through "site.baseurl" }}/files/{{ .ThumbVideoPath }}" controls>>" alt="{{ .Title }}">
-        </video>
-        {{- else }}
-        [[ダウンロード: {{ .Title }}({{ .PrettyType }})]]
+      <div class="mt-2 border p-3">
+        {{- range .Files }}
+        <div>
+          <a href="{{ J "site.baseurl" }}/files/{{ .OriginalFilePath }}">
+          {{- if eq .TopLevelMimetype "image" }}
+          <img src="{{ J "site.baseurl" }}/files/{{ .ThumbImagePath }}" width="{{ .ThumbImageWidth }}" height="{{ .ThumbImageHeight }}" alt="{{ .Title }}" />
+          {{- else if eq .TopLevelMimetype "video" }}
+          <video src="{{ J "site.baseurl" }}/files/{{ .OriginalFilePath }}" poster="{{ J "site.baseurl" }}/files/{{ .ThumbVideoPath }}" controls alt="{{ .Title }}">
+          </video>
+          {{- else }}
+          <span class="f5">[[ダウンロード: {{ .Title }}({{ .PrettyType }})]]</span>
+          {{- end }}
+          </a>
+        </div>
         {{- end }}
-        </a>
       </div>
-      {{- end }}
-    </span>
     {{- end }}
 
     {{- if threads .Ts }}
-    <details class='slacklog-thread'>
-      <summary class-'slacklog-thread-summary'>
-        {{- threadNum .ThreadTs }} 件の返信
-        <span class='slacklog-thread-mtime'>最終返信: {{- threadMtime .ThreadTs }}</span>
-      </summary>
-      {{- range threads .Ts }}
-      {{- if eq .Subtype "thread_broadcast" }}
-      <span class='slacklog-message-broadcasted'>
-        <span class='slacklog-thread-broadcast-text'>チャンネルにも投稿済</span>
-        <span class='slacklog-message' id='ts-{{ .Ts }}'>
-      {{- else }}
-      <span class='slacklog-message' id='ts-{{ .Ts }}'>
-      {{- end }}
-        <img class='slacklog-icon' src='{{ userIconUrl . }}'>
-        <span class='slacklog-name'>{{ username . }}</span>
-        <a class='slacklog-datetime' href='#ts-{{ .Ts }}'>{{ threadMessageTime .Ts .ThreadTs }}</a>
-        <span class='slacklog-text'>{{ text . }}</span>
+      <details class="details-reset mt-3">
+        <summary class="btn-link">
+          <span class="f5">
+          {{- threadNum .ThreadTs }} 件の返信 最終返信:{{- threadMtime .ThreadTs }} <span class="dropdown-caret"></span>
+          </span>
+        </summary>
+        <div class="border mt-2">
+          {{- range threads .Ts }}
+          <div class="p-2" id="ts-{{ .Ts }}">
+            {{- if eq .Subtype "thread_broadcast" }}
+            <div class="d-flex flex-wrap">
+              <div class="f6 ml-3 text-gray-light">#←</div>
+              <div class="f6 ml-2 text-gray-light">チャンネルにも投稿済</div>
+            </div>
+            {{- end }}
+            <div class="float-left mr-2">
+              <img class="avatar" width="36" height="36" src="{{ userIconUrl . }}" />
+            </div>
+            <div>
+              <span class="text-bold mr-1">{{ username . }}</span>
+              <a href="#ts-{{ .Ts }}">{{ datetime .Ts }}</a>
+            </div>
+            <div class="overflow-hidden">
+              {{ text . }}
+            </div>
 
-        {{- if .Attachments }}
-        <span class='slacklog-attachments'>
-          {{- range .Attachments }}
-          {{- if eq .ServiceName "GitHub" }}
-            <span class='slacklog-attachment slacklog-attachment-github'>
-              <span class='slacklog-attachment-github-serviceicon'><img src='{{ .ServiceIcon }}'></span>
-              <span class='slacklog-attachment-github-servicename'>{{ html .ServiceName }}</span>
-              <span class='slacklog-attachment-github-title'><a href='{{ .TitleLink }}'>{{ html .Title }}</a></span>
-              <span class='slacklog-attachment-github-text'>{{ attachmentText . }}</span>
-            </span>
-          {{- else if eq .ServiceName "twitter" }}
-            <span class='slacklog-attachment slacklog-attachment-twitter'>
-              <span class='slacklog-attachment-twitter-authoricon'><img src='{{ .AuthorIcon }}'></span>
-              <span class='slacklog-attachment-twitter-authorname'>{{ .AuthorName }}</span>
-              <span class='slacklog-attachment-twitter-authorsubname'>{{ .AuthorSubname }}</span>
-              <span class='slacklog-attachment-twitter-text'>{{ attachmentText . }}</span>
-              <span class='slacklog-attachment-twitter-footericon'><img src='{{ .FooterIcon }}'></span>
-              <span class='slacklog-attachment-twitter-footer'>{{ html .Footer }}</span>
-              {{- if .VideoHTML }}
-              <span class='slacklog-attachment-twitter-video'>{{ .VideoHTML }}</span>
+            {{- if .Attachments }}
+              {{- range .Attachments }}
+              {{- if eq .ServiceName "GitHub" }}
+                <div class="d-flex">
+                  <div>
+                    <img class="avatar avatar-small" width="32" height="32" src="{{ .ServiceIcon }}" alt="{{ html .ServiceName }}" />
+                  </div>
+                  <div class="flex-self-baseline f4 ml-2">
+                    <span class="Label Label--outline">
+                      <a href="{{ .TitleLink }}">{{ html .Title }}</a>
+                    </span>
+                  </div>
+                </div>
+                <div class="d-flex pl-2 mb-2">
+                  <div class="mt-2">{{ attachmentText . }}</div>
+                </div>
+              {{- else if eq .ServiceName "twitter" }}
+                <div class="d-flex">
+                  <div>
+                    <img class="avatar avatar-small" width="32" height="32" src="{{ .AuthorIcon }}" alt="{{ html .ServiceName }}" />
+                  </div>
+                  <div class="flex-self-baseline f4 ml-2">
+                    <span class="f6 text-gray-light">{{ .AuthorName }} {{ .AuthorSubname }}</span>
+                  </div>
+                </div>
+                <div class="d-flex">
+                  <div class="mt-2">{{ attachmentText . }}</div>
+                </div>
+                <div class="d-flex">
+                  <div>
+                    <img class="avatar avatar-small" width="20" height="20" src="{{ .FooterIcon }}" />
+                  </div>
+                  <div class="flex-self-baseline f5 ml-2">
+                    {{ html .Footer }}
+                  </div>
+                </div>
+                {{- if .VideoHTML }}
+                <div class="d-flex mt-1">
+                  {{ .VideoHTML }}
+                </div>
+                {{- end }}
+              {{- else if eq .ServiceName "Gyazo" }}
+                <div class="d-flex">
+                  <div>
+                    <!-- Gyazo -->
+                    <a href="{{ .Fallback }}">{{ .Fallback }}</a>
+                  </div>
+                </div>
+              {{- else if or .Title .Text }}
+                <div class="d-flex">
+                  {{- if and .Title .TitleLink }}
+                    {{- if and .ServiceIcon .ServiceName }}
+                    <div>
+                      <img class="avatar avatar-small" width="32" height="32" src="{{ .ServiceIcon }}" alt="{{ html .ServiceName }}" />
+                    </div>
+                    {{- end }}
+                    <div class="flex-self-baseline f4 ml-2">
+                      <span class="Label Label--outline">
+                        <a href="{{ .TitleLink }}">{{ html .Title }}</a>
+                      </span>
+                    </div>
+                  {{- else if .Title }}
+                    <div>{{ html .Title }}</div>
+                  {{- end }}
+                </div>
+                {{- if .Text }}
+                  <div class="d-flex">
+                    <div class="mt-2">{{ attachmentText . }}</div>
+                  </div>
+                {{- end }}
+
+                {{- if .ThumbURL }}
+                  <div class="d-flex">
+                    <div class="mt-2">
+                      <img src="{{ .ThumbURL }}" width="{{ .ThumbWidth }}" height="{{ .ThumbHeight }}" alt="{{ html .Title }}" />
+                    </div>
+                  </div>
+                {{- end }}
               {{- end }}
-            </span>
-          {{- else if or .Title .Text }}
-            <span class='slacklog-attachment slacklog-attachment-other'>
-              {{- if and .ServiceIcon .ServiceName }}
-              <div>
-                <span class='slacklog-attachment-other-serviceicon'><img src='{{ .ServiceIcon }}'></span>
-                <span class='slacklog-attachment-other-servicename'>{{ html .ServiceName }}</span>
-              </div>
               {{- end }}
-              {{- if and .Title .TitleLink }}
-              <div class='slacklog-attachment-other-title'><a href='{{ .TitleLink }}'>{{ html .Title }}</a></div>
-              {{- else if .Title }}
-              <div class='slacklog-attachment-other-title'>{{ html .Title }}</div>
-              {{- end }}
-              {{- if .Text }}
-              <div class='slacklog-attachment-other-text'>{{ attachmentText . }}</div>
-              {{- end }}
-            </span>
+            {{- end }}
+          </div>
           {{- end }}
-          {{- end }}
-        </span>
-        {{- end }}
-      </span>
-      {{- if eq .Subtype "thread_broadcast" }}
-      </span>
-      {{- end }}
-      {{- end }}
-    </details>
+        </div>
+      </details>
     {{- end }}
-  </span>
-{{- end }}
-{{- end }}
-
-{{- if or (hasPrevMonth .monthKey) (hasNextMonth .monthKey) }}
-<footer class='slacklog-footer'>
-  {{- if hasPrevMonth .monthKey }}
-  <a class='slacklog-prev-month' href='{{ jekyll_through "site.baseurl" }}/{{ .channel.ID }}/{{ .monthKey.PrevYear }}/{{ .monthKey.PrevMonth }}/'>&lt;&lt;&nbsp;{{ .monthKey.PrevYear }}年{{ .monthKey.PrevMonth }}月</a>
-  {{- end }}
-  {{- if hasNextMonth .monthKey }}
-  <a class='slacklog-next-month' href='{{ jekyll_through "site.baseurl" }}/{{ .channel.ID }}/{{ .monthKey.NextYear }}/{{ .monthKey.NextMonth }}/'>{{ .monthKey.NextYear }}年{{ .monthKey.NextMonth }}月&nbsp;&gt;&gt;</a>
-  {{- end }}
-</footer>
-{{- end }}
-
+    </div>
+  </div>
 </div>
+{{- end }}
+{{- end }}

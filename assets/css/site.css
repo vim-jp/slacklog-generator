@@ -4,77 +4,6 @@ body {
   color: #000;
 }
 
-h1 {
-  font-size: 2.0em;
-  font-weight: bold;
-  margin: 0em 0em 1.2em 0em;
-}
-
-h2 {
-  font-size: 1.3em;
-  margin: 1.2em 0em 1.2em 0em;
-  font-weight: bold;
-}
-
-h3 {
-  font-size: 1.0em;
-  margin: 1.2em 0em 1.2em 0em;
-  font-weight: bold;
-}
-
-h4 {
-  font-size: 0.95em;
-  margin: 1.2em 0em 1.2em 0em;
-  font-weight: bold;
-}
-
-h5 {
-  font-size: 0.9em;
-  margin: 1.2em 0em 1.2em 0em;
-  font-weight: bold;
-}
-
-h6 {
-  font-size: 0.85em;
-  margin: 1.2em 0em 1.2em 0em;
-  font-weight: bold;
-}
-
-img {
-  border: 0;
-}
-
-ol, ul, li {
-  font-size: 1.0em;
-  line-height: 1.3em;
-  margin-top: 0.2em;
-  margin-bottom: 0.1em;
-}
-
-p {
-  font-size: 1.0em;
-  line-height: 1.5em;
-  margin: 1.2em 0em 1.2em 0em;
-}
-
-li > p {
-  margin: 0.2em 0 0.2em 0;
-}
-
-pre {
-  font-family: monospace;
-  font-size: 1.4em;
-  overflow: auto;
-}
-
-strong, b {
-  font-weight: bold;
-}
-
-form textarea {
-  text-align: left;
-}
-
 #content {
   float: left;
   clear: left;
@@ -82,29 +11,8 @@ form textarea {
   width: 100%;
 }
 
-.entry {
-  padding-right: 290px;
-}
-
-.links>div {
-  float: right;
-  clear: right;
-  width: 250px;
-  background: #eee;
-  padding: 10px;
-  margin-bottom: 20px;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
-  border: 1px solid #aaa;
-}
-
 #footer {
   text-align: center;
-}
-
-.body {
-  overflow:hidden;
 }
 
 a, a:link {
@@ -128,7 +36,7 @@ code {
  border: solid 1px #ccc;
 }
 
-pre>code {
+pre > code {
  border: 0px;
  margin: 0px;
  padding: 0px;
@@ -139,63 +47,4 @@ pre {
  background-color: black;
  padding: 0.5em;
 }
-
-.entry-logo {
-  float: left;
-  margin-right: 10px;
-  margin-bottom: 10px;
-}
-
-br.clear {
- clear: both;
-}
-
-.linkList dt {
- margin: 0 0 0.8em;
- width: 7.5em;
- border-left: solid 8px #aaa;
- padding-left: 5px;
- white-space: nowrap;
-}
-
-.linkList dt a {
- color: #0000aa;
- font-weight: bold;
-}
-
-.linkList dd {
- margin: 0 0 1em 0.5em;
-}
-
-#about span a {
- border-left: solid 8px #aaa;
- padding-left: 5px;
- white-space: nowrap;
- color: #0000aa;
- font-weight: bold;
-}
-
-h1>a, h1>a:visited {
-  color: #454545;
-  text-decoration: none;
-}
-
-h1>a:active, h1>a:hover {
-  color: #777777;
-  text-decoration: none;
-}
-
-h2 {
-  color: #555555;
-  border-bottom: 2px solid #ddd;
-}
-
-div.posts h2 {
-  clear: both;
-}
-
-h2>a {
-  text-decoration: none;
-}
-
 /* vim:set ts=8 sts=2 sw=2 noet: */
