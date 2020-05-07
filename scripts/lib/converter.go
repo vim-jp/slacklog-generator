@@ -3,6 +3,7 @@ package slacklog
 import (
 	"html"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 
@@ -18,6 +19,9 @@ type TextConverter struct {
 	// value: display name
 	users map[string]string
 	re    regexps
+	// 公開するサイトのURLのベース
+	// 環境変数BASEURLで指定する
+	baseURL string
 }
 
 // NewTextConverter : TextConverter を生成する
@@ -36,9 +40,10 @@ func NewTextConverter(users, emojis map[string]string) *TextConverter {
 	re.newLine = regexp.MustCompile(`\n`)
 
 	return &TextConverter{
-		emojis: emojis,
-		users:  users,
-		re:     re,
+		emojis:  emojis,
+		users:   users,
+		re:      re,
+		baseURL: os.Getenv("BASEURL"),
 	}
 }
 
@@ -79,7 +84,7 @@ func (c *TextConverter) bindEmoji(emojiExp string) string {
 			return emojiExp
 		}
 	}
-	src := "{{ site.baseurl }}/emojis/" + url.PathEscape(name) + extension
+	src := c.baseURL + "/emojis/" + url.PathEscape(name) + extension
 	return "<img class='slacklog-emoji' title='" + emojiExp + "' alt='" + emojiExp + "' src='" + src + "'>"
 }
 
@@ -95,7 +100,7 @@ func (c *TextConverter) bindChannel(channelExp string) string {
 	matchResult := c.re.channel.FindStringSubmatch(channelExp)
 	channelId := matchResult[1]
 	channelName := matchResult[2]
-	return "<a href='{{ site.baseurl }}/" + channelId + "/'>#" + channelName + "</a>"
+	return "<a href='" + c.baseURL + "/" + channelId + "/'>#" + channelName + "</a>"
 }
 
 // ToHTML : markdown形式のtextをHTMLに変換する
