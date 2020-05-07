@@ -12,8 +12,6 @@ import (
 	"text/template"
 )
 
-var baseURL = os.Getenv("BASEURL")
-
 // HTMLGenerator : ログデータからHTMLを生成するための構造体。
 type HTMLGenerator struct {
 	// text/template形式のテンプレートが置いてあるディレクトリ
@@ -23,6 +21,9 @@ type HTMLGenerator struct {
 	// markdown形式のテキストを変換するためのTextConverter
 	c   *TextConverter
 	cfg Config
+	// 公開するサイトのURLのベース
+	// 環境変数BASEURLで指定する
+	baseURL string
 }
 
 // NewHTMLGenerator : HTMLGeneratorを生成する。
@@ -35,6 +36,7 @@ func NewHTMLGenerator(templateDir string, s *LogStore) *HTMLGenerator {
 		templateDir: templateDir,
 		s:           s,
 		c:           c,
+		baseURL:     os.Getenv("BASEURL"),
 	}
 }
 
@@ -93,7 +95,7 @@ func (g *HTMLGenerator) Generate(outDir string) error {
 func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
 	params := make(map[string]interface{})
 	SortChannel(channels)
-	params["baseURL"] = baseURL
+	params["baseURL"] = g.baseURL
 	params["channels"] = channels
 	tmplPath := filepath.Join(g.templateDir, "index.tmpl")
 	name := filepath.Base(tmplPath)
@@ -156,7 +158,7 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 	})
 
 	params := make(map[string]interface{})
-	params["baseURL"] = baseURL
+	params["baseURL"] = g.baseURL
 	params["channel"] = channel
 	params["keys"] = keys
 
@@ -183,7 +185,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 	}
 
 	params := make(map[string]interface{})
-	params["baseURL"] = baseURL
+	params["baseURL"] = g.baseURL
 	params["channel"] = channel
 	params["monthKey"] = key
 	params["msgs"] = msgs
