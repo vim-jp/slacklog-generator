@@ -56,7 +56,7 @@ func NewDownloader(token string) *Downloader {
 
 	d := &Downloader{
 		token:      token,
-		httpClient: &http.Client{Transport: t},
+		httpClient: cli,
 		targetCh:   make(chan downloadTarget),
 		errs:       []error{},
 	}
