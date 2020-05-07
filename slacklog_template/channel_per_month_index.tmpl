@@ -7,7 +7,7 @@ permalink: /{{ .channel.ID }}/{{ .monthKey.Year }}/{{ .monthKey.Month }}/index:o
 <div class="m-3">
   <nav aria-label="Breadcrumb">
     <ol>
-      <li class="breadcrumb-item f4"><a href="{{ J "site.baseurl" }}/{{ .channel.ID }}/">&#35{{ .channel.Name }}</a></li>
+      <li class="breadcrumb-item f4"><a href="{{ $.baseURL }}/{{ .channel.ID }}/">&#35{{ .channel.Name }}</a></li>
       <li class="breadcrumb-item f4" aria-current="page">{{ .monthKey.Year }}年{{ .monthKey.Month }}月</li>
     </ol>
   </nav>
@@ -127,11 +127,11 @@ permalink: /{{ .channel.ID }}/{{ .monthKey.Year }}/{{ .monthKey.Month }}/index:o
       <div class="mt-2 border p-3">
         {{- range .Files }}
         <div>
-          <a href="{{ J "site.baseurl" }}/files/{{ .OriginalFilePath }}">
+          <a href="{{ $.baseURL }}/files/{{ .OriginalFilePath }}">
           {{- if eq .TopLevelMimetype "image" }}
-          <img src="{{ J "site.baseurl" }}/files/{{ .ThumbImagePath }}" width="{{ .ThumbImageWidth }}" height="{{ .ThumbImageHeight }}" alt="{{ .Title }}" />
+          <img src="{{ $.baseURL }}/files/{{ .ThumbImagePath }}" width="{{ .ThumbImageWidth }}" height="{{ .ThumbImageHeight }}" alt="{{ .Title }}" />
           {{- else if eq .TopLevelMimetype "video" }}
-          <video src="{{ J "site.baseurl" }}/files/{{ .OriginalFilePath }}" poster="{{ J "site.baseurl" }}/files/{{ .ThumbVideoPath }}" controls alt="{{ .Title }}">
+          <video src="{{ $.baseURL }}/files/{{ .OriginalFilePath }}" poster="{{ $.baseURL }}/files/{{ .ThumbVideoPath }}" controls alt="{{ .Title }}">
           </video>
           {{- else }}
           <span class="f5">[[ダウンロード: {{ .Title }}({{ .PrettyType }})]]</span>
