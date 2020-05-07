@@ -9,21 +9,30 @@ import (
 // repliesにはそのスレッドへの返信メッセージが入る。先頭メッセージは含まない。
 type Thread struct {
 	rootMsg *Message
-	replies []Message
+	replies Messages
 }
 
-func (t Thread) LastReplyTime() time.Time {
-	return TsToDateTime(t.replies[len(t.replies)-1].Ts)
+func (th Thread) LastReplyTime() time.Time {
+	return TsToDateTime(th.replies[len(th.replies)-1].Ts)
 }
 
-func (t Thread) ReplyCount() int {
-	return len(t.replies)
+func (th Thread) ReplyCount() int {
+	return len(th.replies)
 }
 
-func (t Thread) RootText() string {
-	return t.rootMsg.Text
+func (th Thread) RootText() string {
+	return th.rootMsg.Text
 }
 
-func (t Thread) Replies() []Message {
-	return t.replies
+func (th Thread) Replies() Messages {
+	return th.replies
+}
+
+// Put puts a message to the thread as "root" or "reply".
+func (th *Thread) Put(m *Message) {
+	if m.IsRootOfThread() {
+		th.rootMsg = m
+	} else {
+		th.replies = append(th.replies, m)
+	}
 }
