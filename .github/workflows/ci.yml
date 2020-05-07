@@ -1,14 +1,14 @@
 name: CI
 
-on: [push, pull_request]
-
-env:
-  GOPATH: ${{ github.workspace }}/..
+on:
+  pull_request:
+    branches:
+    - '**'
 
 jobs:
 
-  gotool:
-    name: 'scripts/main.go'
+  build-tool:
+    name: 'Build and Compile the Tool'
     runs-on: 'ubuntu-latest'
 
     steps:
@@ -25,3 +25,63 @@ jobs:
 
     - name: Test
       run: cd scripts && go test ./...
+
+  diff:
+    name: 'Compare Pages and Site'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - name: 'Check out target branch (commit)'
+      uses: 'actions/checkout@v2'
+      with:
+        # FIXME: 全部取るのはやりすぎ。必要最小限(mereg-base origin/master
+        # HEAD)までだけ取れたら良いのだが…
+        fetch-depth: 0
+
+    - name: 'Preparations'
+      run: |
+        # origin/master の ref が比較のために要る
+        git fetch origin master
+
+        # log-data の取得と展開
+        curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
+
+        # 出力用のディレクトリ。docker から書くのに a+wx が必要だった
+        mkdir -p tmp
+        chmod a+wx tmp
+
+        # jekyll on docker をセットアップするのに必要
+        touch Gemfile.lock
+        chmod a+w Gemfile.lock
+
+    - name: 'Compare pages'
+      run: |
+        ./scripts/pages_diff.sh -o tmp/pages.diff
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: diffs-${{ github.run_id }}
+        path: tmp/pages.diff
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: log-pages-diff-${{ github.run_id }}
+        path: tmp/pages_diff/*.log
+
+    - name: 'Compare site'
+      run: |
+        umask 000
+        # FIXME: 中で実行している docker run jekyll/jekyll:pages が Gems を全部
+        # ダウンロードしてるっぽい。actions/cache などでキャッシュできたら少し
+        # は速くなりそう。
+        ./scripts/site_diff.sh -d -o tmp/site.diff
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: diffs-${{ github.run_id }}
+        path: tmp/site.diff
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: log-site-diff-${{ github.run_id }}
+        path: tmp/site_diff/*.log

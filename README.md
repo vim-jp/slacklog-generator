@@ -115,6 +115,10 @@ $ ./scripts/site_diff.sh -f
 $ ./scripts/site_diff.sh -c
 ```
 
+差分だけを特定のファイルに出力するには `-o {filename}` オプションを使ってくださ
+い。リダイレクト (` > filename`) では差分以外の動作ログも含まれる場合がありま
+す。
+
 注意事項: `./scripts/site_diff.sh` は未コミットな変更を stash を用いて保存・復
 帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
 
@@ -152,6 +156,10 @@ $ ./scripts/pages_diff.sh -f
 $ ./scripts/pages_diff.sh -c
 ```
 
+差分だけを特定のファイルに出力するには `-o {filename}` オプションを使ってくださ
+い。リダイレクト (` > filename`) では差分以外の動作ログも含まれる場合がありま
+す。
+
 注意事項: `./scripts/pages_diff.sh` は未コミットな変更を stash を用いて保存・復
 帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
 
@@ -169,6 +177,39 @@ log-data ブランチにはSlackからエクスポートしたデータを格納
     ```
 
 4. 更新内容を log-data ブランチに `commit --amend` して `push -f`
+
+## Pull Request の影響の確認の方法
+
+以下の手順で Pull Request への `pages_diff.sh` と `site_diff.sh` の実行結果を
+Artifacts として Web から取得できます。レビューの際に利用してください。
+
+1. Pull Request の <b>Checks</b> タブを開く
+2. <b>CI</b> ワークフロー(右側)を選択
+3. <b>Compare Pages and Site</b> ジョブ(右側)を選択
+4. <b>Artifacts</b> ドロワー(左側)を選択
+5. `diffs-{数値}` アーティファクトをダウンロード
+
+以下のスクリーンショットは、上記の選択個所をマーキングしたものです。
+
+![](https://raw.githubusercontent.com/wiki/vim-jp/slacklog-generator/images/where-are-artifacts.png)
+
+Artifacts はそれぞれ zip としてダウンロードできます。
+`diffs-*.zip` には `pages_diff.sh` と `site_diff.sh` の両方の差分が含まれています。
+`log-*.zip` はそれぞれの動作ログが含まれていますが、こちらはCIの動作デバッグ目的のものです。
+末尾の数値は [`${{ github.run_id }}`](https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context) 由来です。
+
+### Artifacts に差分を出力している理由
+
+Artifacts に差分を出力している主な理由は2つあります。1つ目は、小さな変更でも差
+分をオンライン上のどこかに出力しないと、レビューの負荷が高すぎてそれを解消した
+かったという動機です。
+
+2つ目は、テストデータとして実際のログを使っているため、差分とはいえログの一部の
+コピーが消せない状態で永続化されるのを避けたい、という動機です。vim-jp slackで
+は参加者の「忘れられる権利」を尊重しています。
+
+以上の理由から消せる状態でデータ=差分をオンライン上にホストできる GitHub
+Actions の Artifacts を利用しています。
 
 ## LICNESE
 

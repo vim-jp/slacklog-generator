@@ -6,13 +6,15 @@ force=0
 clean=0
 update=0
 docker=0
+outdiff=""
 
-while getopts fcud OPT ; do
+while getopts fcudo: OPT ; do
   case $OPT in
     f) force=1 ;;
     c) clean=1 ;;
     u) update=1 ;;
     d) docker=1 ;;
+    o) outdiff="$OPTARG" ;;
   esac
 done
 
@@ -24,7 +26,7 @@ cmd=${outrootdir}/slacklog-tools
 
 build_tool() {
   cd scripts
-  go build -o ../${cmd} ./main.go
+  go build -o ../${cmd} ./main.go 1>&2
   cd ..
 }
 
@@ -39,7 +41,7 @@ generate_site() {
   rm -f ${cmd}
   rm -rf ${outdir}
   if [ $docker -ne 0 ] ; then
-    docker run --rm -it --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
+    docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
   else
     jekyll build -d ${outdir} > ${outdir}.jekyll-build.log 2>&1
   fi
@@ -73,7 +75,7 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
 
   # merge-base に巻き戻し generate-html を実行する
   git reset -q --hard ${base_commit}
-  echo "move to base: $(git rev-parse HEAD)" 2>&1
+  echo "move to base: $(git rev-parse HEAD)" 1>&2
   generate_site ${base_commit}
 
   # 退避したHEADと変更を復帰する
@@ -82,8 +84,13 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
     git stash pop -q
   fi
 
-  echo "return to current: $(git rev-parse HEAD)" 2>&1
+  echo "return to current: $(git rev-parse HEAD)" 1>&2
 fi
 
 # 差分を出力
-diff -uNr -x sitemap.xml ${base_pages} ${current_pages}
+if [ x"$outdiff" = x ] ; then
+  echo "" 1>&2
+  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} || true
+else
+  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} > "$outdiff" || true
+fi
