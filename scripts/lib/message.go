@@ -480,26 +480,33 @@ type MessageBlockElement struct {
 }
 
 type MessageAttachment struct {
-	ServiceName     string `json:"service_name,omitempty"`
-	AuthorIcon      string `json:"author_icon,omitempty"`
-	AuthorName      string `json:"author_name,omitempty"`
-	AuthorSubname   string `json:"author_subname,omitempty"`
-	Title           string `json:"title,omitempty"`
-	TitleLink       string `json:"title_link,omitempty"`
-	Text            string `json:"text,omitempty"`
-	Fallback        string `json:"fallback,omitempty"`
-	ThumbURL        string `json:"thumb_url,omitempty"`
-	FromURL         string `json:"from_url,omitempty"`
-	ThumbWidth      int    `json:"thumb_width,omitempty"`
-	ThumbHeight     int    `json:"thumb_height,omitempty"`
-	ServiceIcon     string `json:"service_icon,omitempty"`
-	ID              int    `json:"id"`
-	OriginalURL     string `json:"original_url,omitempty"`
-	VideoHTML       string `json:"video_html,omitempty"`
-	VideoHTMLWidth  int    `json:"video_html_width,omitempty"`
-	VideoHTMLHeight int    `json:"video_html_height,omitempty"`
-	Footer          string `json:"footer,omitempty"`
-	FooterIcon      string `json:"footer_icon,omitempty"`
+	ServiceName     string   `json:"service_name,omitempty"`
+	AuthorID        string   `json:"author_id,omitempty"`
+	AuthorIcon      string   `json:"author_icon,omitempty"`
+	AuthorName      string   `json:"author_name,omitempty"`
+	AuthorSubname   string   `json:"author_subname,omitempty"`
+	AuthorLink      string   `json:"author_link,omitempty"`
+	ChannelId       string   `json:"channel_id,omitempty"`
+	ChannelName     string   `json:"channel_name,omitempty"`
+	Title           string   `json:"title,omitempty"`
+	TitleLink       string   `json:"title_link,omitempty"`
+	Text            string   `json:"text,omitempty"`
+	Fallback        string   `json:"fallback,omitempty"`
+	ThumbURL        string   `json:"thumb_url,omitempty"`
+	FromURL         string   `json:"from_url,omitempty"`
+	ThumbWidth      int      `json:"thumb_width,omitempty"`
+	ThumbHeight     int      `json:"thumb_height,omitempty"`
+	ServiceIcon     string   `json:"service_icon,omitempty"`
+	ID              int      `json:"id"`
+	OriginalURL     string   `json:"original_url,omitempty"`
+	VideoHTML       string   `json:"video_html,omitempty"`
+	VideoHTMLWidth  int      `json:"video_html_width,omitempty"`
+	VideoHTMLHeight int      `json:"video_html_height,omitempty"`
+	Footer          string   `json:"footer,omitempty"`
+	FooterIcon      string   `json:"footer_icon,omitempty"`
+	IsMsgUnfurl     bool     `json:"is_msg_unfurl,omitempty"`
+	MrkdwnIn        []string `json:"mrkdwn_in,omitempty"`
+	Ts              string   `json:"ts,omitempty"`
 }
 
 type MessageReaction struct {
