@@ -122,14 +122,9 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 		return false, fmt.Errorf("could not create %s directory: %w", path, err)
 	}
 
-	keys := make([]MessageMonthKey, 0, len(msgsMap))
-	for key := range msgsMap {
-		keys = append(keys, key)
-	}
-
 	if err := g.generateChannelIndex(
 		channel,
-		keys,
+		msgsMap.Keys(),
 		filepath.Join(path, "index.html"),
 	); err != nil {
 		return true, err
@@ -178,7 +173,7 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 	return nil
 }
 
-func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey, msgs []Message, path string) error {
+func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey, msgs Messages, path string) error {
 	if err := os.MkdirAll(path, 0777); err != nil {
 		return fmt.Errorf("could not create %s directory: %w", path, err)
 	}
@@ -233,7 +228,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 				}
 				return ""
 			},
-			"threads": func(ts string) []Message {
+			"threads": func(ts string) Messages {
 				if t, ok := g.s.GetThread(channel.ID, ts); ok {
 					return t.Replies()
 				}

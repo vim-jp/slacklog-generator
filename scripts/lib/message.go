@@ -11,6 +11,29 @@ import (
 	"strings"
 )
 
+// Messages is an array of `*Message`.
+type Messages []*Message
+
+// Sort sorts messages by `Message.Ts` ascendant order.
+func (msgs Messages) Sort() {
+	sort.SliceStable(msgs, func(i, j int) bool {
+		// must be the same digits, so no need to convert the timestamp to a number
+		return msgs[i].Ts < msgs[j].Ts
+	})
+}
+
+// MessagesMap is a map, maps MessageMonthKey to Messages.
+type MessagesMap map[MessageMonthKey]Messages
+
+// Keys returns all keys in the map.
+func (mm MessagesMap) Keys() []MessageMonthKey {
+	keys := make([]MessageMonthKey, 0, len(mm))
+	for key := range mm {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
 // MessageTable : メッセージデータを保持する
 // スレッドは投稿時刻からどのスレッドへの返信かが判断できるためThreadMapのキー
 // はtsである。
@@ -20,7 +43,7 @@ import (
 type MessageTable struct {
 	// key: thread timestamp
 	ThreadMap map[string]*Thread
-	MsgsMap   map[MessageMonthKey][]Message
+	MsgsMap   MessagesMap
 	// key: file path
 	loadedFiles map[string]struct{}
 }
@@ -32,7 +55,7 @@ type MessageTable struct {
 func NewMessageTable() *MessageTable {
 	return &MessageTable{
 		ThreadMap:   map[string]*Thread{},
-		MsgsMap:     map[MessageMonthKey][]Message{},
+		MsgsMap:     MessagesMap{},
 		loadedFiles: map[string]struct{}{},
 	}
 }
@@ -79,13 +102,15 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		return nil
 	}
 
-	var msgs []Message
-	var visibleMsgs []Message
+	var msgs Messages
 	err = ReadFileAsJSON(path, &msgs)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}
-	for i, msg := range msgs {
+
+	// assort messages, visible and threaded.
+	var visibleMsgs Messages
+	for _, msg := range msgs {
 		if !msg.IsVisible() {
 			continue
 		}
@@ -97,18 +122,12 @@ func (m *MessageTable) ReadLogFile(path string) error {
 			visibleMsgs = append(visibleMsgs, msg)
 		}
 		if threadTs != "" {
-			if m.ThreadMap[threadTs] == nil {
-				m.ThreadMap[threadTs] = &Thread{}
+			thread, ok := m.ThreadMap[threadTs]
+			if !ok {
+				thread = &Thread{}
+				m.ThreadMap[threadTs] = thread
 			}
-			if msg.IsRootOfThread() {
-				m.ThreadMap[threadTs].rootMsg = &msgs[i]
-			} else {
-				if m.ThreadMap[threadTs].replies == nil {
-					m.ThreadMap[threadTs].replies = []Message{msg}
-				} else {
-					m.ThreadMap[threadTs].replies = append(m.ThreadMap[threadTs].replies, msg)
-				}
-			}
+			thread.Put(msg)
 		}
 	}
 
@@ -117,22 +136,15 @@ func (m *MessageTable) ReadLogFile(path string) error {
 		return err
 	}
 	if len(visibleMsgs) != 0 {
-		if _, ok := m.MsgsMap[key]; !ok {
-			m.MsgsMap[key] = visibleMsgs
-		} else {
-			m.MsgsMap[key] = append(m.MsgsMap[key], visibleMsgs...)
-		}
+		m.MsgsMap[key] = append(m.MsgsMap[key], visibleMsgs...)
 	}
 
-	for key, msgs := range m.MsgsMap {
-		sort.SliceStable(m.MsgsMap[key], func(i, j int) bool {
-			// must be the same digits, so no need to convert the timestamp to a number
-			return m.MsgsMap[key][i].Ts < m.MsgsMap[key][j].Ts
-		})
+	for _, msgs := range m.MsgsMap {
+		msgs.Sort()
 		var lastUser string
-		for i, msg := range msgs {
+		for _, msg := range msgs {
 			if lastUser == msg.User {
-				(&msgs[i]).Trail = true
+				msg.Trail = true
 			} else {
 				lastUser = msg.User
 			}

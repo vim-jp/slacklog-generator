@@ -73,7 +73,7 @@ func (s *LogStore) HasPrevMonth(channelID string, key MessageMonthKey) bool {
 	return false
 }
 
-func (s *LogStore) GetMessagesPerMonth(channelID string) (map[MessageMonthKey][]Message, error) {
+func (s *LogStore) GetMessagesPerMonth(channelID string) (MessagesMap, error) {
 	mt, ok := s.mts[channelID]
 	if !ok {
 		return nil, fmt.Errorf("not found channel: id=%s", channelID)
