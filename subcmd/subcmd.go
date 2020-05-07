@@ -13,7 +13,8 @@ func Run() error {
     convert-exported-logs
     download-emoji
     download-files
-    generate-html`)
+    generate-html
+    update-user-list`)
 		return nil
 	}
 
@@ -28,6 +29,8 @@ func Run() error {
 		return DownloadFiles(args)
 	case "generate-html":
 		return GenerateHTML(args)
+	case "update-user-list":
+		return UpdateUserList(args)
 	}
 
 	return fmt.Errorf("unknown subcmd: %s", subCmdName)
