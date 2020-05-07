@@ -14,6 +14,7 @@ func Run() error {
     download-emoji
     download-files
     generate-html
+    update-channel-list
     update-user-list`)
 		return nil
 	}
@@ -29,6 +30,8 @@ func Run() error {
 		return DownloadFiles(args)
 	case "generate-html":
 		return GenerateHTML(args)
+	case "update-channel-list":
+		return UpdateChannelList(args)
 	case "update-user-list":
 		return UpdateUserList(args)
 	}
