@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  biuld-tool:
+  build-tool:
     name: 'Build and Compile the Tool'
     runs-on: 'ubuntu-latest'
 

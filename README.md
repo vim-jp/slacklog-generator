@@ -198,6 +198,19 @@ Artifacts はそれぞれ zip としてダウンロードできます。
 `log-*.zip` はそれぞれの動作ログが含まれていますが、こちらはCIの動作デバッグ目的のものです。
 末尾の数値は [`${{ github.run_id }}`](https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context) 由来です。
 
+### Artifacts に差分を出力している理由
+
+Artifacts に差分を出力している主な理由は2つあります。1つ目は、小さな変更でも差
+分をオンライン上のどこかに出力しないと、レビューの負荷が高すぎてそれを解消した
+かったという動機です。
+
+2つ目は、テストデータとして実際のログを使っているため、差分とはいえログの一部の
+コピーが消せない状態で永続化されるのを避けたい、という動機です。vim-jp slackで
+は参加者の「忘れられる権利」を尊重しています。
+
+以上の理由から消せる状態でデータ=差分をオンライン上にホストできる GitHub
+Actions の Artifacts を利用しています。
+
 ## LICNESE
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="クリエイティブ・コモンズ・ライセンス" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />この 作品 は <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">クリエイティブ・コモンズ 表示 4.0 国際 ライセンス</a>の下に提供されています。
