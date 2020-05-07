@@ -85,7 +85,7 @@ func (s *LogStore) GetMessagesPerMonth(channelID string) (MessagesMap, error) {
 	return mt.MsgsMap, nil
 }
 
-func (s *LogStore) GetAllMessages(channelID string) ([]Message, error) {
+func (s *LogStore) GetAllMessages(channelID string) (Messages, error) {
 	mt, ok := s.mts[channelID]
 	if !ok {
 		return nil, fmt.Errorf("not found channel: id=%s", channelID)
@@ -94,7 +94,7 @@ func (s *LogStore) GetAllMessages(channelID string) ([]Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	var allMsgs []Message
+	var allMsgs Messages
 	for _, msgs := range mt.MsgsMap {
 		allMsgs = append(allMsgs, msgs...)
 	}
