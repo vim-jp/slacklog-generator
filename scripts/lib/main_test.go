@@ -3,51 +3,29 @@ package slacklog_test
 import (
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
-	"sync"
 	"testing"
 )
 
-var usedTmpNums sync.Map
+func cleanupTmpDir(t *testing.T, path string) {
+	t.Helper()
 
-type tmpDir string
-
-func (td tmpDir) cleanup(t *testing.T) {
-	path := string(td)
 	err := os.RemoveAll(path)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to cleanupTmpDir: %s", err)
 	}
-	ind, err := strconv.Atoi(filepath.Base(path)[3:])
-	if err != nil {
-		t.Fatal(err)
-	}
-	usedTmpNums.Delete(ind)
 }
 
-func createTmpDir(t *testing.T) tmpDir {
+func createTmpDir(t *testing.T) string {
 	t.Helper()
-	path := "testdata/tmp"
-	var ind int
-	for {
-		ind = rand.Intn(100)
-		_, ok := usedTmpNums.Load(ind)
-		if !ok {
-			break
-		}
-	}
-	path += strconv.Itoa(ind)
-	usedTmpNums.Store(ind, struct{}{})
 
-	err := os.MkdirAll(path, 0777)
+	path, err := ioutil.TempDir("testdata", "slacklog")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to createTmpDir: %s", err)
 	}
-	return tmpDir(path)
+	return path
 }
 
 func dirDiff(a, b string) error {

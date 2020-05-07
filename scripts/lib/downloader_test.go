@@ -13,11 +13,10 @@ import (
 )
 
 func TestDownloader(t *testing.T) {
-	td := createTmpDir(t)
+	tmpPath := createTmpDir(t)
 	defer t.Cleanup(func() {
-		td.cleanup(t)
+		cleanupTmpDir(t, tmpPath)
 	})
-	tmpPath := string(td)
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("testdata/downloader")))
 	defer ts.Close()
@@ -51,11 +50,10 @@ func TestDownloader(t *testing.T) {
 }
 
 func TestDownloader_usingToken(t *testing.T) {
-	td := createTmpDir(t)
+	tmpPath := createTmpDir(t)
 	defer t.Cleanup(func() {
-		td.cleanup(t)
+		cleanupTmpDir(t, tmpPath)
 	})
-	tmpPath := string(td)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Helper()
