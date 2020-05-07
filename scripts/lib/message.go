@@ -88,8 +88,8 @@ var reMsgFilename = regexp.MustCompile(`^(\d{4})-(\d{2})-\d{2}\.json$`)
 
 // ReadLogFile : pathに指定したJSON形式のメッセージデータを読み込む。
 // すでにそのファイルが読み込み済みの場合は処理をスキップする。
-// visibleOnlyがtrueである場合は特定のサブタイプを持つメッセージのみをmsgMapに登録する。
-func (m *MessageTable) ReadLogFile(path string, visibleOnly bool) error {
+// readAllMessagesがfalseである場合は特定のサブタイプを持つメッセージのみをmsgMapに登録する。
+func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 	path, err := filepath.Abs(path)
 	if err != nil {
 		return err
@@ -113,18 +113,10 @@ func (m *MessageTable) ReadLogFile(path string, visibleOnly bool) error {
 	// assort messages, visible and threaded.
 	var visibleMsgs Messages
 	for _, msg := range msgs {
-		if visibleOnly && !msg.IsVisible() {
+		if readAllMessages && !msg.IsVisible() {
 			continue
 		}
 		threadTs := msg.ThreadTs
-		if !visibleOnly {
-			visibleMsgs = append(visibleMsgs, msg)
-		} else if threadTs == "" || msg.IsRootOfThread() ||
-			msg.Subtype == "thread_broadcast" ||
-			msg.Subtype == "bot_message" ||
-			msg.Subtype == "slackbot_response" {
-			visibleMsgs = append(visibleMsgs, msg)
-		}
 		if threadTs != "" {
 			thread, ok := m.ThreadMap[threadTs]
 			if !ok {
@@ -133,6 +125,16 @@ func (m *MessageTable) ReadLogFile(path string, visibleOnly bool) error {
 			}
 			thread.Put(msg)
 		}
+
+		if !readAllMessages &&
+			threadTs != "" && !msg.IsRootOfThread() &&
+			msg.Subtype != "thread_broadcast" &&
+			msg.Subtype != "bot_message" &&
+			msg.Subtype != "slackbot_response" {
+			continue
+		}
+
+		visibleMsgs = append(visibleMsgs, msg)
 	}
 
 	key, err := NewMessageMonthKey(match[1], match[2])
