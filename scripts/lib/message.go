@@ -63,8 +63,8 @@ func NewMessageTable() *MessageTable {
 // ReadLogDir : pathに指定したディレクトリに存在するJSON形式のメッセージデータ
 // を読み込む。
 // すでにそのディレクトリが読み込み済みの場合は処理をスキップする。
-// visibleOnlyがtrueである場合は特定のサブタイプを持つメッセージのみをmsgMapに登録する。
-func (m *MessageTable) ReadLogDir(path string, visibleOnly bool) error {
+// readAllMessagesがfalseである場合は特定のサブタイプを持つメッセージのみをmsgMapに登録する。
+func (m *MessageTable) ReadLogDir(path string, readAllMessages bool) error {
 	dir, err := os.Open(path)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (m *MessageTable) ReadLogDir(path string, visibleOnly bool) error {
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		if err := m.ReadLogFile(filepath.Join(path, name), visibleOnly); err != nil {
+		if err := m.ReadLogFile(filepath.Join(path, name), readAllMessages); err != nil {
 			return err
 		}
 	}
