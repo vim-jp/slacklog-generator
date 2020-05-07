@@ -12,6 +12,8 @@ import (
 	"text/template"
 )
 
+var baseURL = os.Getenv("BASEURL")
+
 // HTMLGenerator : ログデータからHTMLを生成するための構造体。
 type HTMLGenerator struct {
 	// text/template形式のテンプレートが置いてあるディレクトリ
@@ -91,6 +93,7 @@ func (g *HTMLGenerator) Generate(outDir string) error {
 func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
 	params := make(map[string]interface{})
 	SortChannel(channels)
+	params["baseURL"] = baseURL
 	params["channels"] = channels
 	tmplPath := filepath.Join(g.templateDir, "index.tmpl")
 	name := filepath.Base(tmplPath)
@@ -153,6 +156,7 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 	})
 
 	params := make(map[string]interface{})
+	params["baseURL"] = baseURL
 	params["channel"] = channel
 	params["keys"] = keys
 
@@ -179,6 +183,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 	}
 
 	params := make(map[string]interface{})
+	params["baseURL"] = baseURL
 	params["channel"] = channel
 	params["monthKey"] = key
 	params["msgs"] = msgs

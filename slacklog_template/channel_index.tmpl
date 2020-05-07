@@ -8,7 +8,7 @@ permalink: /{{ .channel.ID }}/index:output_ext
   <h4 class="text-gray pb-2 border-bottom">&#35{{ $.channel.Name }}</h4>
   <nav class="SideNav bg-white">
     {{- range .keys }}
-      <a class="SideNav-item" href="{{ J "site.baseurl" }}/{{ $.channel.ID }}/{{ .Year }}/{{ .Month }}/index.html">{{ .Year }}年{{ .Month }}月</a>
+      <a class="SideNav-item" href="{{ $.baseURL }}/{{ $.channel.ID }}/{{ .Year }}/{{ .Month }}/index.html">{{ .Year }}年{{ .Month }}月</a>
     {{- end }}
   </nav>
 </div>

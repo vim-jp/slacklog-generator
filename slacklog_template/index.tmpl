@@ -15,7 +15,7 @@ permalink: /index:output_ext
       </svg>
     </span>
     <span class="Toast-content">
-      参加方法、各チャンネルの概要等は<a href="{{ J "site.baseurl" }}/docs/chat.html">こちら</a>を参照して下さい。
+      参加方法、各チャンネルの概要等は<a href="{{ $.baseURL }}/docs/chat.html">こちら</a>を参照して下さい。
     </span>
   </div>
 </div>
@@ -24,7 +24,7 @@ permalink: /index:output_ext
   <h4 class="text-gray mb-2 pb-2">Channels</h4>
   <nav class="SideNav bg-white">
     {{- range .channels }}
-      <a class="SideNav-item border-top" href="{{ J "site.baseurl" }}/{{ .ID }}/">&#35{{ .Name }}</a>
+      <a class="SideNav-item border-top" href="{{ $.baseURL }}/{{ .ID }}/">&#35{{ .Name }}</a>
     {{- end }}
   </nav>
 </div>
