@@ -36,11 +36,17 @@ func DownloadEmoji(args []string) error {
 	}
 
 	api := slack.New(slackToken)
+
+	emojis, err := api.GetEmoji()
+	if err != nil {
+		return err
+	}
+
 	d := slacklog.NewDownloader(slackToken)
 
-	go generateEmojiFileTargets(d, api, emojisDir)
+	go generateEmojiFileTargets(d, emojis, emojisDir)
 
-	err := outputSummary(api, emojiJSONPath)
+	err = outputSummary(emojis, emojiJSONPath)
 	if err != nil {
 		return err
 	}
@@ -52,14 +58,9 @@ func DownloadEmoji(args []string) error {
 	return nil
 }
 
-func generateEmojiFileTargets(d *slacklog.Downloader, api *slack.Client, outputDir string) {
+func generateEmojiFileTargets(d *slacklog.Downloader, emojis map[string]string, outputDir string) {
 	defer d.CloseQueue()
-	emojis, err := api.GetEmoji()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get emojis: %s", err)
-		return
-	}
-	err = os.MkdirAll(outputDir, 0777)
+	err := os.MkdirAll(outputDir, 0777)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to create %s: %s", outputDir, err)
 		return
@@ -79,17 +80,15 @@ func generateEmojiFileTargets(d *slacklog.Downloader, api *slack.Client, outputD
 	}
 }
 
-func outputSummary(api *slack.Client, path string) error {
-	emojis, err := api.GetEmoji()
-	if err != nil {
-		return err
-	}
+func outputSummary(emojis map[string]string, path string) error {
+	exts := make(map[string]string, len(emojis))
 	for name, url := range emojis {
 		if strings.HasPrefix(url, "alias:") {
+			exts[name] = url
 			continue
 		}
 		ext := filepath.Ext(url)
-		emojis[name] = ext
+		exts[name] = ext
 	}
 
 	f, err := os.Create(path)
@@ -97,7 +96,7 @@ func outputSummary(api *slack.Client, path string) error {
 		return err
 	}
 	defer f.Close()
-	err = json.NewEncoder(f).Encode(emojis)
+	err = json.NewEncoder(f).Encode(exts)
 	if err != nil {
 		return err
 	}
