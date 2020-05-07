@@ -43,7 +43,7 @@ func TestDownloader(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = dirDiff("testdata/downloader", tmpPath)
+	err = dirDiff(t, "testdata/downloader", tmpPath)
 	if err != nil {
 		t.Fatal(err)
 	}

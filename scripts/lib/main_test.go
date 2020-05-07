@@ -28,13 +28,17 @@ func createTmpDir(t *testing.T) string {
 	return path
 }
 
-func dirDiff(a, b string) error {
+func dirDiff(t *testing.T, a, b string) (err error) {
+	t.Helper()
+
 	aInfos, err := ioutil.ReadDir(a)
 	if err != nil {
+		err = fmt.Errorf("failed to dirDiff: %w", err)
 		return err
 	}
 	bInfos, err := ioutil.ReadDir(b)
 	if err != nil {
+		err = fmt.Errorf("failed to dirDiff: %w", err)
 		return err
 	}
 
@@ -55,18 +59,22 @@ func dirDiff(a, b string) error {
 
 	for i := range aInfos {
 		if aInfos[i].Name() != bInfos[i].Name() {
-			return fmt.Errorf(
+			err := fmt.Errorf(
 				"the file name is different: %s != %s",
 				filepath.Join(a, aInfos[i].Name()),
 				filepath.Join(b, bInfos[i].Name()),
 			)
+			err = fmt.Errorf("failed to dirDiff: %w", err)
+			return err
 		}
 		if aInfos[i].Size() != bInfos[i].Size() {
-			return fmt.Errorf(
+			err := fmt.Errorf(
 				"the file size is different: (%s: %d) (%s: %d)",
 				filepath.Join(a, aInfos[i].Name()), aInfos[i].Size(),
 				filepath.Join(b, bInfos[i].Name()), bInfos[i].Size(),
 			)
+			err = fmt.Errorf("failed to dirDiff: %w", err)
+			return err
 		}
 	}
 	return nil
