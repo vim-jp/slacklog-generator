@@ -78,7 +78,7 @@ func (s *LogStore) GetMessagesPerMonth(channelID string) (MessagesMap, error) {
 	if !ok {
 		return nil, fmt.Errorf("not found channel: id=%s", channelID)
 	}
-	if err := mt.ReadLogDir(filepath.Join(s.path, channelID), true); err != nil {
+	if err := mt.ReadLogDir(filepath.Join(s.path, channelID), false); err != nil {
 		return nil, err
 	}
 
@@ -90,7 +90,7 @@ func (s *LogStore) GetAllMessages(channelID string) (Messages, error) {
 	if !ok {
 		return nil, fmt.Errorf("not found channel: id=%s", channelID)
 	}
-	err := mt.ReadLogDir(filepath.Join(s.path, channelID), false)
+	err := mt.ReadLogDir(filepath.Join(s.path, channelID), true)
 	if err != nil {
 		return nil, err
 	}
