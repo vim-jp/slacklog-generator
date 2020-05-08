@@ -99,12 +99,7 @@ func (g *HTMLGenerator) generateIndex(path string, channels []Channel) error {
 	params["channels"] = channels
 	tmplPath := filepath.Join(g.templateDir, "index.tmpl")
 	name := filepath.Base(tmplPath)
-	t, err := template.New(name).
-		Funcs(map[string]interface{}{
-			"jekyll_through": jekyllThrough,
-			"J":              jekyllThrough, // shorthand for "jekyll_through"
-		}).
-		ParseFiles(tmplPath)
+	t, err := template.New(name).ParseFiles(tmplPath)
 	if err != nil {
 		return err
 	}
@@ -164,12 +159,7 @@ func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMont
 
 	tempPath := filepath.Join(g.templateDir, "channel_index.tmpl")
 	name := filepath.Base(tempPath)
-	t, err := template.New(name).
-		Funcs(map[string]interface{}{
-			"jekyll_through": jekyllThrough,
-			"J":              jekyllThrough, // shorthand for "jekyll_through"
-		}).
-		ParseFiles(tempPath)
+	t, err := template.New(name).ParseFiles(tempPath)
 	if err != nil {
 		return err
 	}
@@ -265,8 +255,6 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"hasNextMonth": func(key MessageMonthKey) bool {
 				return g.s.HasNextMonth(channel.ID, key)
 			},
-			"jekyll_through": jekyllThrough,
-			"J":              jekyllThrough, // shorthand for "jekyll_through"
 		}).ParseFiles(tmplPath)
 	if err != nil {
 		return err
@@ -306,8 +294,4 @@ func executeAndWrite(tmpl *template.Template, data interface{}, filename string)
 		return err
 	}
 	return nil
-}
-
-func jekyllThrough(s string) string {
-	return "{{ " + s + " }}"
 }
