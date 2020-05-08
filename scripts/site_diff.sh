@@ -31,7 +31,7 @@ build_tool() {
 }
 
 # generate-html サブコマンドとjekyll buildを実行して指定ディレクトリに出力する
-generate_site_old() {
+generate_site() {
   id=$1 ; shift
   outdir=${outrootdir}/${id}
   echo "jekyll build to: ${outdir}" 1>&2
@@ -40,23 +40,15 @@ generate_site_old() {
   ${cmd} generate-html scripts/config.json slacklog_template/ slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
   rm -f ${cmd}
   rm -rf ${outdir}
-  if [ $docker -ne 0 ] ; then
-    docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
+  if [ -x ./scripts/build.sh ] ; then
+    ./scripts/build.sh -d $docker -o $outdir > ${outdir}.build.log 2>&1
   else
-    jekyll build -d ${outdir} > ${outdir}.jekyll-build.log 2>&1
+    if [ $docker -ne 0 ] ; then
+      docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
+    else
+      jekyll build -d ${outdir} > ${outdir}.jekyll-build.log 2>&1
+    fi
   fi
-}
-
-generate_site_new() {
-  id=$1 ; shift
-  outdir=${outrootdir}/${id}
-  echo "build to: ${outdir}" 1>&2
-  rm -rf slacklog_pages
-  build_tool
-  ${cmd} generate-html scripts/config.json slacklog_template/ slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
-  rm -f ${cmd}
-  rm -rf ${outdir}
-  docker=$docker scripts/build.sh ${outdir}
 }
 
 if [ $clean -ne 0 ] ; then
@@ -65,7 +57,7 @@ if [ $clean -ne 0 ] ; then
   exit 0
 fi
 
-generate_site_new "current"
+generate_site "current"
 
 if [ $update -ne 0 ] ; then
   echo "catching up origin/master" 1>&2
@@ -88,7 +80,7 @@ if [ $force -ne 0 -o ! \( -d $base_pages \) ] ; then
   # merge-base に巻き戻し generate-html を実行する
   git reset -q --hard ${base_commit}
   echo "move to base: $(git rev-parse HEAD)" 1>&2
-  generate_site_old ${base_commit}
+  generate_site ${base_commit}
 
   # 退避したHEADと変更を復帰する
   git reset -q --hard ${current_commit}
