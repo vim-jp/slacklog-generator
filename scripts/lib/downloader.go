@@ -20,8 +20,10 @@ type Downloader struct {
 	targetCh   chan downloadTarget
 	workerWg   sync.WaitGroup
 
-	errs []error
-	// errsに値を入れる際には必ずerrsMuでロックを取る
+	// firstError stores the first error raised in workers.
+	firstError error
+
+	// errsMu: firstError に触る際は必ずコレでロックを取る
 	errsMu sync.Mutex
 }
 
@@ -58,7 +60,6 @@ func NewDownloader(token string) *Downloader {
 		token:      token,
 		httpClient: cli,
 		targetCh:   make(chan downloadTarget),
-		errs:       []error{},
 	}
 
 	for i := 0; i < downloadWorkerNum; i++ {
@@ -82,13 +83,13 @@ func (d *Downloader) QueueDownloadRequest(url, outputPath string, withToken bool
 }
 
 // Wait : ワーカが全て実行終了するまで待つ。
-// ダウンロード処理中にエラーが発生していた場合はその先頭を返す。
+// ダウンロード処理中にエラーが発生していた場合は最初に発生した1つを返す。
+// 他のエラーはログに出力している。
 func (d *Downloader) Wait() error {
 	d.workerWg.Wait()
-	if len(d.errs) != 0 {
-		return d.errs[0]
-	}
-	return nil
+	d.errsMu.Lock()
+	defer d.errsMu.Unlock()
+	return d.firstError
 }
 
 // CloseQueue : ダウンロードキューへの追加が完了したことをDownloaderに通知する
@@ -104,8 +105,11 @@ func (d *Downloader) runWorker() {
 		err := d.download(t)
 		if err != nil {
 			d.errsMu.Lock()
-			d.errs = append(d.errs, err)
+			if d.firstError == nil {
+				d.firstError = err
+			}
 			d.errsMu.Unlock()
+			fmt.Printf("download failed for url=%s: %s\n", t.url, err)
 		}
 	}
 }
