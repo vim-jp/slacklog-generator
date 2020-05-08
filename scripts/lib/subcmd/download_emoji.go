@@ -10,12 +10,12 @@ package subcmd
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/slack-go/slack"
+	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func DownloadEmoji(args []string) error {
@@ -42,60 +42,63 @@ func DownloadEmoji(args []string) error {
 		return err
 	}
 
-	err = os.MkdirAll(emojisDir, 0777)
+	d := slacklog.NewDownloader(slackToken)
+
+	go generateEmojiFileTargets(d, emojis, emojisDir)
+
+	err = outputSummary(emojis, emojiJSONPath)
 	if err != nil {
 		return err
 	}
 
-	for name, url := range emojis {
-		if url[:6] == "alias:" {
-			continue
-		}
-		downloadEmojiToFile(url, name, emojisDir)
-		emojis[name] = filepath.Ext(emojis[name])
+	err = d.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func generateEmojiFileTargets(d *slacklog.Downloader, emojis map[string]string, outputDir string) {
+	defer d.CloseQueue()
+	err := os.MkdirAll(outputDir, 0777)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create %s: %s", outputDir, err)
+		return
 	}
 
-	// write `emojis` to a file as JSON, using with json.Encoder. this saves
-	// memory to marshal JSON.
-	f, err := os.Create(emojiJSONPath)
+	for name, url := range emojis {
+		if strings.HasPrefix(url, "alias:") {
+			continue
+		}
+		ext := filepath.Ext(url)
+		path := filepath.Join(outputDir, name+ext)
+		d.QueueDownloadRequest(
+			url,
+			path,
+			false,
+		)
+	}
+}
+
+func outputSummary(emojis map[string]string, path string) error {
+	exts := make(map[string]string, len(emojis))
+	for name, url := range emojis {
+		if strings.HasPrefix(url, "alias:") {
+			exts[name] = url
+			continue
+		}
+		ext := filepath.Ext(url)
+		exts[name] = ext
+	}
+
+	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	err = json.NewEncoder(f).Encode(emojis)
+	err = json.NewEncoder(f).Encode(exts)
 	if err != nil {
 		return err
 	}
-
 	return nil
-}
-
-func downloadEmojiToFile(url, name, basePath string) error {
-	extension := filepath.Ext(url)
-	destFile := filepath.Join(basePath, name+extension)
-	if _, err := os.Stat(destFile); err == nil {
-		return nil
-	}
-
-	fmt.Printf("Downloading: :%s:\n", name)
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode/100 != 2 {
-		return fmt.Errorf("[%s]: %s", resp.Status, url)
-	}
-
-	w, err := os.Create(destFile)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	_, err = io.Copy(w, resp.Body)
-
-	return err
 }
