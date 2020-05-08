@@ -13,6 +13,7 @@ func Run() error {
     convert-exported-logs
     download-emoji
     download-files
+    fetch-messages
     generate-html
     update-channel-list
     update-user-list`)
@@ -28,6 +29,8 @@ func Run() error {
 		return DownloadEmoji(args)
 	case "download-files":
 		return DownloadFiles(args)
+	case "fetch-messages":
+		return FetchMessages(args)
 	case "generate-html":
 		return GenerateHTML(args)
 	case "update-channel-list":
