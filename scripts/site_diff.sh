@@ -40,10 +40,14 @@ generate_site() {
   ${cmd} generate-html scripts/config.json slacklog_template/ slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
   rm -f ${cmd}
   rm -rf ${outdir}
-  if [ $docker -ne 0 ] ; then
-    docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
+  if [ -x ./scripts/build.sh ] ; then
+    ./scripts/build.sh -d $docker -o $outdir > ${outdir}.build.log 2>&1
   else
-    jekyll build -d ${outdir} > ${outdir}.jekyll-build.log 2>&1
+    if [ $docker -ne 0 ] ; then
+      docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
+    else
+      jekyll build -d ${outdir} > ${outdir}.jekyll-build.log 2>&1
+    fi
   fi
 }
 
