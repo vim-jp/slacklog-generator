@@ -88,6 +88,7 @@ func TestDownloader_usingToken(t *testing.T) {
 	}
 	var got map[string]string
 	err = json.NewDecoder(f).Decode(&got)
+	f.Close()
 	if err != nil {
 		t.Fatal(err)
 	}

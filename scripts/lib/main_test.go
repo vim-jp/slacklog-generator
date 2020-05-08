@@ -21,7 +21,7 @@ func cleanupTmpDir(t *testing.T, path string) {
 func createTmpDir(t *testing.T) string {
 	t.Helper()
 
-	path, err := ioutil.TempDir("testdata", "slacklog")
+	path, err := ioutil.TempDir("", "slacklog")
 	if err != nil {
 		t.Fatalf("failed to createTmpDir: %s", err)
 	}
