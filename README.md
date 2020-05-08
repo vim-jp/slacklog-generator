@@ -63,7 +63,7 @@ scripts/download_files.sh
 開発サーバーの起動(例):
 
 ```console
-python -m http.server
+python -m http.server --directory=_site
 ```
 
 ### geneate-html サブコマンドの出力の差分の確認方法
