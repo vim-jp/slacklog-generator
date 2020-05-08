@@ -21,11 +21,12 @@ jobs:
       - name: 'Trigger'
         run: |
           cd generator/scripts
-          BASEURL=/slacklog go run ./main.go generate-html ./config.json ../slacklog_template/ ../../data/slacklog_data/ ../../data/slacklog_pages/
+          BASEURL=/slacklog go run ./main.go generate-html ./config.json ../slacklog_template/ ../../data/slacklog_data/ ../../data/
           cd ..
-          cp -r _config.yml _layouts assets favicon.ico sitemap.xml ../data
+          cp -r assets favicon.ico ../data
           cd ../data
           rm -fr slacklog_data/ .github/
+          touch .nojekyll
           git checkout --orphan=gh-pages --quiet
           git add --all --force
           git config user.email "slacklog@vim-jp.org"
