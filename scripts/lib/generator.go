@@ -21,8 +21,8 @@ type HTMLGenerator struct {
 	// markdown形式のテキストを変換するためのTextConverter
 	c   *TextConverter
 	cfg Config
-	// 公開するサイトのURLのベース
-	// 環境変数BASEURLで指定する
+
+	// baseURL is root path for public site, configured by `BASEURL` environment variable.
 	baseURL string
 }
 
