@@ -21,10 +21,7 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 ## 開発に必要なもの
 
 - Go
-- ローカルで開発する場合 (Docker を使う場合は不要)
-  - Ruby
-  - Jekyll
-  - (あれば)GNU Make
+- (あれば)GNU Make
 
 ## 環境変数
 
@@ -33,15 +30,7 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 
 ## 開発方法
 
-### Docker を使う場合
-
-```console
-./scripts/docker.sh
-```
-
-### ローカルで開発する場合
-
-#### HTML の生成
+### HTML の生成
 
 ログを展開
 
@@ -49,80 +38,35 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
 ```
 
-Jekyll に必要な HTML を生成
+HTMLの生成
+
+以下のコマンドを実行すると`_site`以下に生成されます
 
 ```console
 scripts/generate_html.sh
+scripts/build.sh
 ```
 
 GNU Makeがあれば`make`もしくは`gmake`を実行するだけで生成されます
 
-#### 添付ファイルと絵文字のダウンロード
+### 添付ファイルと絵文字のダウンロード
 
 ```console
 scripts/download_emoji.sh
 scripts/download_files.sh
 ```
 
-#### 開発サーバーの起動
+### 開発サーバーの起動
 
-Jekyll のインストール(初回のみ)
+特定のツールに依存していないので、各自お好きなサーバーを`_site`以下で起動してください
 
-```console
-bundle install
-```
-
-開発サーバーの起動
+開発サーバーの起動(例):
 
 ```console
-bundle exec jekyll serve -w
+python -m http.server
 ```
 
-#### `jekyll build` の出力の差分の確認方法
-
-以下のコマンドで自分が変更した結果として生じた `jekyll build` の出力内容の差分
-を確認できます。
-
-```console
-$ ./scripts/site_diff.sh
-```
-
-`site_diff.sh` では現在のHEADでの `jekyll build` の結果と
-merge-base での `jekyll build` の結果の diff を取得しています。
-出力先は `./tmp/site_diff/current/` および
-`./tmp/site_diff/{merge-base-commit-id}/` ディレクトリとなっています。
-
-デフォルトではローカルにインストールした jekyll を使います。dockerのjekyllを使
-用する場合には `-d` オプションを指定してください。
-
-merge-base の算出基準はローカルの origin/master です。そのため origin/master が
-リモート(GitHub)の物よりも古いと出力内容が異なり、差分も異なる場合があります。
-`-u` オプションを使うと merge-base の算出前にローカルの origin/master を更新し
-ます。変更がなくても更新にそれなりに時間がかかるため、デフォルトではオフになっ
-ており明示的に指定するようにしています。
-
-merge-base の出力結果はキャッシュし再利用しています。このキャッシュを無視して強
-制的に再出力するには `-f` オプションを使ってください。
-
-```console
-$ ./scripts/site_diff.sh -f
-```
-
-全てのキャッシュを破棄したい場合には `-c` オプションを使ってください。`-c` オプ
-ションでは `./tmp/site_diff/` ディレクトリを消すだけで差分の出力は行いません。
-
-```console
-$ ./scripts/site_diff.sh -c
-```
-
-差分だけを特定のファイルに出力するには `-o {filename}` オプションを使ってくださ
-い。リダイレクト (` > filename`) では差分以外の動作ログも含まれる場合がありま
-す。
-
-注意事項: `./scripts/site_diff.sh` は未コミットな変更を stash を用いて保存・復
-帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
-
-#### geneate-html サブコマンドの出力の差分の確認方法
+### geneate-html サブコマンドの出力の差分の確認方法
 
 以下のコマンドで自分が変更した結果として生じた generate-html の出力内容の差分
 を確認できます。
@@ -180,7 +124,7 @@ log-data ブランチにはSlackからエクスポートしたデータを格納
 
 ## Pull Request の影響の確認の方法
 
-以下の手順で Pull Request への `pages_diff.sh` と `site_diff.sh` の実行結果を
+以下の手順で Pull Request への `pages_diff.sh` の実行結果を
 Artifacts として Web から取得できます。レビューの際に利用してください。
 
 1. Pull Request の <b>Checks</b> タブを開く
@@ -194,8 +138,8 @@ Artifacts として Web から取得できます。レビューの際に利用�
 ![](https://raw.githubusercontent.com/wiki/vim-jp/slacklog-generator/images/where-are-artifacts.png)
 
 Artifacts はそれぞれ zip としてダウンロードできます。
-`diffs-*.zip` には `pages_diff.sh` と `site_diff.sh` の両方の差分が含まれています。
-`log-*.zip` はそれぞれの動作ログが含まれていますが、こちらはCIの動作デバッグ目的のものです。
+`diffs-*.zip` には `pages_diff.sh` の差分が含まれています。
+`log-*.zip` は動作ログが含まれていますが、こちらはCIの動作デバッグ目的のものです。
 末尾の数値は [`${{ github.run_id }}`](https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context) 由来です。
 
 ### Artifacts に差分を出力している理由
