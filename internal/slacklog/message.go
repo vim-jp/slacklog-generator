@@ -116,7 +116,7 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 	// assort messages, visible and threaded.
 	var visibleMsgs Messages
 	for _, msg := range msgs {
-		if readAllMessages && !msg.IsVisible() {
+		if !readAllMessages && !msg.IsVisible() {
 			continue
 		}
 		threadTs := msg.ThreadTs
