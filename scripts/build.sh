@@ -12,8 +12,11 @@ while getopts d:o: OPT ; do
   esac
 done
 
-if [ $docker -ne 0 ] ; then
-  docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir}
-else
-  jekyll build -d ${outdir}
-fi
+cd "$(dirname "$0")/.." || exit "$?"
+make slacklog_pages
+mkdir -p ${outdir}
+cp -a assets ${outdir}
+cp -a emojis ${outdir}
+cp favicon.ico ${outdir}
+cp -a files ${outdir}
+cp -a slacklog_pages/* ${outdir}

@@ -1,3 +1,7 @@
+_site: slacklog_pages
+	./scripts/build.sh
+	touch -c _site
+
 slacklog_pages: slacklog_data $(wildcard scripts/**) $(wildcard slacklog_template/**)
 	./scripts/generate_html.sh
 	touch -c slacklog_pages
@@ -7,6 +11,7 @@ slacklog_data:
 
 .phony: clean
 clean:
+	rm -rf _site
 	rm -rf emojis
 	rm -rf files
 	rm -rf slacklog_data
