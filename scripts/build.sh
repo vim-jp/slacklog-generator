@@ -12,8 +12,6 @@ while getopts d:o: OPT ; do
   esac
 done
 
-cd "$(dirname "$0")/.." || exit "$?"
-make slacklog_pages
 mkdir -p ${outdir}
 cp -a assets ${outdir}
 cp -a emojis ${outdir}
