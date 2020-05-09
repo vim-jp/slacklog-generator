@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/vim-jp/slacklog/lib/subcmd"
-
 	"github.com/joho/godotenv"
+	"github.com/vim-jp/slacklog-generator/subcmd"
 )
 
 func main() {

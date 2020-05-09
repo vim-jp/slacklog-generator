@@ -14,12 +14,12 @@ import (
 	"os"
 	"path/filepath"
 
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 func ConvertExportedLogs(args []string) error {
 	if len(args) < 2 {
-		fmt.Println("Usage: go run scripts/main.go convert_exported_logs {indir} {outdir}")
+		fmt.Println("Usage: go run . convert_exported_logs {indir} {outdir}")
 		return nil
 	}
 

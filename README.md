@@ -117,7 +117,7 @@ log-data ブランチにはSlackからエクスポートしたデータを格納
 3. `convert-exported-logs` サブコマンドを実行する
 
     ```console
-    $ cd scripts && go run ./main.go convert-exported-logs {indir} {outdir}
+    $ go run . convert-exported-logs {indir} {outdir}
     ```
 
 4. 更新内容を log-data ブランチに `commit --amend` して `push -f`

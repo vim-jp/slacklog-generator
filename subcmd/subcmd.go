@@ -8,7 +8,7 @@ import (
 func Run() error {
 	fmt.Println(os.Args)
 	if len(os.Args) < 2 {
-		fmt.Println(`Usage: go run scripts/main.go {subcmd}
+		fmt.Println(`Usage: go run . {subcmd}
   Subcmd:
     convert-exported-logs
     download-emoji

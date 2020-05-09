@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 func DownloadFiles(args []string) error {
@@ -22,7 +22,7 @@ func DownloadFiles(args []string) error {
 	}
 
 	if len(args) < 2 {
-		fmt.Println("Usage: go run scripts/main.go download_files {log-dir} {files-dir}")
+		fmt.Println("Usage: go run . download_files {log-dir} {files-dir}")
 		return nil
 	}
 

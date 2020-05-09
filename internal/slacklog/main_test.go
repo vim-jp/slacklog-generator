@@ -1,4 +1,4 @@
-package slacklog_test
+package slacklog
 
 import (
 	"fmt"

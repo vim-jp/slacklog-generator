@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"path/filepath"
 
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 // GenerateHTML : SlackからエクスポートしたデータをHTMLに変換して出力する。
 func GenerateHTML(args []string) error {
 	if len(args) < 4 {
-		fmt.Println("Usage: go run scripts/main.go generate_html {config.json} {templatedir} {indir} {outdir}")
+		fmt.Println("Usage: go run . generate_html {config.json} {templatedir} {indir} {outdir}")
 		return nil
 	}
 	configJSONPath := filepath.Clean(args[0])

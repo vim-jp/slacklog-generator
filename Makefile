@@ -1,3 +1,19 @@
+.PHONY: build
+build:
+	go build
+
+.PHONY: test
+test:
+	go test . ./internal/... ./subcmd/...
+
+.PHONY: vet
+vet:
+	go vet . ./internal/... ./subcmd/...
+
+.PHONY: lint
+lint:
+	golint . ./internal/... ./subcmd/...
+
 _site: slacklog_pages
 	./scripts/build.sh
 	touch -c _site
