@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/slack-go/slack"
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 func DownloadEmoji(args []string) error {

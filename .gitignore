@@ -6,3 +6,6 @@
 /files/
 /emojis/
 /scripts/.env
+slacklog-generator
+*.exe
+

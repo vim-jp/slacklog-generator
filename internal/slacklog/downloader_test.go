@@ -1,4 +1,4 @@
-package slacklog_test
+package slacklog
 
 import (
 	"encoding/json"
@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	slacklog "github.com/vim-jp/slacklog/lib"
 )
 
 func TestDownloader(t *testing.T) {
@@ -26,7 +24,7 @@ func TestDownloader(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	d := slacklog.NewDownloader("dummyToken")
+	d := NewDownloader("dummyToken")
 
 	for _, fileInfo := range fileInfos {
 		url := ts.URL + "/" + fileInfo.Name()
@@ -69,7 +67,7 @@ func TestDownloader_usingToken(t *testing.T) {
 	defer ts.Close()
 
 	testToken := "dummyToken"
-	d := slacklog.NewDownloader(testToken)
+	d := NewDownloader(testToken)
 
 	testFileName := "test.json"
 	url := ts.URL + "/" + testFileName

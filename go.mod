@@ -1,4 +1,4 @@
-module github.com/vim-jp/slacklog
+module github.com/vim-jp/slacklog-generator
 
 go 1.14
 

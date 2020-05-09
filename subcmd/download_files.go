@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 func DownloadFiles(args []string) error {

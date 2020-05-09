@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	slacklog "github.com/vim-jp/slacklog/lib"
+	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 // GenerateHTML : SlackからエクスポートしたデータをHTMLに変換して出力する。
