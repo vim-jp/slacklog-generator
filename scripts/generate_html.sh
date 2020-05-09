@@ -1,4 +1,7 @@
 #!/bin/bash
 
-cd "$(dirname "$0")" || exit "$?"
-go run ./main.go generate-html ./config.json ../templates/ ../slacklog_data/ ../slacklog_pages/
+set -eu
+
+cd "$(dirname "$0")/.." || exit "$?"
+
+go run . generate-html scripts/config.json templates/ slacklog_data/ slacklog_pages/

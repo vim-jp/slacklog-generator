@@ -23,9 +23,13 @@ current_pages=${outrootdir}/current
 cmd=${outrootdir}/slacklog-tools
 
 build_tool() {
-  cd scripts
-  go build -o ../${cmd} ./main.go 1>&2
-  cd ..
+  if [ -f main.go ] ; then
+    go build -o ${cmd} . 1>&2
+  else
+    cd scripts
+    go build -o ../${cmd} ./main.go 1>&2
+    cd ..
+  fi
 }
 
 # generate-html サブコマンドとjekyll buildを実行して指定ディレクトリに出力する

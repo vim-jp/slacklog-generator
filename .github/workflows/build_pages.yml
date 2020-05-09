@@ -20,9 +20,8 @@ jobs:
           ssh-key: '${{ secrets.SLACKLOG_SSH_KEY }}'
       - name: 'Trigger'
         run: |
-          cd generator/scripts
-          BASEURL=/slacklog go run ./main.go generate-html ./config.json ../templates/ ../../data/slacklog_data/ ../../data/
-          cd ..
+          cd generator
+          BASEURL=/slacklog go run . generate-html scripts/config.json templates/ ../data/slacklog_data/ ../data/
           cp -r assets favicon.ico ../data
           cd ../data
           rm -fr slacklog_data/ .github/
