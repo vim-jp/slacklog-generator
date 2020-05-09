@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Ts is a type represents "Ts" fields in message.go or so.
 type Ts struct {
 	IsNumber bool
 	Value    string
@@ -14,6 +15,7 @@ type Ts struct {
 var _ json.Marshaler = (*Ts)(nil)
 var _ json.Unmarshaler = (*Ts)(nil)
 
+// UnmarshalJSON implements "encoding/json".Unmarshaller interface.
 func (ts *Ts) UnmarshalJSON(b []byte) error {
 	var v interface{}
 	err := json.Unmarshal(b, &v)
@@ -33,7 +35,8 @@ func (ts *Ts) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (ts *Ts) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements "encoding/json".Marshaller interface.
+func (ts Ts) MarshalJSON() ([]byte, error) {
 	if ts.IsNumber {
 		f, err := strconv.ParseFloat(ts.Value, 64)
 		if err != nil {
