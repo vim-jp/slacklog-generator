@@ -13,7 +13,6 @@ done
 mkdir -p ${outdir}
 
 cp -a assets ${outdir}
-cp -p favicon.ico ${outdir}
 
 for d in emojis files ; do
   if [ -d _logdata/${d} ] ; then

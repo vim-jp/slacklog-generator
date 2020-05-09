@@ -22,7 +22,7 @@ jobs:
         run: |
           cd generator
           BASEURL=/slacklog go run . generate-html scripts/config.json templates/ ../data/slacklog_data/ ../data/
-          cp -r assets favicon.ico ../data
+          cp -r assets ../data
           cd ../data
           rm -fr slacklog_data/ .github/
           touch .nojekyll
