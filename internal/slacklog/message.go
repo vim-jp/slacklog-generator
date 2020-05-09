@@ -75,6 +75,8 @@ func (m *MessageTable) ReadLogDir(path string, readAllMessages bool) error {
 	if err != nil {
 		return err
 	}
+	// ReadLogFile()は日付順に処理する必要があり、そのためにファイル名でソート
+	// している
 	sort.Strings(names)
 	for _, name := range names {
 		if err := m.ReadLogFile(filepath.Join(path, name), readAllMessages); err != nil {
