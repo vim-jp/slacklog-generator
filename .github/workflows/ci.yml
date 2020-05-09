@@ -27,7 +27,7 @@ jobs:
       run: go test . ./internal/... ./subcmd/...
 
   diff:
-    name: 'Compare Pages and Site'
+    name: 'Compare Site'
     runs-on: 'ubuntu-latest'
 
     steps:
@@ -44,7 +44,7 @@ jobs:
         git fetch origin master
 
         # log-data の取得と展開
-        curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
+        make logdata
 
         # 出力用のディレクトリ
         mkdir -p tmp
