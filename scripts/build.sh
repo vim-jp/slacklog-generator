@@ -16,4 +16,3 @@ cp -a assets ${outdir}
 cp -a emojis ${outdir}
 cp -p favicon.ico ${outdir}
 cp -a files ${outdir}
-cp -a slacklog_pages/* ${outdir}
