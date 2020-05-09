@@ -5,15 +5,13 @@ set -eu
 force=0
 clean=0
 update=0
-docker=0
 outdiff=""
 
-while getopts fcudo: OPT ; do
+while getopts fcuo: OPT ; do
   case $OPT in
     f) force=1 ;;
     c) clean=1 ;;
     u) update=1 ;;
-    d) docker=1 ;;
     o) outdiff="$OPTARG" ;;
   esac
 done
@@ -40,15 +38,7 @@ generate_site() {
   ${cmd} generate-html scripts/config.json slacklog_template/ slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
   rm -f ${cmd}
   rm -rf ${outdir}
-  if [ -x ./scripts/build.sh ] ; then
-    ./scripts/build.sh -d $docker -o $outdir > ${outdir}.build.log 2>&1
-  else
-    if [ $docker -ne 0 ] ; then
-      docker run --rm -t --volume="$PWD:/srv/jekyll" jekyll/jekyll:pages jekyll build -d ${outdir} > ${outdir}.docker-jekyll-build.log 2>&1
-    else
-      jekyll build -d ${outdir} > ${outdir}.jekyll-build.log 2>&1
-    fi
-  fi
+  ./scripts/build.sh -o $outdir > ${outdir}.build.log 2>&1
 }
 
 if [ $clean -ne 0 ] ; then

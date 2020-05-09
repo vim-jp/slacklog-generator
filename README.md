@@ -72,13 +72,13 @@ python -m http.server --directory=_site
 を確認できます。
 
 ```console
-$ ./scripts/pages_diff.sh
+$ ./scripts/site_diff.sh
 ```
 
-`pages_diff.sh` では現在のHEADでの generate-html の結果と merge-base での
+`site_diff.sh` では現在のHEADでの generate-html の結果と merge-base での
 geneate-html の結果の diff を取得しています。
-出力先は `./tmp/pages_diff/current/` および
-`./tmp/pages_diff/{merge-base-commit-id}/` ディレクトリとなっています。
+出力先は `./tmp/site_diff/current/` および
+`./tmp/site_diff/{merge-base-commit-id}/` ディレクトリとなっています。
 
 merge-base の算出基準はローカルの origin/master です。そのため origin/master が
 リモート(GitHub)の物よりも古いと出力内容が異なり、差分も異なる場合があります。
@@ -90,21 +90,21 @@ merge-base の出力結果はキャッシュし再利用しています。この
 制的に再出力するには `-f` オプションを使ってください。
 
 ```console
-$ ./scripts/pages_diff.sh -f
+$ ./scripts/site_diff.sh -f
 ```
 
 全てのキャッシュを破棄したい場合には `-c` オプションを使ってください。`-c` オプ
-ションでは `./tmp/pages_diff/` ディレクトリを消すだけで差分の出力は行いません。
+ションでは `./tmp/site_diff/` ディレクトリを消すだけで差分の出力は行いません。
 
 ```console
-$ ./scripts/pages_diff.sh -c
+$ ./scripts/site_diff.sh -c
 ```
 
 差分だけを特定のファイルに出力するには `-o {filename}` オプションを使ってくださ
 い。リダイレクト (` > filename`) では差分以外の動作ログも含まれる場合がありま
 す。
 
-注意事項: `./scripts/pages_diff.sh` は未コミットな変更を stash を用いて保存・復
+注意事項: `./scripts/site_diff.sh` は未コミットな変更を stash を用いて保存・復
 帰しているため staged な変更が unstaged に巻き戻ることに留意してください。
 
 ## log-data の更新手順
@@ -124,7 +124,7 @@ log-data ブランチにはSlackからエクスポートしたデータを格納
 
 ## Pull Request の影響の確認の方法
 
-以下の手順で Pull Request への `pages_diff.sh` の実行結果を
+以下の手順で Pull Request への `site_diff.sh` の実行結果を
 Artifacts として Web から取得できます。レビューの際に利用してください。
 
 1. Pull Request の <b>Checks</b> タブを開く
@@ -134,11 +134,12 @@ Artifacts として Web から取得できます。レビューの際に利用�
 5. `diffs-{数値}` アーティファクトをダウンロード
 
 以下のスクリーンショットは、上記の選択個所をマーキングしたものです。
+(SSには3つのアーティファクトが表示されますが、現在は2つになっています)
 
 ![](https://raw.githubusercontent.com/wiki/vim-jp/slacklog-generator/images/where-are-artifacts.png)
 
 Artifacts はそれぞれ zip としてダウンロードできます。
-`diffs-*.zip` には `pages_diff.sh` の差分が含まれています。
+`diffs-*.zip` には `sites_diff.sh` の差分が含まれています。
 `log-*.zip` は動作ログが含まれていますが、こちらはCIの動作デバッグ目的のものです。
 末尾の数値は [`${{ github.run_id }}`](https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context) 由来です。
 
