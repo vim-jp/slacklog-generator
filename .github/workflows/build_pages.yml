@@ -21,7 +21,7 @@ jobs:
       - name: 'Trigger'
         run: |
           cd generator/scripts
-          BASEURL=/slacklog go run ./main.go generate-html ./config.json ../slacklog_template/ ../../data/slacklog_data/ ../../data/
+          BASEURL=/slacklog go run ./main.go generate-html ./config.json ../templates/ ../../data/slacklog_data/ ../../data/
           cd ..
           cp -r assets favicon.ico ../data
           cd ../data

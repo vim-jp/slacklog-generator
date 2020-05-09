@@ -2,7 +2,7 @@ _site: slacklog_pages
 	./scripts/build.sh
 	touch -c _site
 
-slacklog_pages: slacklog_data $(wildcard scripts/**) $(wildcard slacklog_template/**)
+slacklog_pages: slacklog_data $(wildcard scripts/**) $(wildcard templates/**)
 	./scripts/generate_html.sh
 	touch -c slacklog_pages
 

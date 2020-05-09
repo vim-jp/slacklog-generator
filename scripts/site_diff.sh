@@ -35,7 +35,11 @@ generate_site() {
   echo "jekyll build to: ${outdir}" 1>&2
   rm -rf slacklog_pages
   build_tool
-  ${cmd} generate-html scripts/config.json slacklog_template/ slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
+  tmpldir=slacklog_template/
+  if [ -d templates ] ; then
+    tmpldir=templates/
+  fi
+  ${cmd} generate-html scripts/config.json ${tmpldir} slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
   rm -f ${cmd}
   rm -rf ${outdir}
   ./scripts/build.sh -o $outdir > ${outdir}.build.log 2>&1
