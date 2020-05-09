@@ -14,12 +14,13 @@ func TestMessageAttachment_Ts_JSON(t *testing.T) {
 	}{
 		{`{"id":0,"ts":"1234.5678"}`, MessageAttachment{
 			ID: 0,
-			Ts: Ts{false, "1234.5678"},
+			Ts: &Ts{false, "1234.5678"},
 		}},
 		{`{"id":0,"ts":1234.5678}`, MessageAttachment{
 			ID: 0,
-			Ts: Ts{true, "1234.5678"},
+			Ts: &Ts{true, "1234.5678"},
 		}},
+		{`{"id":0}`, MessageAttachment{ID: 0, Ts: nil}},
 	} {
 		var act1 MessageAttachment
 		err := json.Unmarshal([]byte(tc.json), &act1)
