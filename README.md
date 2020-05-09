@@ -25,7 +25,7 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 
 ## 環境変数
 
-`scripts/.env.template` からコピーして `scripts/.env` ファイルを作成してください。
+`.env.template` からコピーして `.env` ファイルを作成してください。
 (各環境変数の説明はファイルを参照)
 
 ## 開発方法
