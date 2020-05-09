@@ -443,14 +443,7 @@ func (f *MessageFile) DownloadFilename(url, suffix string) string {
 		}
 	}
 
-	filename := filenameReplacer.Replace(name + suffix + ext)
-
-	// XXX: Jekyll doesn't publish files that name starts with some characters
-	if strings.HasPrefix(filename, "_") || strings.HasPrefix(filename, ".") {
-		filename = "files" + filename
-	}
-
-	return filename
+	return filenameReplacer.Replace(name + suffix + ext)
 }
 
 type MessageIcons struct {
