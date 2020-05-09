@@ -1,3 +1,8 @@
+_site: slacklog_data $(wildcard scripts/**) $(wildcard templates/**)
+	./scripts/generate_html.sh
+	./scripts/build.sh
+	touch -c _site
+
 .PHONY: build
 build:
 	go build
@@ -13,14 +18,6 @@ vet:
 .PHONY: lint
 lint:
 	golint . ./internal/... ./subcmd/...
-
-_site: slacklog_pages
-	./scripts/build.sh
-	touch -c _site
-
-slacklog_pages: slacklog_data $(wildcard scripts/**) $(wildcard templates/**)
-	./scripts/generate_html.sh
-	touch -c slacklog_pages
 
 slacklog_data:
 	curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github

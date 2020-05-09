@@ -1,11 +1,10 @@
 *~
 *.swp
+/_site/
 /tmp/
 /slacklog_data/
-/slacklog_pages/
 /files/
 /emojis/
 /scripts/.env
 slacklog-generator
 *.exe
-
