@@ -144,10 +144,11 @@ func (g *HTMLGenerator) generateChannelDir(path string, channel Channel) (bool, 
 }
 
 func (g *HTMLGenerator) generateChannelIndex(channel Channel, keys []MessageMonthKey, path string) error {
-
 	sort.Slice(keys, func(i, j int) bool {
 		if keys[i].year < keys[j].year {
 			return true
+		} else if keys[i].year > keys[j].year {
+			return false
 		}
 		return keys[i].month < keys[j].month
 	})
