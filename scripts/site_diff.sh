@@ -18,7 +18,7 @@ done
 
 cd "$(dirname "$0")/.." || exit "$?"
 
-outrootdir=tmp/site_diff
+outrootdir=tmp/_site_diff
 current_pages=${outrootdir}/current
 cmd=${outrootdir}/slacklog-tools
 
@@ -37,15 +37,18 @@ generate_site() {
   id=$1 ; shift
   outdir=${outrootdir}/${id}
   echo "jekyll build to: ${outdir}" 1>&2
-  rm -rf slacklog_pages
+  rm -rf ${outdir}
   build_tool
   tmpldir=slacklog_template/
   if [ -d templates ] ; then
     tmpldir=templates/
   fi
-  ${cmd} generate-html scripts/config.json ${tmpldir} slacklog_data/ slacklog_pages/ > ${outdir}.generate-html.log 2>&1
+  logdir=slacklog_data/
+  if [ -d _logdata ] ; then
+    logdir=_logdata/slacklog_data/
+  fi
+  ${cmd} generate-html scripts/config.json ${tmpldir} ${logdir} ${outdir}/ > ${outdir}.generate-html.log 2>&1
   rm -f ${cmd}
-  rm -rf ${outdir}
   ./scripts/build.sh -o $outdir > ${outdir}.build.log 2>&1
 }
 

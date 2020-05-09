@@ -22,10 +22,38 @@ lint:
 slacklog_data:
 	curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
 
-.phony: clean
+.PHONY: clean
 clean:
 	rm -rf _site
-	rm -rf emojis
-	rm -rf files
-	rm -rf slacklog_data
-	rm -rf slacklog_pages
+
+.PHONY: distclean
+distclean: clean logdata-clean
+
+##############################################################################
+# manage logdata
+
+.PHONY: logdata
+logdata: _logdata
+
+.PHONY: logdata-clean
+logdata-clean:
+	rm -rf logdata
+
+.PHONY: logdata-distclean
+logdata-distclean: logdata-clean
+	rm -f tmp/log-data.tar.gz
+
+.PHONY: logdata-restore
+logdata-restore: logdata-clean logdata
+
+.PHONY: logdata-update
+logdata-update: logdata-distclean logdata
+
+_logdata: tmp/log-data.tar.gz
+	rm -rf $@
+	mkdir -p $@
+	tar xz --strip-components=1 --exclude=.github -f tmp/log-data.tar.gz -C $@
+
+tmp/log-data.tar.gz:
+	mkdir -p tmp
+	curl -Lo $@ https://github.com/vim-jp/slacklog/archive/log-data.tar.gz
