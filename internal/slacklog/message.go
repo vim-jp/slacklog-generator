@@ -508,7 +508,7 @@ type MessageAttachment struct {
 	FooterIcon      string   `json:"footer_icon,omitempty"`
 	IsMsgUnfurl     bool     `json:"is_msg_unfurl,omitempty"`
 	MrkdwnIn        []string `json:"mrkdwn_in,omitempty"`
-	Ts              string   `json:"ts,omitempty"`
+	Ts              *Ts      `json:"ts,omitempty"`
 }
 
 type MessageReaction struct {
