@@ -1,7 +1,20 @@
-_site: slacklog_data $(wildcard scripts/**) $(wildcard templates/**)
+.PHONY: generate
+generate: _site
+
+_site: _logdata $(wildcard scripts/**) $(wildcard templates/**)
 	./scripts/generate_html.sh
 	./scripts/build.sh
 	touch -c _site
+
+.PHONY: clean
+clean: go-clean
+	rm -rf _site
+
+.PHONY: distclean
+distclean: clean logdata-distclean
+
+##############################################################################
+## Go
 
 .PHONY: build
 build:
@@ -19,15 +32,9 @@ vet:
 lint:
 	golint . ./internal/... ./subcmd/...
 
-slacklog_data:
-	curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
-
-.PHONY: clean
-clean:
-	rm -rf _site
-
-.PHONY: distclean
-distclean: clean logdata-clean
+.PHONY: go-clean
+go-clean:
+	go clean
 
 ##############################################################################
 # manage logdata
