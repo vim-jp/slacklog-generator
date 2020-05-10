@@ -39,7 +39,7 @@ jobs:
           path: files.txt
 
       - name: 'Update https://vim-jp.org/slacklog/'
-        if: github.ref == 'master'
+        if: github.ref == 'refs/heads/master'
         run: |
           git checkout --orphan=gh-pages --quiet
           git add --all --force
