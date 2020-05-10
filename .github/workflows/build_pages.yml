@@ -41,6 +41,7 @@ jobs:
       - name: 'Update https://vim-jp.org/slacklog/'
         if: github.ref == 'refs/heads/master'
         run: |
+          cd data
           git checkout --orphan=gh-pages --quiet
           git add --all --force
           git config user.email "slacklog@vim-jp.org"
