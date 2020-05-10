@@ -454,26 +454,6 @@ func (f *MessageFile) DownloadFilename(url, suffix string) string {
 	return filenameReplacer.Replace(name + suffix + ext)
 }
 
-// 'text/plain' な添付ファイルをHTMLに埋め込む
-// 存在しない場合、エラーを表示する
-func (f *MessageFile) CodeHTML() (string, error) {
-	suffix := f.DownloadURLsAndSuffixes()[f.URLPrivate]
-	path := "files/" + f.ID + "/" + f.DownloadFilename(f.URLPrivate, suffix)
-	_, err := os.Stat(path)
-	if err != nil {
-		return "ファイルが存在しません", err
-	}
-	src, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "ファイルが読み取れません", err
-	}
-	ftype := f.Filetype
-	if f.Filetype == "text" {
-		ftype = "none"
-	}
-	return "<code class='language-" + ftype + "'>" + string(src) + "</code>", nil
-}
-
 type MessageIcons struct {
 	Image48 string `json:"image_48"`
 }

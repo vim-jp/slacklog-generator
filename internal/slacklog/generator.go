@@ -3,6 +3,7 @@ package slacklog
 import (
 	"fmt"
 	"html"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,6 +17,8 @@ import (
 type HTMLGenerator struct {
 	// text/template形式のテンプレートが置いてあるディレクトリ
 	templateDir string
+	// files がおいてあるディレクトリ
+	filesDir string
 	// ログデータを取得するためのLogStore
 	s *LogStore
 	// markdown形式のテキストを変換するためのTextConverter
@@ -27,13 +30,14 @@ type HTMLGenerator struct {
 }
 
 // NewHTMLGenerator : HTMLGeneratorを生成する。
-func NewHTMLGenerator(templateDir string, s *LogStore) *HTMLGenerator {
+func NewHTMLGenerator(templateDir string, filesDir string, s *LogStore) *HTMLGenerator {
 	users := s.GetDisplayNameMap()
 	emojis := s.GetEmojiMap()
 	c := NewTextConverter(users, emojis)
 
 	return &HTMLGenerator{
 		templateDir: templateDir,
+		filesDir:    filesDir,
 		s:           s,
 		c:           c,
 		baseURL:     os.Getenv("BASEURL"),
@@ -220,6 +224,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			},
 			"text":           g.generateMessageText,
 			"attachmentText": g.generateAttachmentText,
+			"fileHTML":       g.generateFileHTML,
 			"threadMtime": func(ts string) string {
 				if t, ok := g.s.GetThread(channel.ID, ts); ok {
 					return LevelOfDetailTime(t.LastReplyTime(), TsToDateTime(ts))
@@ -281,6 +286,25 @@ func (g *HTMLGenerator) generateMessageText(msg Message) string {
 
 func (g *HTMLGenerator) generateAttachmentText(attachment MessageAttachment) string {
 	return g.c.ToHTML(attachment.Text)
+}
+
+// generateFileHTML : 'text/plain' な添付ファイルをHTMLに埋め込む
+// 存在しない場合、エラーを表示する
+func (g *HTMLGenerator) generateFileHTML(file *MessageFile) string {
+	suffix := file.DownloadURLsAndSuffixes()[file.URLPrivate]
+	path := g.filesDir + "/" + file.ID + "/" + file.DownloadFilename(file.URLPrivate, suffix)
+	src, err := ioutil.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Sprintf(`<span class="file-error">no files found: %s</span>`, err)
+		}
+		return fmt.Sprintf(`<span class="file-error">failed to read a file: %s</span>`, err)
+	}
+	ftype := file.Filetype
+	if file.Filetype == "text" {
+		ftype = "none"
+	}
+	return "<code class='language-" + ftype + "'>" + string(src) + "</code>"
 }
 
 // executeAndWrite executes a template and writes contents to a file.
