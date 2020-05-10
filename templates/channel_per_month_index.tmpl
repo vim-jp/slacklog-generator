@@ -150,6 +150,7 @@
               <div class="mt-2 border p-3">
                 {{- range .Files }}
                 <div>
+                  {{- if .IsSlackHosted }}
                   <a href="{{ $.baseURL }}/files/{{ .OriginalFilePath }}">
                   {{- if eq .TopLevelMimetype "image" }}
                   <img src="{{ $.baseURL }}/files/{{ .ThumbImagePath }}" width="{{ .ThumbImageWidth }}" height="{{ .ThumbImageHeight }}" alt="{{ .Title }}" />
@@ -160,6 +161,10 @@
                   <span class="f5">[[ダウンロード: {{ .Title }}({{ .PrettyType }})]]</span>
                   {{- end }}
                   </a>
+                  {{- else }}
+                  {{- /* TODO: 外部ページへのリンクだということがわかりやすい表示にする */ -}}
+                  <a href="{{ .URLPrivate }}">{{ .Title }}</a>
+                  {{- end }}
                 </div>
                 {{- end }}
               </div>

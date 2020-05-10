@@ -363,6 +363,12 @@ type MessageFile struct {
 	HasRichPreview     bool   `json:"has_rich_preview"`
 }
 
+// IsSlackHosted は、ファイルが slack.com にホストされている場合に true を返します。
+// MessageFile のファイルは slack.com にアップロードされていない場合があります。
+func (f *MessageFile) IsSlackHosted() bool {
+	return strings.HasPrefix(f.URLPrivate, "https://files.slack.com/")
+}
+
 func (f *MessageFile) TopLevelMimetype() string {
 	i := strings.Index(f.Mimetype, "/")
 	if i < 0 {
