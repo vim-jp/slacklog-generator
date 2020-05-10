@@ -6,11 +6,14 @@
 <title>vim-jp &raquo; vim-jp.slack.com log - &#35{{ .channel.Name }} - {{ .monthKey.Year }}年{{ .monthKey.Month }}月</title>
 <link rel="stylesheet" href="{{ $.baseURL }}/assets/css/site.css" type="text/css" />
 <link rel="stylesheet" href="https://unpkg.com/@primer/css/dist/primer.css" type="text/css" />
+<link rel="stylesheet" href="https://unpkg.com/prismjs@1.20.0/themes/prism-tomorrow.css" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="RSS" href="//vim-jp.org/rss.xml" />
 <link rel="canonical" href="{{ $.baseURL }}/{{ .channel.ID }}/{{ .monthKey.Year }}/{{ .monthKey.Month }}/" />
 <link rel="shortcut icon" type="image/x-icon" href="/assets/images/favicon.ico" />
 <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://unpkg.com/prismjs@1.20.0/components/prism-core.min.js"></script>
+<script src="https://unpkg.com/prismjs@1.20.0/plugins/autoloader/prism-autoloader.min.js"></script>
 <script src="{{ $.baseURL }}/assets/javascripts/slacklog.js"></script>
 </head>
 <body>
