@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -51,9 +52,17 @@ func NewDownloader(token string) *Downloader {
 
 	cli := &http.Client{Transport: t}
 	// 無効なSlack API tokenを食わせても、リダイレクトされ、200が返ってきてエラー
-	// かどうか判別できないためリダイレクトをしないように制御しておく
+	// かどうか判別できない。
+	// 一方で、なぜか .svg ファイルのダウンロード時にはリダイレクトが発生する。
+	// リダイレクト先の URL を見て雰囲気で認証ページに行ってそうだったらエラーにする
 	cli.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
+		_, redirEixsts := req.URL.Query()["redir"]
+		if strings.HasSuffix(req.URL.Host, ".slack.com") &&
+			req.URL.Path == "/" &&
+			redirEixsts {
+			return http.ErrUseLastResponse
+		}
+		return nil
 	}
 
 	d := &Downloader{
