@@ -24,7 +24,7 @@ jobs:
       - name: 'Generate htdocs'
         run: |
           cd generator
-          BASEURL=/slacklog go run . generate-html scripts/config.json templates/ ../data/slacklog_data/ ../data/
+          BASEURL=/slacklog go run . generate-html scripts/config.json templates/ ../data/files ../data/slacklog_data/ ../data/
           cp -r assets ../data
           rm -fr ../data/slacklog_data/ ../data/.github/
           touch ../data/.nojekyll

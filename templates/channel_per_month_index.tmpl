@@ -161,6 +161,9 @@
                   <span class="f5">[[ダウンロード: {{ .Title }}({{ .PrettyType }})]]</span>
                   {{- end }}
                   </a>
+                  {{- if eq .Mimetype "text/plain" }}
+                  <pre>{{ fileHTML . }}</pre>
+                  {{- end }}
                   {{- else }}
                   {{- /* TODO: 外部ページへのリンクだということがわかりやすい表示にする */ -}}
                   <a href="{{ .URLPrivate }}">{{ .Title }}</a>
