@@ -51,9 +51,9 @@ generate_site() {
   if [ -d _logdata ] ; then
     filesdir=_logdata/files/
   fi
-  ${cmd} generate-html scripts/config.json ${tmpldir} ${filesdir} ${logdir} ${outdir}/ > ${outdir}.generate-html.log 2>&1
+  ${cmd} generate-html scripts/config.json ${tmpldir} ${filesdir} ${logdir} ${outdir}/ > ${outdir}.generate-html.log 2>&1 || ( cat ${outdir}.generate-html.log && exit 1 )
   rm -f ${cmd}
-  ./scripts/build.sh -o $outdir > ${outdir}.build.log 2>&1
+  ./scripts/build.sh -o $outdir > ${outdir}.build.log 2>&1 || ( cat ${outdir}.build.log && exit 1 )
 }
 
 if [ $clean -ne 0 ] ; then
@@ -101,5 +101,8 @@ if [ x"$outdiff" = x ] ; then
   echo "" 1>&2
   diff -uNr -x sitemap.xml ${base_pages} ${current_pages} || true
 else
-  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} > "$outdiff" || true
+  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} > "$outdiff" || (
+    echo "" 1>&2
+    echo "have some diff, please check $outdiff" 1>&2
+  )
 fi
