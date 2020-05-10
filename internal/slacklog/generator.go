@@ -29,6 +29,10 @@ type HTMLGenerator struct {
 	baseURL string
 }
 
+// MAX_EMBEDDED_FILE_SIZE : 添付ファイルの埋め込みを行うファイルサイズ
+// これ以下の場合、表示されるようになる
+const MAX_EMBEDDED_FILE_SIZE = 100000
+
 // NewHTMLGenerator : HTMLGeneratorを生成する。
 func NewHTMLGenerator(templateDir string, filesDir string, s *LogStore) *HTMLGenerator {
 	users := s.GetDisplayNameMap()
@@ -291,6 +295,9 @@ func (g *HTMLGenerator) generateAttachmentText(attachment MessageAttachment) str
 // generateFileHTML : 'text/plain' な添付ファイルをHTMLに埋め込む
 // 存在しない場合、エラーを表示する
 func (g *HTMLGenerator) generateFileHTML(file *MessageFile) string {
+	if file.Size > MAX_EMBEDDED_FILE_SIZE {
+		return `<span class="file-error">ファイルサイズが大きいため、展開しません</span>`
+	}
 	suffix := file.DownloadURLsAndSuffixes()[file.URLPrivate]
 	path := filepath.Join(g.filesDir, file.ID, file.DownloadFilename(file.URLPrivate, suffix))
 	src, err := ioutil.ReadFile(path)
