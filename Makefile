@@ -22,15 +22,15 @@ build:
 
 .PHONY: test
 test:
-	go test . ./internal/... ./subcmd/...
+	go test ./...
 
 .PHONY: vet
 vet:
-	go vet . ./internal/... ./subcmd/...
+	go vet ./...
 
 .PHONY: lint
 lint:
-	golint . ./internal/... ./subcmd/...
+	golint ./...
 
 .PHONY: go-clean
 go-clean:
@@ -44,7 +44,7 @@ logdata: _logdata
 
 .PHONY: logdata-clean
 logdata-clean:
-	rm -rf logdata
+	rm -rf _logdata
 
 .PHONY: logdata-distclean
 logdata-distclean: logdata-clean
