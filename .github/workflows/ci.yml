@@ -51,7 +51,7 @@ jobs:
 
     - name: 'Compare site'
       run: |
-        ./scripts/site_diff.sh -d -o tmp/site.diff
+        ./scripts/site_diff.sh -o tmp/site.diff
 
     - uses: actions/upload-artifact@v2
       with:
