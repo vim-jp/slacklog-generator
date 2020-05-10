@@ -116,9 +116,11 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 	// assort messages, visible and threaded.
 	var visibleMsgs Messages
 	for _, msg := range msgs {
-		if !readAllMessages && !msg.IsVisible() {
+		if !readAllMessages && !msg.isVisible() {
 			continue
 		}
+
+		// スレッドに所属してるメッセージは ThreadMap へスレッド毎に分別しておく
 		threadTs := msg.ThreadTs
 		if threadTs != "" {
 			thread, ok := m.ThreadMap[threadTs]
@@ -129,11 +131,7 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 			thread.Put(msg)
 		}
 
-		if !readAllMessages &&
-			threadTs != "" && !msg.IsRootOfThread() &&
-			msg.Subtype != "thread_broadcast" &&
-			msg.Subtype != "bot_message" &&
-			msg.Subtype != "slackbot_response" {
+		if !readAllMessages && msg.isThreadChild() {
 			continue
 		}
 
@@ -263,9 +261,9 @@ type Message struct {
 	Trail bool `json:"-"`
 }
 
-// IsVisible : 表示すべきメッセージ種別かを判定する。
+// isVisible : 表示すべきメッセージ種別かを判定する。
 // 例えばchannel_joinなどは投稿された出力する必要がないため、falseを返す。
-func (m Message) IsVisible() bool {
+func (m *Message) isVisible() bool {
 	return m.Subtype == "" ||
 		m.Subtype == "bot_message" ||
 		m.Subtype == "slackbot_response" ||
@@ -275,6 +273,11 @@ func (m Message) IsVisible() bool {
 // IsRootOfThread : メッセージがスレッドの最初のメッセージであるかを判定する。
 func (m Message) IsRootOfThread() bool {
 	return m.Ts == m.ThreadTs
+}
+
+// isThreadChild returns true when a message should be shown in a thread only.
+func (m *Message) isThreadChild() bool {
+	return m.ThreadTs != "" && m.Ts != m.ThreadTs && m.Subtype != "thread_broadcast"
 }
 
 var reToken = regexp.MustCompile(`\?t=xoxe-[-a-f0-9]+$`)
