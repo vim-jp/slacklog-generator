@@ -17,6 +17,8 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
+// ConvertExportedLogs converts log which exported from Slack, to generator can
+// treated.
 func ConvertExportedLogs(args []string) error {
 	if len(args) < 2 {
 		fmt.Println("Usage: go run . convert_exported_logs {indir} {outdir}")
@@ -92,9 +94,9 @@ func copyFile(from string, to string) error {
 	return err
 }
 
-func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Channel, map[string]*slacklog.Channel, error) {
+func readChannels(channelJSONPath string, cfgChannels []string) ([]slacklog.Channel, map[string]*slacklog.Channel, error) {
 	var channels []slacklog.Channel
-	err := slacklog.ReadFileAsJSON(channelsJsonPath, &channels)
+	err := slacklog.ReadFileAsJSON(channelJSONPath, &channels)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -108,6 +110,7 @@ func readChannels(channelsJsonPath string, cfgChannels []string) ([]slacklog.Cha
 	return channels, channelMap, err
 }
 
+// ReadAllMessages reads all message files in the directory.
 func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 	dir, err := os.Open(inDir)
 	if err != nil {

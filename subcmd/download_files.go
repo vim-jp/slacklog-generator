@@ -15,6 +15,7 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
+// DownloadFiles downloads and saves files which attached to message.
 func DownloadFiles(args []string) error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {

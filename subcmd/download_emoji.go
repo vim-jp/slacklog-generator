@@ -18,6 +18,7 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
+// DownloadEmoji downloads and save emoji image files.
 func DownloadEmoji(args []string) error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {

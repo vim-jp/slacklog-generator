@@ -86,7 +86,7 @@ type UserProfile struct {
 	// added for https://github.com/vim-jp/slacklog-generator/issues/69
 	// 「unknown な JSON のフィールドがあったらエラーにする」
 	AlwaysActive  bool   `json:"always_active"`
-	ApiAppID      string `json:"api_app_id"`
+	APIAppID      string `json:"api_app_id"`
 	Image1024     string `json:"image_1024"`
 	ImageOriginal string `json:"image_original"`
 	IsCustomImage bool   `json:"is_custom_image"`

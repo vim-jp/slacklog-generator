@@ -66,6 +66,7 @@ func SortChannel(channels []Channel) {
 	})
 }
 
+// Channel represents channel object in Slack.
 type Channel struct {
 	ID         string         `json:"id"`
 	Name       string         `json:"name"`
@@ -79,6 +80,7 @@ type Channel struct {
 	Purpose    ChannelPurpose `json:"purpose"`
 }
 
+// ChannelPin represents a pinned message for a channel.
 type ChannelPin struct {
 	ID      string `json:"id"`
 	Typ     string `json:"type"`
@@ -87,12 +89,14 @@ type ChannelPin struct {
 	Owner   string `json:"owner"`
 }
 
+// ChannelTopic represents topic of a channel.
 type ChannelTopic struct {
 	Value   string `json:"value"`
 	Creator string `json:"creator"`
 	LastSet int64  `json:"last_set"`
 }
 
+// ChannelPurpose represents puropse of a channel.
 type ChannelPurpose struct {
 	Value   string `json:"value"`
 	Creator string `json:"creator"`
