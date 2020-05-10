@@ -14,7 +14,7 @@ clean: go-clean
 distclean: clean logdata-distclean
 
 ##############################################################################
-## Go
+# Go
 
 .PHONY: build
 build:
