@@ -206,25 +206,24 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 				return strings.Replace(ts, ".", "", 1)
 			},
 			"username": func(msg *Message) string {
-				if msg.Subtype == "bot_message" || msg.Subtype == "slackbot_response" {
+				if msg.isBotMessage() {
 					return g.c.escapeSpecialChars(msg.Username)
 				}
 				return g.c.escapeSpecialChars(g.s.GetDisplayNameByUserID(msg.User))
 			},
 			"userIconUrl": func(msg *Message) string {
-				switch msg.Subtype {
-				case "", "thread_broadcast":
-					user, ok := g.s.GetUserByID(msg.User)
-					if !ok {
-						return "" // TODO show default icon
-					}
-					return user.Profile.Image48
-				case "bot_message", "slackbot_response":
+				userID := msg.User
+				if msg.isBotMessage() {
 					if msg.Icons != nil && msg.Icons.Image48 != "" {
 						return msg.Icons.Image48
 					}
+					userID = msg.BotID
 				}
-				return ""
+				user, ok := g.s.GetUserByID(userID)
+				if !ok {
+					return "" // TODO show default icon
+				}
+				return user.Profile.Image48
 			},
 			"text":           g.generateMessageText,
 			"attachmentText": g.generateAttachmentText,

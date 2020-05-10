@@ -270,6 +270,12 @@ func (m *Message) isVisible() bool {
 		m.Subtype == "thread_broadcast"
 }
 
+// isBotMessage : メッセージがBotからの物かを判定する。
+func (m *Message) isBotMessage() bool {
+	return m.Subtype == "bot_message" ||
+		m.Subtype == "slackbot_response"
+}
+
 // IsRootOfThread : メッセージがスレッドの最初のメッセージであるかを判定する。
 func (m Message) IsRootOfThread() bool {
 	return m.Ts == m.ThreadTs
