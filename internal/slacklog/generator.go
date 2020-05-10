@@ -292,7 +292,7 @@ func (g *HTMLGenerator) generateAttachmentText(attachment MessageAttachment) str
 // 存在しない場合、エラーを表示する
 func (g *HTMLGenerator) generateFileHTML(file *MessageFile) string {
 	suffix := file.DownloadURLsAndSuffixes()[file.URLPrivate]
-	path := g.filesDir + "/" + file.ID + "/" + file.DownloadFilename(file.URLPrivate, suffix)
+	path := filepath.Join(g.filesDir, file.ID, file.DownloadFilename(file.URLPrivate, suffix))
 	src, err := ioutil.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
