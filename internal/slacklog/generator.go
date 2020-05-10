@@ -29,9 +29,9 @@ type HTMLGenerator struct {
 	baseURL string
 }
 
-// MAX_EMBEDDED_FILE_SIZE : 添付ファイルの埋め込みを行うファイルサイズ
+// maxEmbeddedFileSize : 添付ファイルの埋め込みを行うファイルサイズ
 // これ以下の場合、表示されるようになる
-const MAX_EMBEDDED_FILE_SIZE = 100000
+const maxEmbeddedFileSize = 102400
 
 // NewHTMLGenerator : HTMLGeneratorを生成する。
 func NewHTMLGenerator(templateDir string, filesDir string, s *LogStore) *HTMLGenerator {
@@ -295,8 +295,8 @@ func (g *HTMLGenerator) generateAttachmentText(attachment MessageAttachment) str
 // generateFileHTML : 'text/plain' な添付ファイルをHTMLに埋め込む
 // 存在しない場合、エラーを表示する
 func (g *HTMLGenerator) generateFileHTML(file *MessageFile) string {
-	if file.Size > MAX_EMBEDDED_FILE_SIZE {
-		return `<span class="file-error">ファイルサイズが大きいため、展開しません</span>`
+	if file.Size > maxEmbeddedFileSize {
+		return `<span class="file-error">file size is too big to embed. please download from above link to see.</span>`
 	}
 	suffix := file.DownloadURLsAndSuffixes()[file.URLPrivate]
 	path := filepath.Join(g.filesDir, file.ID, file.DownloadFilename(file.URLPrivate, suffix))
