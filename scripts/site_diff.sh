@@ -99,9 +99,9 @@ fi
 # 差分を出力
 if [ x"$outdiff" = x ] ; then
   echo "" 1>&2
-  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} || true
+  diff -uNrw -x sitemap.xml ${base_pages} ${current_pages} || true
 else
-  diff -uNr -x sitemap.xml ${base_pages} ${current_pages} > "$outdiff" || (
+  diff -uNrw -x sitemap.xml ${base_pages} ${current_pages} > "$outdiff" || (
     echo "" 1>&2
     echo "have some diff, please check $outdiff" 1>&2
   )
