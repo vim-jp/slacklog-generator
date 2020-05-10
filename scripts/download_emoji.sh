@@ -4,4 +4,9 @@ set -eu
 
 cd "$(dirname "$0")/.." || exit "$?"
 
-go run . download-emoji emojis/ slacklog_data/emoji.json
+if  [ ! -d _logdata/slacklog_data/ ] ; then
+  echo "one of input missing. please make assure _logdata/slacklog_data/ directory"
+  exit 1
+fi
+
+go run . download-emoji _logdata/emojis/ _logdata/slacklog_data/emoji.json

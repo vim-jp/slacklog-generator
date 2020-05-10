@@ -35,7 +35,7 @@ vim-jp Slack への参加方法はこちらをどうぞ。<br>
 ログを展開
 
 ```console
-curl -Ls https://github.com/vim-jp/slacklog/archive/log-data.tar.gz | tar xz --strip-components=1 --exclude=.github
+$ make logdata
 ```
 
 HTMLの生成

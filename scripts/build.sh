@@ -15,9 +15,9 @@ mkdir -p ${outdir}
 cp -a assets ${outdir}
 
 for d in emojis files ; do
-  if [ -d _logdata/${d} ] ; then
-    cp -a _logdata/${d} ${outdir}
-  else
-    cp -a ${d} ${outdir}
+  if [ ! -d _logdata/${d} ] ; then
+    echo "one of input missing. please run 'make logdata' and retry"
+    exit 1
   fi
+  cp -a _logdata/${d} ${outdir}
 done

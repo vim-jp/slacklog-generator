@@ -2,30 +2,45 @@ name: 'Trigger Rebuild Pages'
 on:
   push:
     branches:
-      - master
+      - '**'
 
 jobs:
   build-pages:
-    name: 'Trigger Rebuild Pages'
+    name: 'Generate htdocs and Update https://vim-jp.org/slacklog/'
     runs-on: 'ubuntu-latest'
+
     steps:
       - uses: 'actions/checkout@v2'
         with:
           path: 'generator'
+
       - uses: 'actions/checkout@v2'
         with:
           repository: 'vim-jp/slacklog'
           path: 'data'
           ref: 'log-data'
           ssh-key: '${{ secrets.SLACKLOG_SSH_KEY }}'
-      - name: 'Trigger'
+
+      - name: 'Generate htdocs'
         run: |
           cd generator
           BASEURL=/slacklog go run . generate-html scripts/config.json templates/ ../data/slacklog_data/ ../data/
           cp -r assets ../data
+          rm -fr ../data/slacklog_data/ ../data/.github/
+          touch ../data/.nojekyll
+          # create finger print
           cd ../data
-          rm -fr slacklog_data/ .github/
-          touch .nojekyll
+          find . -type d -name '.git' -prune -o -type f -print0 | xargs -0 md5sum > ../files.txt
+
+      - name: 'Save fingerprint'
+        uses: actions/upload-artifact@v2
+        with:
+          name: fingerprint
+          path: files.txt
+
+      - name: 'Update https://vim-jp.org/slacklog/'
+        if: github.ref == 'master'
+        run: |
           git checkout --orphan=gh-pages --quiet
           git add --all --force
           git config user.email "slacklog@vim-jp.org"
