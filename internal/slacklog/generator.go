@@ -1,6 +1,7 @@
 package slacklog
 
 import (
+	"errors"
 	"fmt"
 	"html"
 	"io/ioutil"
@@ -191,9 +192,8 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 
 	// TODO check below subtypes work correctly
 	// TODO support more subtypes
-	tmplPath := filepath.Join(g.templateDir, "channel_per_month_index.tmpl")
-	name := filepath.Base(tmplPath)
-	t, err := template.New(name).
+
+	t, err := template.New("").
 		Funcs(map[string]interface{}{
 			"visible": g.isVisibleMessage,
 			"datetime": func(ts string) string {
@@ -264,11 +264,16 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"hasNextMonth": func(key MessageMonthKey) bool {
 				return g.s.HasNextMonth(channel.ID, key)
 			},
-		}).ParseFiles(tmplPath)
+		}).
+		ParseGlob(filepath.Join(g.templateDir, "channel_per_month", "*.tmpl"))
 	if err != nil {
 		return err
 	}
-	err = executeAndWrite(t, params, filepath.Join(path, "index.html"))
+	tmpl := t.Lookup("index.tmpl")
+	if tmpl == nil {
+		return errors.New("no index.tmpl in channel_per_month/ dir")
+	}
+	err = executeAndWrite(tmpl, params, filepath.Join(path, "index.html"))
 	if err != nil {
 		return err
 	}
