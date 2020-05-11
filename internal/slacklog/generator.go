@@ -212,11 +212,11 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 				return g.c.escapeSpecialChars(g.s.GetDisplayNameByUserID(msg.User))
 			},
 			"userIconUrl": func(msg *Message) string {
+				if msg.Icons != nil && msg.Icons.Image48 != "" {
+					return msg.Icons.Image48
+				}
 				userID := msg.User
 				if msg.isBotMessage() {
-					if msg.Icons != nil && msg.Icons.Image48 != "" {
-						return msg.Icons.Image48
-					}
 					userID = msg.BotID
 				}
 				user, ok := g.s.GetUserByID(userID)
