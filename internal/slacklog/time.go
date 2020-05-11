@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// TsToDateTime converts Ts string to time.Time.
 func TsToDateTime(ts string) time.Time {
 	t := strings.Split(ts, ".")
 	if len(t) != 2 {

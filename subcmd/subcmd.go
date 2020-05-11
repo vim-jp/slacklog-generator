@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Run runs one of sub-commands.
 func Run() error {
 	fmt.Println(os.Args)
 	if len(os.Args) < 2 {

@@ -12,18 +12,22 @@ type Thread struct {
 	replies Messages
 }
 
+// LastReplyTime returns last replied time for the thread.
 func (th Thread) LastReplyTime() time.Time {
 	return TsToDateTime(th.replies[len(th.replies)-1].Ts)
 }
 
+// ReplyCount return counts of replied messages.
 func (th Thread) ReplyCount() int {
 	return len(th.replies)
 }
 
+// RootText returns text of root message of the thread.
 func (th Thread) RootText() string {
 	return th.rootMsg.Text
 }
 
+// Replies returns replied messages for the thread.
 func (th Thread) Replies() Messages {
 	return th.replies
 }

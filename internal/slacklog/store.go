@@ -53,10 +53,12 @@ func NewLogStore(dirPath string, cfg *Config) (*LogStore, error) {
 	}, nil
 }
 
+// GetChannels gets all stored channgels.
 func (s *LogStore) GetChannels() []Channel {
 	return s.ct.Channels
 }
 
+// HasNextMonth returns a channel has next key or not.
 func (s *LogStore) HasNextMonth(channelID string, key MessageMonthKey) bool {
 	if mt, ok := s.mts[channelID]; ok && mt != nil {
 		_, ok := mt.MsgsMap[key.Next()]
@@ -65,6 +67,7 @@ func (s *LogStore) HasNextMonth(channelID string, key MessageMonthKey) bool {
 	return false
 }
 
+// HasPrevMonth returns a channel has previous logs or not.
 func (s *LogStore) HasPrevMonth(channelID string, key MessageMonthKey) bool {
 	if mt, ok := s.mts[channelID]; ok && mt != nil {
 		_, ok := mt.MsgsMap[key.Prev()]
@@ -73,6 +76,8 @@ func (s *LogStore) HasPrevMonth(channelID string, key MessageMonthKey) bool {
 	return false
 }
 
+// GetMessagesPerMonth gets a messages map for the channel.
+// Messages map have all message split in per month.
 func (s *LogStore) GetMessagesPerMonth(channelID string) (MessagesMap, error) {
 	mt, ok := s.mts[channelID]
 	if !ok {
@@ -85,6 +90,7 @@ func (s *LogStore) GetMessagesPerMonth(channelID string) (MessagesMap, error) {
 	return mt.MsgsMap, nil
 }
 
+// GetAllMessages returns all messages as array.
 func (s *LogStore) GetAllMessages(channelID string) (Messages, error) {
 	mt, ok := s.mts[channelID]
 	if !ok {
@@ -101,11 +107,14 @@ func (s *LogStore) GetAllMessages(channelID string) (Messages, error) {
 	return allMsgs, nil
 }
 
+// GetUserByID gets a user by (user) ID.
+// Sometimes by bot ID.
 func (s *LogStore) GetUserByID(userID string) (*User, bool) {
 	u, ok := s.ut.UserMap[userID]
 	return u, ok
 }
 
+// GetDisplayNameByUserID gets display name for the user.
 func (s *LogStore) GetDisplayNameByUserID(userID string) string {
 	if user, ok := s.ut.UserMap[userID]; ok {
 		if user.Profile.RealName != "" {
@@ -118,6 +127,7 @@ func (s *LogStore) GetDisplayNameByUserID(userID string) string {
 	return ""
 }
 
+// GetDisplayNameMap gets a map from user ID to user's display name.
 func (s *LogStore) GetDisplayNameMap() map[string]string {
 	ret := make(map[string]string, len(s.ut.UserMap))
 	for id, u := range s.ut.UserMap {
@@ -126,10 +136,12 @@ func (s *LogStore) GetDisplayNameMap() map[string]string {
 	return ret
 }
 
+// GetEmojiMap gets a map from emoji name to its file extension (image type).
 func (s *LogStore) GetEmojiMap() map[string]string {
 	return s.et.NameToExt
 }
 
+// GetThread gets a thread (chain of messages) by channel ID and Ts (thread root's Ts).
 func (s *LogStore) GetThread(channelID, ts string) (*Thread, bool) {
 	mt, ok := s.mts[channelID]
 	if !ok {

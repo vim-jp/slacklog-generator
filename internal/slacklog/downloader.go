@@ -30,6 +30,7 @@ type Downloader struct {
 
 var downloadWorkerNum = 8
 
+// NewDownloader creates a downloader for Slack with the token.
 func NewDownloader(token string) *Downloader {
 	// http.DefaultTransportの値からMaxConnsPerHostのみ修正
 	t := &http.Transport{

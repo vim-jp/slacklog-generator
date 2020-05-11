@@ -97,9 +97,9 @@ func (c *TextConverter) bindUser(userExp string) string {
 
 func (c *TextConverter) bindChannel(channelExp string) string {
 	matchResult := c.re.channel.FindStringSubmatch(channelExp)
-	channelId := matchResult[1]
+	channelID := matchResult[1]
 	channelName := matchResult[2]
-	return "<a href='" + c.baseURL + "/" + channelId + "/'>#" + channelName + "</a>"
+	return "<a href='" + c.baseURL + "/" + channelID + "/'>#" + channelName + "</a>"
 }
 
 // ToHTML : markdown形式のtextをHTMLに変換する

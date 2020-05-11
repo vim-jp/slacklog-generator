@@ -163,11 +163,14 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 	return nil
 }
 
+// MessageMonthKey is a key for messages.
 type MessageMonthKey struct {
 	year  int
 	month int
 }
 
+// NewMessageMonthKey creates MessageMonthKey key from two strings: which
+// represents year and month.
 func NewMessageMonthKey(year, month string) (MessageMonthKey, error) {
 	y, err := strconv.Atoi(year)
 	if err != nil {
@@ -180,6 +183,7 @@ func NewMessageMonthKey(year, month string) (MessageMonthKey, error) {
 	return MessageMonthKey{year: y, month: m}, nil
 }
 
+// Next gets a key for next month.
 func (k MessageMonthKey) Next() MessageMonthKey {
 	if k.month >= 12 {
 		return MessageMonthKey{year: k.year + 1, month: 1}
@@ -187,6 +191,7 @@ func (k MessageMonthKey) Next() MessageMonthKey {
 	return MessageMonthKey{year: k.year, month: k.month + 1}
 }
 
+// Prev gets a key for previous month.
 func (k MessageMonthKey) Prev() MessageMonthKey {
 	if k.month <= 1 {
 		return MessageMonthKey{year: k.year - 1, month: 12}
@@ -194,14 +199,17 @@ func (k MessageMonthKey) Prev() MessageMonthKey {
 	return MessageMonthKey{year: k.year, month: k.month - 1}
 }
 
+// Year returns string represents year.
 func (k MessageMonthKey) Year() string {
 	return fmt.Sprintf("%4d", k.year)
 }
 
+// Month returns string represents month.
 func (k MessageMonthKey) Month() string {
 	return fmt.Sprintf("%02d", k.month)
 }
 
+// NextYear returns a string for next year.
 func (k MessageMonthKey) NextYear() string {
 	if k.month >= 12 {
 		return fmt.Sprintf("%4d", k.year+1)
@@ -209,6 +217,7 @@ func (k MessageMonthKey) NextYear() string {
 	return fmt.Sprintf("%4d", k.year)
 }
 
+// NextMonth returns a string for next month.
 func (k MessageMonthKey) NextMonth() string {
 	if k.month >= 12 {
 		return "01"
@@ -216,6 +225,7 @@ func (k MessageMonthKey) NextMonth() string {
 	return fmt.Sprintf("%02d", k.month+1)
 }
 
+// PrevYear returns a string for previous year.
 func (k MessageMonthKey) PrevYear() string {
 	if k.month <= 1 {
 		return fmt.Sprintf("%4d", k.year-1)
@@ -223,6 +233,7 @@ func (k MessageMonthKey) PrevYear() string {
 	return fmt.Sprintf("%4d", k.year)
 }
 
+// PrevMonth returns a string for previous month.
 func (k MessageMonthKey) PrevMonth() string {
 	if k.month <= 1 {
 		return "12"
@@ -286,6 +297,7 @@ func removeToken(s string) string {
 	return reToken.ReplaceAllLiteralString(s, "")
 }
 
+// RemoveTokenFromURLs removes the token from URLs in a message.
 func (m *Message) RemoveTokenFromURLs() {
 	for i, f := range m.Files {
 		f.URLPrivate = removeToken(f.URLPrivate)
@@ -326,7 +338,7 @@ type MessageFile struct {
 	IsExternal         bool   `json:"is_external"`
 	ExternalType       string `json:"external_type"`
 	IsPublic           bool   `json:"is_public"`
-	PublicUrlShared    bool   `json:"public_url_shared"`
+	PublicURLShared    bool   `json:"public_url_shared"`
 	DisplayAsBot       bool   `json:"display_as_bot"`
 	Username           string `json:"username"`
 	URLPrivate         string `json:"url_private"`
@@ -372,6 +384,7 @@ func (f *MessageFile) IsSlackHosted() bool {
 	return strings.HasPrefix(f.URLPrivate, "https://files.slack.com/")
 }
 
+// TopLevelMimetype returns top level of mimetype string.
 func (f *MessageFile) TopLevelMimetype() string {
 	i := strings.Index(f.Mimetype, "/")
 	if i < 0 {
@@ -380,11 +393,13 @@ func (f *MessageFile) TopLevelMimetype() string {
 	return f.Mimetype[:i]
 }
 
+// OriginalFilePath returns path of file on local.
 func (f *MessageFile) OriginalFilePath() string {
 	suffix := f.DownloadURLsAndSuffixes()[f.URLPrivate]
 	return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.URLPrivate, suffix))
 }
 
+// ThumbImagePath returns path of thumbnail image file.
 func (f *MessageFile) ThumbImagePath() string {
 	if f.Thumb1024 != "" {
 		suffix := f.DownloadURLsAndSuffixes()[f.Thumb1024]
@@ -393,6 +408,7 @@ func (f *MessageFile) ThumbImagePath() string {
 	return f.OriginalFilePath()
 }
 
+// ThumbImageWidth returns width of thumbnail image.
 func (f *MessageFile) ThumbImageWidth() int64 {
 	if f.Thumb1024 != "" {
 		return f.Thumb1024W
@@ -400,6 +416,7 @@ func (f *MessageFile) ThumbImageWidth() int64 {
 	return f.OriginalW
 }
 
+// ThumbImageHeight returns height of thumbnail image.
 func (f *MessageFile) ThumbImageHeight() int64 {
 	if f.Thumb1024 != "" {
 		return f.Thumb1024H
@@ -407,11 +424,13 @@ func (f *MessageFile) ThumbImageHeight() int64 {
 	return f.OriginalH
 }
 
+// ThumbVideoPath returns local path of thumbnail for the video.
 func (f *MessageFile) ThumbVideoPath() string {
 	suffix := f.DownloadURLsAndSuffixes()[f.ThumbVideo]
 	return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.ThumbVideo, suffix))
 }
 
+// DownloadURLsAndSuffixes returns map of suffixes for thumbnails.
 func (f *MessageFile) DownloadURLsAndSuffixes() map[string]string {
 	return map[string]string{
 		f.URLPrivate:   "",
@@ -443,6 +462,7 @@ var filenameReplacer = strings.NewReplacer(
 	"|", "_",
 )
 
+// DownloadFilename returns local downloaded path for file.
 func (f *MessageFile) DownloadFilename(url, suffix string) string {
 	ext := filepath.Ext(url)
 	nameExt := filepath.Ext(f.Name)
@@ -457,15 +477,18 @@ func (f *MessageFile) DownloadFilename(url, suffix string) string {
 	return filenameReplacer.Replace(name + suffix + ext)
 }
 
+// MessageIcons represents icon for each message.
 type MessageIcons struct {
 	Image48 string `json:"image_48"`
 }
 
+// MessageEdited shows message is editted or not.
 type MessageEdited struct {
 	User string `json:"user"`
 	Ts   string `json:"ts"`
 }
 
+// MessageUserProfile represents user's profile for message.
 type MessageUserProfile struct {
 	AvatarHash        string `json:"avatar_hash"`
 	Image72           string `json:"image72"`
@@ -478,11 +501,13 @@ type MessageUserProfile struct {
 	IsUltraRestricted bool   `json:"is_ultra_restricted"`
 }
 
+// MessageBlock represents Block, how to render message.
 type MessageBlock struct {
 	Typ      string                `json:"type"`
 	Elements []MessageBlockElement `json:"elements"`
 }
 
+// MessageBlockElement represents an element for Block.
 type MessageBlockElement struct {
 	Typ       string `json:"type"`
 	Name      string `json:"name"`       // for type = "emoji"
@@ -490,6 +515,7 @@ type MessageBlockElement struct {
 	ChannelID string `json:"channel_id"` // for type = "channel"
 }
 
+// MessageAttachment represents an attachement for message.
 type MessageAttachment struct {
 	ServiceName     string   `json:"service_name,omitempty"`
 	AuthorID        string   `json:"author_id,omitempty"`
@@ -497,7 +523,7 @@ type MessageAttachment struct {
 	AuthorName      string   `json:"author_name,omitempty"`
 	AuthorSubname   string   `json:"author_subname,omitempty"`
 	AuthorLink      string   `json:"author_link,omitempty"`
-	ChannelId       string   `json:"channel_id,omitempty"`
+	ChannelID       string   `json:"channel_id,omitempty"`
 	ChannelName     string   `json:"channel_name,omitempty"`
 	Title           string   `json:"title,omitempty"`
 	TitleLink       string   `json:"title_link,omitempty"`
@@ -520,6 +546,7 @@ type MessageAttachment struct {
 	Ts              *Ts      `json:"ts,omitempty"`
 }
 
+// MessageReaction repersents a reaction for message.
 type MessageReaction struct {
 	Name  string   `json:"name"`
 	Users []string `json:"users"`
