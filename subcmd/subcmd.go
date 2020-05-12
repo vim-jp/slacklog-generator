@@ -3,6 +3,8 @@ package subcmd
 import (
 	"fmt"
 	"os"
+
+	"github.com/vim-jp/slacklog-generator/subcmd/serve"
 )
 
 // Run runs one of sub-commands.
@@ -29,6 +31,8 @@ func Run() error {
 		return DownloadFiles(args)
 	case "generate-html":
 		return GenerateHTML(args)
+	case "serve":
+		return serve.Run(args)
 	}
 
 	return fmt.Errorf("unknown subcmd: %s", subCmdName)
