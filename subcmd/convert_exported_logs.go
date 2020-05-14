@@ -14,19 +14,21 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
 // ConvertExportedLogs converts log which exported from Slack, to generator can
 // treated.
-func ConvertExportedLogs(args []string) error {
-	if len(args) < 2 {
-		fmt.Println("Usage: go run . convert_exported_logs {indir} {outdir}")
-		return nil
+func ConvertExportedLogs(c *cli.Context) error {
+	var inDir, outDir string
+	if c.Args().Present() {
+		inDir = filepath.Clean(c.Args().Get(0))
+		outDir = filepath.Clean(c.Args().Get(1))
+	} else {
+		inDir = filepath.Clean("_old_logs")
+		outDir = filepath.Clean(filepath.Join("_logdata", "slacklog_data"))
 	}
-
-	inDir := filepath.Clean(args[0])
-	outDir := filepath.Clean(args[1])
 	inChannelsFile := filepath.Join(inDir, "channels.json")
 
 	channels, _, err := readChannels(inChannelsFile, []string{"*"})

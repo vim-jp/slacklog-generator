@@ -9,4 +9,4 @@ if [ ! -d _logdata/slacklog_data/ ] ; then
   exit 1
 fi
 
-go run . generate-html scripts/config.json templates/ files/ _logdata/slacklog_data/ _site/
+go run . generate-html scripts/config.json templates/ _logdata/files/ _logdata/slacklog_data/ _site/
