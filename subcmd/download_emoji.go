@@ -28,7 +28,7 @@ func DownloadEmoji(c *cli.Context) error {
 
 	var emojisDir string
 	if c.Args().Present() {
-		emojisDir = filepath.Clean(c.Args().First())
+		emojisDir = filepath.Clean(c.Args().Get(0))
 	} else {
 		emojisDir = filepath.Clean(filepath.Join("_logdata", "emoji"))
 	}
