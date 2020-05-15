@@ -17,7 +17,7 @@ var commands = []*cli.Command{
 	},
 	{
 		Name: "download-emoji",
-		Usage: "download custamized emoji from slack",
+		Usage: "download customized emoji from slack",
 		Action: DownloadEmoji,
 		Flags: EmojisFlags,
 	},
