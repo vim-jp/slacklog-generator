@@ -4,36 +4,52 @@ import (
 	"fmt"
 	"os"
 
+	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/subcmd/serve"
 )
+
+var commands = []*cli.Command{
+	{
+		Name: "convert-exported-logs",
+		Usage: "convert slack exported logs to API download logs",
+		Action: ConvertExportedLogs,
+		Flags: ConvertExportedLogsFlags,
+	},
+	{
+		Name: "download-emoji",
+		Usage: "download customized emoji from slack",
+		Action: DownloadEmoji,
+		Flags: EmojisFlags,
+	},
+	{
+		Name: "download-files",
+		Usage: "download files from slack.com",
+		Action: DownloadFiles,
+		Flags: FilesFlags,
+	},
+	{
+		Name: "generate-html",
+		Usage: "generate html from slacklog_data",
+		Action: GenerateHTML,
+		Flags: GenerateHTMLFlags,
+	},
+	{
+		Name: "serve",
+		Usage: "serve a generated HTML with files proxy",
+		Action: serve.Run,
+		Flags: serve.Flags,
+	},
+}
 
 // Run runs one of sub-commands.
 func Run() error {
 	fmt.Println(os.Args)
-	if len(os.Args) < 2 {
-		fmt.Println(`Usage: go run . {subcmd}
-  Subcmd:
-    convert-exported-logs
-    download-emoji
-    download-files
-    generate-html`)
-		return nil
-	}
+	app := cli.NewApp()
+	app.EnableBashCompletion = true
+	app.Name = "slacklog-generator"
+	app.Usage = "generate slacklog HTML"
+	app.Version = "0.0.0"
+	app.Commands = commands
 
-	args := os.Args[2:]
-	subCmdName := os.Args[1]
-	switch subCmdName {
-	case "convert-exported-logs":
-		return ConvertExportedLogs(args)
-	case "download-emoji":
-		return DownloadEmoji(args)
-	case "download-files":
-		return DownloadFiles(args)
-	case "generate-html":
-		return GenerateHTML(args)
-	case "serve":
-		return serve.Run(args)
-	}
-
-	return fmt.Errorf("unknown subcmd: %s", subCmdName)
+	return app.Run(os.Args)
 }

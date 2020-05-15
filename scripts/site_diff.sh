@@ -51,7 +51,7 @@ generate_site() {
   if [ -d _logdata ] ; then
     filesdir=_logdata/files/
   fi
-  ${cmd} generate-html scripts/config.json ${tmpldir} ${filesdir} ${logdir} ${outdir}/ > ${outdir}.generate-html.log 2>&1 || ( cat ${outdir}.generate-html.log && exit 1 )
+  ${cmd} generate-html --templatedir ${tmpldir} --filesdir ${filesdir} --indir ${logdir} --outdir ${outdir}/ > ${outdir}.generate-html.log 2>&1 || ( cat ${outdir}.generate-html.log && exit 1 )
   rm -f ${cmd}
   ./scripts/build.sh -o $outdir > ${outdir}.build.log 2>&1 || ( cat ${outdir}.build.log && exit 1 )
 }

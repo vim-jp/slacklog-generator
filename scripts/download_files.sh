@@ -9,4 +9,4 @@ if  [ ! -d _logdata/slacklog_data/ ] ; then
   exit 1
 fi
 
-go run . download-files _logdata/slacklog_data/ _logdata/files/
+go run . download-files

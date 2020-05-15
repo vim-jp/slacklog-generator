@@ -1,11 +1,30 @@
 package serve
 
 import (
-	"flag"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	cli "github.com/urfave/cli/v2"
 )
+
+var Flags = []cli.Flag{
+	&cli.StringFlag{
+		Name: "addr",
+		Usage: "address for serve",
+		Value: ":8081",
+	},
+	&cli.StringFlag{
+		Name: "htdocs",
+		Usage: "root of files",
+		Value: "_site",
+	},
+	&cli.StringFlag{
+		Name: "target",
+		Usage: "proxy target endpoint",
+		Value: "https://vim-jp.org/slacklog/",
+	},
+}
 
 func newReverseProxy(targetURL string) (*httputil.ReverseProxy, error) {
 	u, err := url.Parse(targetURL)
@@ -23,20 +42,10 @@ func newReverseProxy(targetURL string) (*httputil.ReverseProxy, error) {
 
 // Run starts combined HTTP server (file + reverse proxy) to serve slacklog for
 // development.
-func Run(args []string) error {
-	var (
-		addr   string
-		htdocs string
-		target string
-	)
-	fs := flag.NewFlagSet("serve", flag.ExitOnError)
-	fs.StringVar(&addr, "addr", ":8001", "address for serve")
-	fs.StringVar(&htdocs, "htdocs", "_site", "root of files")
-	fs.StringVar(&target, "target", "https://vim-jp.org/slacklog/", "proxy target endpoint")
-	err := fs.Parse(args)
-	if err != nil {
-		return err
-	}
+func Run(c *cli.Context) error {
+	addr := c.String("addr")
+	htdocs := c.String("htdocs")
+	target := c.String("target")
 
 	proxy, err := newReverseProxy(target)
 	if err != nil {
