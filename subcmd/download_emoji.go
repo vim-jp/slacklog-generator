@@ -15,9 +15,22 @@ import (
 	"strings"
 
 	"github.com/slack-go/slack"
-	"github.com/urfave/cli/v2"
+	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
+
+var EmojisFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name: "outdir",
+		Usage: "emojis download target dir",
+		Value: filepath.Join("_logdata", "emojis"),
+	},
+	&cli.StringFlag{
+		Name: "emojiJSON",
+		Usage: "emoji json path",
+		Value: filepath.Join("_logdata", "emojis", "emoji.json"),
+	},
+}
 
 // DownloadEmoji downloads and save emoji image files.
 func DownloadEmoji(c *cli.Context) error {
@@ -26,16 +39,8 @@ func DownloadEmoji(c *cli.Context) error {
 		return fmt.Errorf("$SLACK_TOKEN required")
 	}
 
-	var emojisDir string
-	if c.Args().Present() {
-		emojisDir = filepath.Clean(c.Args().Get(0))
-	} else {
-		emojisDir = filepath.Clean(filepath.Join("_logdata", "emoji"))
-	}
-	emojiJSONPath := filepath.Join(emojisDir, "emoji.json")
-	if 1 < c.Args().Len() {
-		emojiJSONPath = filepath.Clean(c.Args().Get(1))
-	}
+	emojisDir := filepath.Clean(c.String("outdir"))
+	emojiJSONPath := filepath.Clean(c.String("emojiJSON"))
 
 	api := slack.New(slackToken)
 

@@ -12,9 +12,22 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/urfave/cli/v2"
+	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
+
+var FilesFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name: "indir",
+		Usage: "slacklog_data dir",
+		Value: filepath.Join("_logdata", "slacklog_data"),
+	},
+	&cli.StringFlag{
+		Name: "outdir",
+		Usage: "files download target dir",
+		Value: filepath.Join("_logdata", "files"),
+	},
+}
 
 // DownloadFiles downloads and saves files which attached to message.
 func DownloadFiles(c *cli.Context) error {
@@ -23,14 +36,8 @@ func DownloadFiles(c *cli.Context) error {
 		return fmt.Errorf("$SLACK_TOKEN required")
 	}
 
-	var logDir, filesDir string
-	if c.Args().Present() {
-		logDir = filepath.Clean(c.Args().Get(0))
-		filesDir = filepath.Clean(c.Args().Get(1))
-	} else {
-		logDir = filepath.Clean(filepath.Join("_logdata", "slacklog_data"))
-		filesDir = filepath.Clean(filepath.Join("_logdata", "files"))
-	}
+	logDir := filepath.Clean(c.String("indir"))
+	filesDir := filepath.Clean(c.String("outdir"))
 
 	s, err := slacklog.NewLogStore(logDir, &slacklog.Config{Channels: []string{"*"}})
 	if err != nil {

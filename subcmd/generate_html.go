@@ -4,26 +4,45 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/urfave/cli/v2"
+	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
+var GenerateHTMLFlags =  []cli.Flag{
+	&cli.StringFlag{
+		Name: "config",
+		Usage: "config.json path",
+		Value: filepath.Join("scripts", "config.json"),
+	},
+	&cli.StringFlag{
+		Name: "templatedir",
+		Usage: "templates dir",
+		Value: "templates",
+	},
+	&cli.StringFlag{
+		Name: "filesdir",
+		Usage: "files downloaded dir",
+		Value: filepath.Join("_logdata", "files"),
+	},
+	&cli.StringFlag{
+		Name: "indir",
+		Usage: "slacklog_data dir",
+		Value: filepath.Join("_logdata", "slacklog_data"),
+	},
+	&cli.StringFlag{
+		Name: "outdir",
+		Usage: "generated html target dir",
+		Value: "_site",
+	},
+}
+
 // GenerateHTML : SlackからエクスポートしたデータをHTMLに変換して出力する。
 func GenerateHTML(c *cli.Context) error {
-	var configJSONPath, templateDir, filesDir, inDir, outDir string
-	if c.Args().Present() {
-		configJSONPath = filepath.Clean(c.Args().Get(0))
-		templateDir = filepath.Clean(c.Args().Get(1))
-		filesDir = filepath.Clean(c.Args().Get(2))
-		inDir = filepath.Clean(c.Args().Get(3))
-		outDir = filepath.Clean(c.Args().Get(4))
-	} else {
-		configJSONPath = filepath.Clean(filepath.Join("scripts", "config.json"))
-		templateDir = filepath.Clean("templates")
-		filesDir = filepath.Clean(filepath.Join("_logdata", "files"))
-		inDir = filepath.Clean(filepath.Join("_logdata", "slacklog_data"))
-		outDir = filepath.Clean("_site")
-	}
+	configJSONPath := filepath.Clean(c.String("config"))
+	templateDir := filepath.Clean(c.String("templatedir"))
+	filesDir := filepath.Clean(c.String("filesdir"))
+	inDir := filepath.Clean(c.String("indir"))
+	outDir := filepath.Clean(c.String("outdir"))
 
 	cfg, err := slacklog.ReadConfig(configJSONPath)
 	if err != nil {
