@@ -16,7 +16,8 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
-// DownloadFilesCommand downloads and saves files which attached to message.
+// DownloadFilesCommand provides "downloads-files" sub-command, it downloads
+// and saves files which attached to message.
 var DownloadFilesCommand = &cli.Command{
 	Name:   "download-files",
 	Usage:  "download files from slack.com",
