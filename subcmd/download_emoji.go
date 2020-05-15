@@ -19,21 +19,28 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
-var EmojisFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name: "outdir",
-		Usage: "emojis download target dir",
-		Value: filepath.Join("_logdata", "emojis"),
-	},
-	&cli.StringFlag{
-		Name: "emojiJSON",
-		Usage: "emoji json path",
-		Value: filepath.Join("_logdata", "emojis", "emoji.json"),
+// DownloadEmojiCommand provides "download-emoji". It downloads and save emoji
+// image files.
+var DownloadEmojiCommand = &cli.Command{
+	Name:   "download-emoji",
+	Usage:  "download customized emoji from slack",
+	Action: downloadEmoji,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "outdir",
+			Usage: "emojis download target dir",
+			Value: filepath.Join("_logdata", "emojis"),
+		},
+		&cli.StringFlag{
+			Name:  "emojiJSON",
+			Usage: "emoji json path",
+			Value: filepath.Join("_logdata", "emojis", "emoji.json"),
+		},
 	},
 }
 
-// DownloadEmoji downloads and save emoji image files.
-func DownloadEmoji(c *cli.Context) error {
+// downloadEmoji downloads and save emoji image files.
+func downloadEmoji(c *cli.Context) error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		return fmt.Errorf("$SLACK_TOKEN required")

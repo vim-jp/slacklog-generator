@@ -18,22 +18,29 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
-var ConvertExportedLogsFlags = []cli.Flag {
-	&cli.StringFlag{
-		Name: "indir",
-		Usage: "exported log dir",
-		Value: "_old_logs",
-	},
-	&cli.StringFlag{
-		Name: "outdir",
-		Usage: "slacklog_data dir",
-		Value: filepath.Join("_logdata", "slacklog_data"),
+// ConvertExportedLogsCommand provides "convert-exported-logs". It converts log
+// which exported from Slack, to generator can treat.
+var ConvertExportedLogsCommand = &cli.Command{
+	Name:   "convert-exported-logs",
+	Usage:  "convert slack exported logs to API download logs",
+	Action: convertExportedLogs,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "indir",
+			Usage: "exported log dir",
+			Value: "_old_logs",
+		},
+		&cli.StringFlag{
+			Name:  "outdir",
+			Usage: "slacklog_data dir",
+			Value: filepath.Join("_logdata", "slacklog_data"),
+		},
 	},
 }
 
-// ConvertExportedLogs converts log which exported from Slack, to generator can
-// treated.
-func ConvertExportedLogs(c *cli.Context) error {
+// convertExportedLogs converts log which exported from Slack, to generator can
+// treat.
+func convertExportedLogs(c *cli.Context) error {
 	inDir := filepath.Clean(c.String("indir"))
 	outDir := filepath.Clean(c.String("outdir"))
 	inChannelsFile := filepath.Join(inDir, "channels.json")

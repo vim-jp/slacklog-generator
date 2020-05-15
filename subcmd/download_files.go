@@ -16,21 +16,28 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
 
-var FilesFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name: "indir",
-		Usage: "slacklog_data dir",
-		Value: filepath.Join("_logdata", "slacklog_data"),
-	},
-	&cli.StringFlag{
-		Name: "outdir",
-		Usage: "files download target dir",
-		Value: filepath.Join("_logdata", "files"),
+// DownloadFilesCommand provides "downloads-files" sub-command, it downloads
+// and saves files which attached to message.
+var DownloadFilesCommand = &cli.Command{
+	Name:   "download-files",
+	Usage:  "download files from slack.com",
+	Action: downloadFiles,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "indir",
+			Usage: "slacklog_data dir",
+			Value: filepath.Join("_logdata", "slacklog_data"),
+		},
+		&cli.StringFlag{
+			Name:  "outdir",
+			Usage: "files download target dir",
+			Value: filepath.Join("_logdata", "files"),
+		},
 	},
 }
 
-// DownloadFiles downloads and saves files which attached to message.
-func DownloadFiles(c *cli.Context) error {
+// downloadFiles downloads and saves files which attached to message.
+func downloadFiles(c *cli.Context) error {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		return fmt.Errorf("$SLACK_TOKEN required")

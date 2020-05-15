@@ -8,21 +8,28 @@ import (
 	cli "github.com/urfave/cli/v2"
 )
 
-var Flags = []cli.Flag{
-	&cli.StringFlag{
-		Name: "addr",
-		Usage: "address for serve",
-		Value: ":8081",
-	},
-	&cli.StringFlag{
-		Name: "htdocs",
-		Usage: "root of files",
-		Value: "_site",
-	},
-	&cli.StringFlag{
-		Name: "target",
-		Usage: "proxy target endpoint",
-		Value: "https://vim-jp.org/slacklog/",
+// Command provides "serve" sub-command. It starts HTML server for slacklog for
+// development.
+var Command = &cli.Command{
+	Name:   "serve",
+	Usage:  "serve a generated HTML with files proxy",
+	Action: run,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "addr",
+			Usage: "address for serve",
+			Value: ":8081",
+		},
+		&cli.StringFlag{
+			Name:  "htdocs",
+			Usage: "root of files",
+			Value: "_site",
+		},
+		&cli.StringFlag{
+			Name:  "target",
+			Usage: "proxy target endpoint",
+			Value: "https://vim-jp.org/slacklog/",
+		},
 	},
 }
 
@@ -40,9 +47,9 @@ func newReverseProxy(targetURL string) (*httputil.ReverseProxy, error) {
 	return rp, nil
 }
 
-// Run starts combined HTTP server (file + reverse proxy) to serve slacklog for
+// run starts combined HTTP server (file + reverse proxy) to serve slacklog for
 // development.
-func Run(c *cli.Context) error {
+func run(c *cli.Context) error {
 	addr := c.String("addr")
 	htdocs := c.String("htdocs")
 	target := c.String("target")
