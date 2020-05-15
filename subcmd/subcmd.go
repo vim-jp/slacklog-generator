@@ -9,36 +9,11 @@ import (
 )
 
 var commands = []*cli.Command{
-	{
-		Name: "convert-exported-logs",
-		Usage: "convert slack exported logs to API download logs",
-		Action: ConvertExportedLogs,
-		Flags: ConvertExportedLogsFlags,
-	},
-	{
-		Name: "download-emoji",
-		Usage: "download customized emoji from slack",
-		Action: DownloadEmoji,
-		Flags: EmojisFlags,
-	},
-	{
-		Name: "download-files",
-		Usage: "download files from slack.com",
-		Action: DownloadFiles,
-		Flags: FilesFlags,
-	},
-	{
-		Name: "generate-html",
-		Usage: "generate html from slacklog_data",
-		Action: GenerateHTML,
-		Flags: GenerateHTMLFlags,
-	},
-	{
-		Name: "serve",
-		Usage: "serve a generated HTML with files proxy",
-		Action: serve.Run,
-		Flags: serve.Flags,
-	},
+	ConvertExportedLogsCommand,
+	DownloadEmojiCommand,
+	DownloadFilesCommand,
+	GenerateHTMLCommand,
+	serve.Command,
 }
 
 // Run runs one of sub-commands.
