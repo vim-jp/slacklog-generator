@@ -1,0 +1,79 @@
+{{- range .Attachments }}
+  {{- if eq .ServiceName "GitHub" }}
+    <div class="d-flex">
+      <div>
+        <img class="avatar avatar-small" width="32" height="32" src="{{ .ServiceIcon }}" alt="{{ html .ServiceName }}" />
+      </div>
+      <div class="flex-self-baseline f4 ml-2">
+        <span class="Label Label--outline">
+          <a href="{{ .TitleLink }}">{{ html .Title }}</a>
+        </span>
+      </div>
+    </div>
+    <div class="d-flex pl-2 mb-2">
+      <div class="mt-2">{{ attachmentText . }}</div>
+    </div>
+  {{- else if eq .ServiceName "twitter" }}
+    <div class="d-flex">
+      <div>
+        <img class="avatar avatar-small" width="32" height="32" src="{{ .AuthorIcon }}" alt="{{ html .ServiceName }}" />
+      </div>
+      <div class="flex-self-baseline f4 ml-2">
+        <span class="f6 text-gray-light">{{ .AuthorName }} {{ .AuthorSubname }}</span>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="mt-2">{{ attachmentText . }}</div>
+    </div>
+    <div class="d-flex">
+      <div>
+        <img class="avatar avatar-small" width="20" height="20" src="{{ .FooterIcon }}" />
+      </div>
+      <div class="flex-self-baseline f5 ml-2">
+        {{ html .Footer }}
+      </div>
+    </div>
+    {{- if .VideoHTML }}
+    <div class="d-flex mt-1">
+      {{ .VideoHTML }}
+    </div>
+    {{- end }}
+  {{- else if eq .ServiceName "Gyazo" }}
+      <div class="d-flex">
+        <div>
+          <!-- Gyazo -->
+          <a href="{{ .Fallback }}">{{ .Fallback }}</a>
+        </div>
+      </div>
+  {{- else if or .Title .Text }}
+    <div class="d-flex">
+      {{- if and .Title .TitleLink }}
+        {{- if and .ServiceIcon .ServiceName }}
+        <div>
+          <img class="avatar avatar-small" width="32" height="32" src="{{ .ServiceIcon }}" alt="{{ html .ServiceName }}" />
+        </div>
+        {{- end }}
+        <div class="flex-self-baseline f4 ml-2">
+          <span class="Label Label--outline">
+            <a href="{{ .TitleLink }}">{{ html .Title }}</a>
+          </span>
+        </div>
+      {{- else if .Title }}
+        <div>{{ html .Title }}</div>
+      {{- end }}
+    </div>
+    {{- if .Text }}
+      <div class="d-flex">
+        <div class="mt-2">{{ attachmentText . }}</div>
+      </div>
+    {{- end }}
+
+    {{- if .ThumbURL }}
+      <div class="d-flex">
+        <div class="mt-2">
+          <img src="{{ .ThumbURL }}" width="{{ .ThumbWidth }}" height="{{ .ThumbHeight }}" alt="{{ html .Title }}" />
+        </div>
+      </div>
+    {{- end }}
+  {{- end }}
+{{- end }}
