@@ -266,9 +266,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"hasNextMonth": func(key MessageMonthKey) bool {
 				return g.s.HasNextMonth(channel.ID, key)
 			},
-			"hostBySlack": func(f slack.File) bool {
-				return HostBySlack(f)
-			},
+			"hostBySlack":      HostBySlack,
 			"localPath":        LocalPath,
 			"topLevelMimetype": TopLevelMimetype,
 			"thumbImagePath":   ThumbImagePath,
