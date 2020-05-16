@@ -27,7 +27,7 @@ type TextConverter struct {
 func NewTextConverter(users, emojis map[string]string) *TextConverter {
 	re := regexps{}
 	// TODO tokenize/parse message.Text
-	re.linkWithTitle = regexp.MustCompile(`&lt;(https?://[^>]+?\|(.+?))&gt;`)
+	re.linkWithTitle = regexp.MustCompile(`&lt;(https?://[^>]+?)\|(.+?)&gt;`)
 	re.link = regexp.MustCompile(`&lt;(https?://[^>]+?)&gt;`)
 	// go regexp does not support back reference
 	re.code = regexp.MustCompile("`{3}|｀{3}")
