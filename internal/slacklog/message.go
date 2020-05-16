@@ -248,39 +248,9 @@ func (k MessageMonthKey) PrevMonth() string {
 type Message struct {
 	slack.Message
 
-	Icons *MessageIcons `json:"icons,omitempty"`
-
 	// Trail shows the user of message is same as the previous one.
 	// FIXME: 本来はココに書いてはいけない
 	Trail bool `json:"-"`
-
-	// unused fields but export-log provided:
-
-	SourceTeam   string `json:"source_team,omitempty"`
-	UserTeam     string `json:"user_team,omitempty"`
-	DisplayAsBot bool   `json:"display_as_bot,omitempty"`
-
-	//ClientMsgID  string              `json:"client_msg_id,omitempty"`
-	//Typ          string              `json:"type"`
-	//Subtype      string              `json:"subtype,omitempty"`
-	//Text         string              `json:"text"`
-	//User         string              `json:"user"`
-	//Ts           string              `json:"ts"`
-	//ThreadTs     string              `json:"thread_ts,omitempty"`
-	//ParentUserID string              `json:"parent_user_id,omitempty"`
-	//Username     string              `json:"username,omitempty"`
-	//BotID        string              `json:"bot_id,omitempty"`
-	//Team         string              `json:"team,omitempty"`
-	//UserProfile  *MessageUserProfile `json:"user_profile,omitempty"`
-	//Attachments  []MessageAttachment `json:"attachments,omitempty"`
-	//Blocks       []interface{}       `json:"blocks,omitempty"` // TODO: Use messageBlock
-	//Reactions    []MessageReaction   `json:"reactions,omitempty"`
-	//Edited       *MessageEdited      `json:"edited,omitempty"`
-	//Files        []MessageFile       `json:"files,omitempty"`
-	//Root         *Message            `json:"root,omitempty"`
-	//Upload       bool                `json:"upload,omitempty"`
-	//// if true, the message user the same as the previous one
-	//Trail bool `json:"-"`
 }
 
 // isVisible : 表示すべきメッセージ種別かを判定する。

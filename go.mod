@@ -14,4 +14,4 @@ require (
 )
 
 //replace github.com/slack-go/slack => ../slacklog-slack
-replace github.com/slack-go/slack => github.com/vim-jp/slacklog-slack v0.0.0-20200516054158-51fd085a014e
+replace github.com/slack-go/slack => github.com/vim-jp/slacklog-slack v0.0.0-20200516060239-575febb4155b
