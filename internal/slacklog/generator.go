@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+
+	"github.com/slack-go/slack"
 )
 
 // HTMLGenerator : ログデータからHTMLを生成するための構造体。
@@ -264,6 +266,15 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"hasNextMonth": func(key MessageMonthKey) bool {
 				return g.s.HasNextMonth(channel.ID, key)
 			},
+			"hostBySlack": func(f slack.File) bool {
+				return HostBySlack(f)
+			},
+			"localPath":        LocalPath,
+			"topLevelMimetype": TopLevelMimetype,
+			"thumbImagePath":   ThumbImagePath,
+			"thumbImageWidth":  ThumbImageWidth,
+			"thumbImageHeight": ThumbImageHeight,
+			"thumbVideoPath":   ThumbVideoPath,
 		}).
 		ParseGlob(filepath.Join(g.templateDir, "channel_per_month", "*.tmpl"))
 	if err != nil {
@@ -281,7 +292,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 }
 
 func (g *HTMLGenerator) isVisibleMessage(msg Message) bool {
-	return msg.Subtype == "" || msg.Subtype == "bot_message" || msg.Subtype == "slackbot_response" || msg.Subtype == "thread_broadcast"
+	return msg.SubType == "" || msg.SubType == "bot_message" || msg.SubType == "slackbot_response" || msg.SubType == "thread_broadcast"
 }
 
 func (g *HTMLGenerator) generateMessageText(msg Message) string {
@@ -292,18 +303,17 @@ func (g *HTMLGenerator) generateMessageText(msg Message) string {
 	return text
 }
 
-func (g *HTMLGenerator) generateAttachmentText(attachment MessageAttachment) string {
+func (g *HTMLGenerator) generateAttachmentText(attachment slack.Attachment) string {
 	return g.c.ToHTML(attachment.Text)
 }
 
 // generateFileHTML : 'text/plain' な添付ファイルをHTMLに埋め込む
 // 存在しない場合、エラーを表示する
-func (g *HTMLGenerator) generateFileHTML(file *MessageFile) string {
+func (g *HTMLGenerator) generateFileHTML(file slack.File) string {
 	if file.Size > maxEmbeddedFileSize {
 		return `<span class="file-error">file size is too big to embed. please download from above link to see.</span>`
 	}
-	suffix := file.DownloadURLsAndSuffixes()[file.URLPrivate]
-	path := filepath.Join(g.filesDir, file.ID, file.DownloadFilename(file.URLPrivate, suffix))
+	path := filepath.Join(g.filesDir, file.ID, LocalName(file, file.URLPrivate, ""))
 	src, err := ioutil.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

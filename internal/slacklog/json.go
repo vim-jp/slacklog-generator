@@ -14,7 +14,7 @@ func ReadFileAsJSON(filename string, dst interface{}) error {
 	}
 	defer f.Close()
 	d := json.NewDecoder(f)
-	d.DisallowUnknownFields()
+	//d.DisallowUnknownFields()
 	err = d.Decode(dst)
 	if err != nil {
 		return err

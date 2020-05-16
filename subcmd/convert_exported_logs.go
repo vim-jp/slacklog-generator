@@ -71,7 +71,6 @@ func convertExportedLogs(c *cli.Context) error {
 		}
 
 		for _, message := range messages {
-			message.UserProfile = nil
 			message.RemoveTokenFromURLs()
 		}
 
@@ -155,7 +154,7 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 func groupMessagesByDay(messages []*slacklog.Message) map[string][]*slacklog.Message {
 	messagesPerDay := map[string][]*slacklog.Message{}
 	for _, msg := range messages {
-		time := slacklog.TsToDateTime(msg.Ts).Format("2006-01-02")
+		time := slacklog.TsToDateTime(msg.Timestamp).Format("2006-01-02")
 		messagesPerDay[time] = append(messagesPerDay[time], msg)
 	}
 	return messagesPerDay

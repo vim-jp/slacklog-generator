@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/slack-go/slack"
 )
 
 // Messages is an array of `*Message`.
@@ -18,7 +20,7 @@ type Messages []*Message
 func (msgs Messages) Sort() {
 	sort.SliceStable(msgs, func(i, j int) bool {
 		// must be the same digits, so no need to convert the timestamp to a number
-		return msgs[i].Ts < msgs[j].Ts
+		return msgs[i].Timestamp < msgs[j].Timestamp
 	})
 }
 
@@ -121,7 +123,7 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 		}
 
 		// スレッドに所属してるメッセージは ThreadMap へスレッド毎に分別しておく
-		threadTs := msg.ThreadTs
+		threadTs := msg.ThreadTimestamp
 		if threadTs != "" {
 			thread, ok := m.ThreadMap[threadTs]
 			if !ok {
@@ -245,56 +247,66 @@ func (k MessageMonthKey) PrevMonth() string {
 // エクスポートしたYYYY-MM-DD.jsonの中身を保持する。
 // https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
 type Message struct {
-	ClientMsgID  string              `json:"client_msg_id,omitempty"`
-	Typ          string              `json:"type"`
-	Subtype      string              `json:"subtype,omitempty"`
-	Text         string              `json:"text"`
-	User         string              `json:"user"`
-	Ts           string              `json:"ts"`
-	ThreadTs     string              `json:"thread_ts,omitempty"`
-	ParentUserID string              `json:"parent_user_id,omitempty"`
-	Username     string              `json:"username,omitempty"`
-	BotID        string              `json:"bot_id,omitempty"`
-	Team         string              `json:"team,omitempty"`
-	UserTeam     string              `json:"user_team,omitempty"`
-	SourceTeam   string              `json:"source_team,omitempty"`
-	UserProfile  *MessageUserProfile `json:"user_profile,omitempty"`
-	Attachments  []MessageAttachment `json:"attachments,omitempty"`
-	Blocks       []interface{}       `json:"blocks,omitempty"` // TODO: Use messageBlock
-	Reactions    []MessageReaction   `json:"reactions,omitempty"`
-	Edited       *MessageEdited      `json:"edited,omitempty"`
-	Icons        *MessageIcons       `json:"icons,omitempty"`
-	Files        []MessageFile       `json:"files,omitempty"`
-	Root         *Message            `json:"root,omitempty"`
-	DisplayAsBot bool                `json:"display_as_bot,omitempty"`
-	Upload       bool                `json:"upload,omitempty"`
-	// if true, the message user the same as the previous one
+	slack.Message
+
+	Icons *MessageIcons `json:"icons,omitempty"`
+
+	// Trail shows the user of message is same as the previous one.
+	// FIXME: 本来はココに書いてはいけない
 	Trail bool `json:"-"`
+
+	// unused fields but export-log provided:
+
+	SourceTeam   string `json:"source_team,omitempty"`
+	UserTeam     string `json:"user_team,omitempty"`
+	DisplayAsBot bool   `json:"display_as_bot,omitempty"`
+
+	//ClientMsgID  string              `json:"client_msg_id,omitempty"`
+	//Typ          string              `json:"type"`
+	//Subtype      string              `json:"subtype,omitempty"`
+	//Text         string              `json:"text"`
+	//User         string              `json:"user"`
+	//Ts           string              `json:"ts"`
+	//ThreadTs     string              `json:"thread_ts,omitempty"`
+	//ParentUserID string              `json:"parent_user_id,omitempty"`
+	//Username     string              `json:"username,omitempty"`
+	//BotID        string              `json:"bot_id,omitempty"`
+	//Team         string              `json:"team,omitempty"`
+	//UserProfile  *MessageUserProfile `json:"user_profile,omitempty"`
+	//Attachments  []MessageAttachment `json:"attachments,omitempty"`
+	//Blocks       []interface{}       `json:"blocks,omitempty"` // TODO: Use messageBlock
+	//Reactions    []MessageReaction   `json:"reactions,omitempty"`
+	//Edited       *MessageEdited      `json:"edited,omitempty"`
+	//Files        []MessageFile       `json:"files,omitempty"`
+	//Root         *Message            `json:"root,omitempty"`
+	//Upload       bool                `json:"upload,omitempty"`
+	//// if true, the message user the same as the previous one
+	//Trail bool `json:"-"`
 }
 
 // isVisible : 表示すべきメッセージ種別かを判定する。
 // 例えばchannel_joinなどは投稿された出力する必要がないため、falseを返す。
 func (m *Message) isVisible() bool {
-	return m.Subtype == "" ||
-		m.Subtype == "bot_message" ||
-		m.Subtype == "slackbot_response" ||
-		m.Subtype == "thread_broadcast"
+	return m.SubType == "" ||
+		m.SubType == "bot_message" ||
+		m.SubType == "slackbot_response" ||
+		m.SubType == "thread_broadcast"
 }
 
 // isBotMessage : メッセージがBotからの物かを判定する。
 func (m *Message) isBotMessage() bool {
-	return m.Subtype == "bot_message" ||
-		m.Subtype == "slackbot_response"
+	return m.SubType == "bot_message" ||
+		m.SubType == "slackbot_response"
 }
 
 // IsRootOfThread : メッセージがスレッドの最初のメッセージであるかを判定する。
 func (m Message) IsRootOfThread() bool {
-	return m.Ts == m.ThreadTs
+	return m.Timestamp == m.ThreadTimestamp
 }
 
 // isThreadChild returns true when a message should be shown in a thread only.
 func (m *Message) isThreadChild() bool {
-	return m.ThreadTs != "" && m.Ts != m.ThreadTs && m.Subtype != "thread_broadcast"
+	return m.ThreadTimestamp != "" && m.Timestamp != m.ThreadTimestamp && m.SubType != "thread_broadcast"
 }
 
 var reToken = regexp.MustCompile(`\?t=xoxe-[-a-f0-9]+$`)
@@ -314,13 +326,13 @@ func (m *Message) RemoveTokenFromURLs() {
 		f.Thumb360 = removeToken(f.Thumb360)
 		f.Thumb480 = removeToken(f.Thumb480)
 		f.Thumb720 = removeToken(f.Thumb720)
-		f.Thumb800 = removeToken(f.Thumb800)
+		//f.Thumb800 = removeToken(f.Thumb800)
 		f.Thumb960 = removeToken(f.Thumb960)
 		f.Thumb1024 = removeToken(f.Thumb1024)
 		f.Thumb360Gif = removeToken(f.Thumb360Gif)
-		f.Thumb480Gif = removeToken(f.Thumb480Gif)
-		f.DeanimateGif = removeToken(f.DeanimateGif)
-		f.ThumbVideo = removeToken(f.ThumbVideo)
+		//f.Thumb480Gif = removeToken(f.Thumb480Gif)
+		//f.DeanimateGif = removeToken(f.DeanimateGif)
+		//f.ThumbVideo = removeToken(f.ThumbVideo)
 		m.Files[i] = f
 	}
 }
@@ -468,6 +480,11 @@ var filenameReplacer = strings.NewReplacer(
 	"|", "_",
 )
 
+// RegulateFilename replaces unusable characters as filepath by '_'.
+func RegulateFilename(s string) string {
+	return filenameReplacer.Replace(s)
+}
+
 // DownloadFilename returns local downloaded path for file.
 func (f *MessageFile) DownloadFilename(url, suffix string) string {
 	ext := filepath.Ext(url)
@@ -476,7 +493,7 @@ func (f *MessageFile) DownloadFilename(url, suffix string) string {
 	if ext == "" {
 		ext = nameExt
 		if ext == "" {
-			ext = filetypeToExtension[f.Filetype]
+			ext = FiletypeToExtension[f.Filetype]
 		}
 	}
 

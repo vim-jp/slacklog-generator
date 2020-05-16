@@ -1,7 +1,9 @@
 package slacklog
 
-// https://api.slack.com/types/file
-var filetypeToExtension = map[string]string{
+// FiletypeToExtension is a map which maps filetype to filename extension.
+//
+// Based on <https://api.slack.com/types/file>
+var FiletypeToExtension = map[string]string{
 	"auto":         "",             // Auto Detect Type,
 	"text":         ".txt",         // Plain Text,
 	"ai":           ".ai",          // Illustrator File,
