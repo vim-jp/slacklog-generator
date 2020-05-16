@@ -1,0 +1,91 @@
+name: reviewdog
+on: [pull_request]
+jobs:
+  # NOTE: golangci-lint doesn't report multiple errors on the same line from
+  # different linters and just report one of the errors?
+
+  golangci-lint:
+    name: runner / golangci-lint (pre-build docker image)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: golangci-lint
+        # uses: ./ # Build with Dockerfile
+        uses: docker://reviewdog/action-golangci-lint:v1 # Pre-built image
+        with:
+          github_token: ${{ secrets.github_token }}
+
+  golangci-lint-all-in-one:
+    name: runner / golangci-lint-all-in-one
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: golangci-lint (All-In-One config)
+        uses: docker://reviewdog/action-golangci-lint:v1
+        with:
+          github_token: ${{ secrets.github_token }}
+
+  govet:
+    name: runner / govet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: govet
+        uses: docker://reviewdog/action-golangci-lint:v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          tool_name: govet
+
+  staticcheck:
+    name: runner / staticcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: staticcheck
+        uses: docker://reviewdog/action-golangci-lint:v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          tool_name: staticcheck
+
+  golint:
+    name: runner / golint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: golint
+        uses: docker://reviewdog/action-golangci-lint:v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          tool_name: golint
+          level: warning
+
+  errcheck:
+    name: runner / errcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: errcheck
+        uses: docker://reviewdog/action-golangci-lint:v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          tool_name: errcheck
+          level: warning
+
+  misspell:
+    name: runner / misspell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: misspell
+        uses: docker://reviewdog/action-golangci-lint:v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          tool_name: misspell
+          level: info
