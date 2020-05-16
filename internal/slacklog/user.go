@@ -14,7 +14,7 @@ type UserTable struct {
 // 成する。
 func NewUserTable(path string) (*UserTable, error) {
 	var users []User
-	err := ReadFileAsJSON(path, &users)
+	err := ReadFileAsJSON(path, true, &users)
 	if err != nil {
 		return nil, err
 	}

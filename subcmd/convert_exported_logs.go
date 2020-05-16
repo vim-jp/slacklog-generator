@@ -111,7 +111,7 @@ func copyFile(from string, to string) error {
 
 func readChannels(channelJSONPath string, cfgChannels []string) ([]slacklog.Channel, map[string]*slacklog.Channel, error) {
 	var channels []slacklog.Channel
-	err := slacklog.ReadFileAsJSON(channelJSONPath, &channels)
+	err := slacklog.ReadFileAsJSON(channelJSONPath, true, &channels)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -141,7 +141,7 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 	var messages []*slacklog.Message
 	for _, name := range names {
 		var msgs []*slacklog.Message
-		err := slacklog.ReadFileAsJSON(filepath.Join(inDir, name), &msgs)
+		err := slacklog.ReadFileAsJSON(filepath.Join(inDir, name), false, &msgs)
 		if err != nil {
 			return nil, err
 		}

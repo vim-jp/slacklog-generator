@@ -109,7 +109,7 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 	}
 
 	var msgs Messages
-	err = ReadFileAsJSON(path, &msgs)
+	err = ReadFileAsJSON(path, false, &msgs)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}

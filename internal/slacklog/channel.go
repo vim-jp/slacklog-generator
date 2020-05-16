@@ -18,7 +18,7 @@ type ChannelTable struct {
 // whitelistに指定したチャンネル名のみを読み込む。
 func NewChannelTable(path string, whitelist []string) (*ChannelTable, error) {
 	var channels []Channel
-	if err := ReadFileAsJSON(path, &channels); err != nil {
+	if err := ReadFileAsJSON(path, true, &channels); err != nil {
 		return nil, err
 	}
 	channels = FilterChannel(channels, whitelist)
