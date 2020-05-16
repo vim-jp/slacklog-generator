@@ -2,6 +2,8 @@ package slacklog
 
 import (
 	"sort"
+
+	"github.com/slack-go/slack"
 )
 
 // ChannelTable : チャンネルデータを保持する。
@@ -68,16 +70,9 @@ func SortChannel(channels []Channel) {
 
 // Channel represents channel object in Slack.
 type Channel struct {
-	ID         string         `json:"id"`
-	Name       string         `json:"name"`
-	Created    int64          `json:"created"`
-	Creator    string         `json:"creator"`
-	IsArchived bool           `json:"is_archived"`
-	IsGeneral  bool           `json:"is_general"`
-	Members    []string       `json:"members"`
-	Pins       []ChannelPin   `json:"pins"`
-	Topic      ChannelTopic   `json:"topic"`
-	Purpose    ChannelPurpose `json:"purpose"`
+	slack.Channel
+
+	Pins []ChannelPin `json:"pins"`
 }
 
 // ChannelPin represents a pinned message for a channel.
@@ -87,18 +82,4 @@ type ChannelPin struct {
 	Created int64  `json:"created"`
 	User    string `json:"user"`
 	Owner   string `json:"owner"`
-}
-
-// ChannelTopic represents topic of a channel.
-type ChannelTopic struct {
-	Value   string `json:"value"`
-	Creator string `json:"creator"`
-	LastSet int64  `json:"last_set"`
-}
-
-// ChannelPurpose represents puropse of a channel.
-type ChannelPurpose struct {
-	Value   string `json:"value"`
-	Creator string `json:"creator"`
-	LastSet int64  `json:"last_set"`
 }
