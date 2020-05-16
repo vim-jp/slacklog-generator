@@ -32,11 +32,11 @@ build_tool() {
   fi
 }
 
-# generate-html サブコマンドとjekyll buildを実行して指定ディレクトリに出力する
+# generate-html サブコマンドと build.sh を実行して指定ディレクトリに出力する
 generate_site() {
   id=$1 ; shift
   outdir=${outrootdir}/${id}
-  echo "jekyll build to: ${outdir}" 1>&2
+  echo "build to: ${outdir}" 1>&2
   rm -rf ${outdir}
   build_tool
   tmpldir=slacklog_template/
