@@ -13,6 +13,7 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/kyokomi/emoji"
 	"github.com/slack-go/slack"
 )
 
@@ -228,6 +229,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 				return user.Profile.Image48
 			},
 			"text":           g.generateMessageText,
+			"reactions":      g.generateEmojiLink,
 			"attachmentText": g.generateAttachmentText,
 			"fileHTML":       g.generateFileHTML,
 			"threadMtime": func(ts string) string {
@@ -324,6 +326,48 @@ func (g *HTMLGenerator) generateFileHTML(file slack.File) string {
 		ftype = "none"
 	}
 	return "<code class='language-" + ftype + "'>" + string(src) + "</code>"
+}
+
+type ReactionInfo struct {
+	EmojiLink string
+	Name      string
+	Count     int
+	Users     string
+	Default   bool
+}
+
+func (g *HTMLGenerator) generateEmojiLink(msg Message) []ReactionInfo {
+	var info []ReactionInfo
+
+	for _, reaction := range msg.Reactions {
+		emojiLink := "_logdata/emojis/" + reaction.Name
+
+		_, err := os.Stat(emojiLink + ".png")
+
+		var displayName []string
+		for _, user := range reaction.Users {
+			displayName = append(displayName, g.s.GetDisplayNameByUserID(user))
+		}
+
+		users := strings.Join(displayName, ", ")
+
+		if err == nil {
+			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + ".png", Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
+		}
+
+		_, err = os.Stat(emojiLink + ".gif")
+
+		if err == nil {
+			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + ".gif", Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
+		}
+
+		char, ok := emoji.CodeMap()[":"+reaction.Name+":"]
+		if ok {
+			info = append(info, ReactionInfo{EmojiLink: "", Name: char, Count: reaction.Count, Users: users, Default: true})
+		}
+	}
+
+	return info
 }
 
 // executeAndWrite executes a template and writes contents to a file.
