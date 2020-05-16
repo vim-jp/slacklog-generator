@@ -295,13 +295,13 @@ func (m *Message) RemoveTokenFromURLs() {
 		f.Thumb360 = removeToken(f.Thumb360)
 		f.Thumb480 = removeToken(f.Thumb480)
 		f.Thumb720 = removeToken(f.Thumb720)
-		//f.Thumb800 = removeToken(f.Thumb800)
+		f.Thumb800 = removeToken(f.Thumb800)
 		f.Thumb960 = removeToken(f.Thumb960)
 		f.Thumb1024 = removeToken(f.Thumb1024)
 		f.Thumb360Gif = removeToken(f.Thumb360Gif)
-		//f.Thumb480Gif = removeToken(f.Thumb480Gif)
-		//f.DeanimateGif = removeToken(f.DeanimateGif)
-		//f.ThumbVideo = removeToken(f.ThumbVideo)
+		f.Thumb480Gif = removeToken(f.Thumb480Gif)
+		f.DeanimateGif = removeToken(f.DeanimateGif)
+		f.ThumbVideo = removeToken(f.ThumbVideo)
 		m.Files[i] = f
 	}
 }
