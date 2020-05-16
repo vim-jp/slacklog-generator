@@ -13,4 +13,4 @@ require (
 	github.com/urfave/cli/v2 v2.2.0
 )
 
-replace github.com/slack-go/slack => ../slacklog-slack
+replace github.com/slack-go/slack => github.com/vim-jp/slacklog-slack v0.0.0-20200516040724-ba0191a4c5ce
