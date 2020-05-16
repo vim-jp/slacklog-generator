@@ -25,7 +25,7 @@ func NewEmojiTable(path string) (*EmojiTable, error) {
 		return nil, os.ErrNotExist
 	}
 
-	if err := ReadFileAsJSON(path, &emojis.NameToExt); err != nil {
+	if err := ReadFileAsJSON(path, true, &emojis.NameToExt); err != nil {
 		return nil, err
 	}
 

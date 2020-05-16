@@ -10,7 +10,7 @@ type Config struct {
 // ReadConfig : pathに指定したファイルからコンフィグを読み込む。
 func ReadConfig(path string) (*Config, error) {
 	var cfg Config
-	if err := ReadFileAsJSON(path, &cfg); err != nil {
+	if err := ReadFileAsJSON(path, true, &cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil

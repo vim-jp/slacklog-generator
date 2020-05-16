@@ -2,13 +2,14 @@ package slacklog
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/slack-go/slack"
 )
 
 // Messages is an array of `*Message`.
@@ -18,7 +19,7 @@ type Messages []*Message
 func (msgs Messages) Sort() {
 	sort.SliceStable(msgs, func(i, j int) bool {
 		// must be the same digits, so no need to convert the timestamp to a number
-		return msgs[i].Ts < msgs[j].Ts
+		return msgs[i].Timestamp < msgs[j].Timestamp
 	})
 }
 
@@ -108,7 +109,7 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 	}
 
 	var msgs Messages
-	err = ReadFileAsJSON(path, &msgs)
+	err = ReadFileAsJSON(path, true, &msgs)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}
@@ -121,7 +122,7 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 		}
 
 		// スレッドに所属してるメッセージは ThreadMap へスレッド毎に分別しておく
-		threadTs := msg.ThreadTs
+		threadTs := msg.ThreadTimestamp
 		if threadTs != "" {
 			thread, ok := m.ThreadMap[threadTs]
 			if !ok {
@@ -245,56 +246,36 @@ func (k MessageMonthKey) PrevMonth() string {
 // エクスポートしたYYYY-MM-DD.jsonの中身を保持する。
 // https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
 type Message struct {
-	ClientMsgID  string              `json:"client_msg_id,omitempty"`
-	Typ          string              `json:"type"`
-	Subtype      string              `json:"subtype,omitempty"`
-	Text         string              `json:"text"`
-	User         string              `json:"user"`
-	Ts           string              `json:"ts"`
-	ThreadTs     string              `json:"thread_ts,omitempty"`
-	ParentUserID string              `json:"parent_user_id,omitempty"`
-	Username     string              `json:"username,omitempty"`
-	BotID        string              `json:"bot_id,omitempty"`
-	Team         string              `json:"team,omitempty"`
-	UserTeam     string              `json:"user_team,omitempty"`
-	SourceTeam   string              `json:"source_team,omitempty"`
-	UserProfile  *MessageUserProfile `json:"user_profile,omitempty"`
-	Attachments  []MessageAttachment `json:"attachments,omitempty"`
-	Blocks       []interface{}       `json:"blocks,omitempty"` // TODO: Use messageBlock
-	Reactions    []MessageReaction   `json:"reactions,omitempty"`
-	Edited       *MessageEdited      `json:"edited,omitempty"`
-	Icons        *MessageIcons       `json:"icons,omitempty"`
-	Files        []MessageFile       `json:"files,omitempty"`
-	Root         *Message            `json:"root,omitempty"`
-	DisplayAsBot bool                `json:"display_as_bot,omitempty"`
-	Upload       bool                `json:"upload,omitempty"`
-	// if true, the message user the same as the previous one
+	slack.Message
+
+	// Trail shows the user of message is same as the previous one.
+	// FIXME: 本来はココに書いてはいけない
 	Trail bool `json:"-"`
 }
 
 // isVisible : 表示すべきメッセージ種別かを判定する。
 // 例えばchannel_joinなどは投稿された出力する必要がないため、falseを返す。
 func (m *Message) isVisible() bool {
-	return m.Subtype == "" ||
-		m.Subtype == "bot_message" ||
-		m.Subtype == "slackbot_response" ||
-		m.Subtype == "thread_broadcast"
+	return m.SubType == "" ||
+		m.SubType == "bot_message" ||
+		m.SubType == "slackbot_response" ||
+		m.SubType == "thread_broadcast"
 }
 
 // isBotMessage : メッセージがBotからの物かを判定する。
 func (m *Message) isBotMessage() bool {
-	return m.Subtype == "bot_message" ||
-		m.Subtype == "slackbot_response"
+	return m.SubType == "bot_message" ||
+		m.SubType == "slackbot_response"
 }
 
 // IsRootOfThread : メッセージがスレッドの最初のメッセージであるかを判定する。
 func (m Message) IsRootOfThread() bool {
-	return m.Ts == m.ThreadTs
+	return m.Timestamp == m.ThreadTimestamp
 }
 
 // isThreadChild returns true when a message should be shown in a thread only.
 func (m *Message) isThreadChild() bool {
-	return m.ThreadTs != "" && m.Ts != m.ThreadTs && m.Subtype != "thread_broadcast"
+	return m.ThreadTimestamp != "" && m.Timestamp != m.ThreadTimestamp && m.SubType != "thread_broadcast"
 }
 
 var reToken = regexp.MustCompile(`\?t=xoxe-[-a-f0-9]+$`)
@@ -325,137 +306,6 @@ func (m *Message) RemoveTokenFromURLs() {
 	}
 }
 
-// MessageFile :
-// エクスポートしたYYYY-MM-DD.jsonの中身を保持する
-// https://slack.com/intl/ja-jp/help/articles/220556107-Slack-%E3%81%8B%E3%82%89%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%81%97%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E6%96%B9
-type MessageFile struct {
-	ID                 string `json:"id"`
-	Created            int64  `json:"created"`
-	Timestamp          int64  `json:"timestamp"`
-	Name               string `json:"name"`
-	Title              string `json:"title"`
-	Mimetype           string `json:"mimetype"`
-	Filetype           string `json:"filetype"`
-	PrettyType         string `json:"pretty_type"`
-	User               string `json:"user"`
-	Editable           bool   `json:"editable"`
-	Size               int64  `json:"size"`
-	Mode               string `json:"mode"`
-	IsExternal         bool   `json:"is_external"`
-	ExternalType       string `json:"external_type"`
-	IsPublic           bool   `json:"is_public"`
-	PublicURLShared    bool   `json:"public_url_shared"`
-	DisplayAsBot       bool   `json:"display_as_bot"`
-	Username           string `json:"username"`
-	URLPrivate         string `json:"url_private"`
-	URLPrivateDownload string `json:"url_private_download"`
-	Thumb64            string `json:"thumb_64,omitempty"`
-	Thumb80            string `json:"thumb_80,omitempty"`
-	Thumb160           string `json:"thumb_160,omitempty"`
-	Thumb360           string `json:"thumb_360,omitempty"`
-	Thumb360W          int64  `json:"thumb_360_w,omitempty"`
-	Thumb360H          int64  `json:"thumb_360_h,omitempty"`
-	Thumb480           string `json:"thumb_480,omitempty"`
-	Thumb480W          int64  `json:"thumb_480_w,omitempty"`
-	Thumb480H          int64  `json:"thumb_480_h,omitempty"`
-	Thumb720           string `json:"thumb_720,omitempty"`
-	Thumb720W          int64  `json:"thumb_720_w,omitempty"`
-	Thumb720H          int64  `json:"thumb_720_h,omitempty"`
-	Thumb800           string `json:"thumb_800,omitempty"`
-	Thumb800W          int64  `json:"thumb_800_w,omitempty"`
-	Thumb800H          int64  `json:"thumb_800_h,omitempty"`
-	Thumb960           string `json:"thumb_960,omitempty"`
-	Thumb960W          int64  `json:"thumb_960_w,omitempty"`
-	Thumb960H          int64  `json:"thumb_960_h,omitempty"`
-	Thumb1024          string `json:"thumb_1024,omitempty"`
-	Thumb1024W         int64  `json:"thumb_1024_w,omitempty"`
-	Thumb1024H         int64  `json:"thumb_1024_h,omitempty"`
-	Thumb360Gif        string `json:"thumb_360_gif,omitempty"`
-	Thumb480Gif        string `json:"thumb_480_gif,omitempty"`
-	DeanimateGif       string `json:"deanimate_gif,omitempty"`
-	ThumbTiny          string `json:"thumb_tiny,omitempty"`
-	OriginalW          int64  `json:"original_w,omitempty"`
-	OriginalH          int64  `json:"original_h,omitempty"`
-	ThumbVideo         string `json:"thumb_video,omitempty"`
-	Permalink          string `json:"permalink"`
-	PermalinkPublic    string `json:"permalink_public"`
-	EditLink           string `json:"edit_link,omitempty"`
-	IsStarred          bool   `json:"is_starred"`
-	HasRichPreview     bool   `json:"has_rich_preview"`
-}
-
-// IsSlackHosted は、ファイルが slack.com にホストされている場合に true を返します。
-// MessageFile のファイルは slack.com にアップロードされていない場合があります。
-func (f *MessageFile) IsSlackHosted() bool {
-	return strings.HasPrefix(f.URLPrivate, "https://files.slack.com/")
-}
-
-// TopLevelMimetype returns top level of mimetype string.
-func (f *MessageFile) TopLevelMimetype() string {
-	i := strings.Index(f.Mimetype, "/")
-	if i < 0 {
-		return ""
-	}
-	return f.Mimetype[:i]
-}
-
-// OriginalFilePath returns path of file on local.
-func (f *MessageFile) OriginalFilePath() string {
-	suffix := f.DownloadURLsAndSuffixes()[f.URLPrivate]
-	return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.URLPrivate, suffix))
-}
-
-// ThumbImagePath returns path of thumbnail image file.
-func (f *MessageFile) ThumbImagePath() string {
-	if f.Thumb1024 != "" {
-		suffix := f.DownloadURLsAndSuffixes()[f.Thumb1024]
-		return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.Thumb1024, suffix))
-	}
-	return f.OriginalFilePath()
-}
-
-// ThumbImageWidth returns width of thumbnail image.
-func (f *MessageFile) ThumbImageWidth() int64 {
-	if f.Thumb1024 != "" {
-		return f.Thumb1024W
-	}
-	return f.OriginalW
-}
-
-// ThumbImageHeight returns height of thumbnail image.
-func (f *MessageFile) ThumbImageHeight() int64 {
-	if f.Thumb1024 != "" {
-		return f.Thumb1024H
-	}
-	return f.OriginalH
-}
-
-// ThumbVideoPath returns local path of thumbnail for the video.
-func (f *MessageFile) ThumbVideoPath() string {
-	suffix := f.DownloadURLsAndSuffixes()[f.ThumbVideo]
-	return f.ID + "/" + url.PathEscape(f.DownloadFilename(f.ThumbVideo, suffix))
-}
-
-// DownloadURLsAndSuffixes returns map of suffixes for thumbnails.
-func (f *MessageFile) DownloadURLsAndSuffixes() map[string]string {
-	return map[string]string{
-		f.URLPrivate:   "",
-		f.Thumb64:      "_64",
-		f.Thumb80:      "_80",
-		f.Thumb160:     "_160",
-		f.Thumb360:     "_360",
-		f.Thumb480:     "_480",
-		f.Thumb720:     "_720",
-		f.Thumb800:     "_800",
-		f.Thumb960:     "_960",
-		f.Thumb1024:    "_1024",
-		f.Thumb360Gif:  "_360",
-		f.Thumb480Gif:  "_480",
-		f.DeanimateGif: "_deanimate_gif",
-		f.ThumbVideo:   "_thumb_video",
-	}
-}
-
 var filenameReplacer = strings.NewReplacer(
 	`\`, "_",
 	"/", "_",
@@ -468,93 +318,12 @@ var filenameReplacer = strings.NewReplacer(
 	"|", "_",
 )
 
-// DownloadFilename returns local downloaded path for file.
-func (f *MessageFile) DownloadFilename(url, suffix string) string {
-	ext := filepath.Ext(url)
-	nameExt := filepath.Ext(f.Name)
-	name := f.Name[:len(f.Name)-len(ext)]
-	if ext == "" {
-		ext = nameExt
-		if ext == "" {
-			ext = filetypeToExtension[f.Filetype]
-		}
-	}
-
-	return filenameReplacer.Replace(name + suffix + ext)
+// RegulateFilename replaces unusable characters as filepath by '_'.
+func RegulateFilename(s string) string {
+	return filenameReplacer.Replace(s)
 }
 
 // MessageIcons represents icon for each message.
 type MessageIcons struct {
 	Image48 string `json:"image_48"`
-}
-
-// MessageEdited shows message is editted or not.
-type MessageEdited struct {
-	User string `json:"user"`
-	Ts   string `json:"ts"`
-}
-
-// MessageUserProfile represents user's profile for message.
-type MessageUserProfile struct {
-	AvatarHash        string `json:"avatar_hash"`
-	Image72           string `json:"image72"`
-	FirstName         string `json:"first_name"`
-	RealName          string `json:"real_name"`
-	DisplayName       string `json:"display_name"`
-	Team              string `json:"team"`
-	Name              string `json:"name"`
-	IsRestricted      bool   `json:"is_restricted"`
-	IsUltraRestricted bool   `json:"is_ultra_restricted"`
-}
-
-// MessageBlock represents Block, how to render message.
-type MessageBlock struct {
-	Typ      string                `json:"type"`
-	Elements []MessageBlockElement `json:"elements"`
-}
-
-// MessageBlockElement represents an element for Block.
-type MessageBlockElement struct {
-	Typ       string `json:"type"`
-	Name      string `json:"name"`       // for type = "emoji"
-	Text      string `json:"text"`       // for type = "text"
-	ChannelID string `json:"channel_id"` // for type = "channel"
-}
-
-// MessageAttachment represents an attachement for message.
-type MessageAttachment struct {
-	ServiceName     string   `json:"service_name,omitempty"`
-	AuthorID        string   `json:"author_id,omitempty"`
-	AuthorIcon      string   `json:"author_icon,omitempty"`
-	AuthorName      string   `json:"author_name,omitempty"`
-	AuthorSubname   string   `json:"author_subname,omitempty"`
-	AuthorLink      string   `json:"author_link,omitempty"`
-	ChannelID       string   `json:"channel_id,omitempty"`
-	ChannelName     string   `json:"channel_name,omitempty"`
-	Title           string   `json:"title,omitempty"`
-	TitleLink       string   `json:"title_link,omitempty"`
-	Text            string   `json:"text,omitempty"`
-	Fallback        string   `json:"fallback,omitempty"`
-	ThumbURL        string   `json:"thumb_url,omitempty"`
-	FromURL         string   `json:"from_url,omitempty"`
-	ThumbWidth      int      `json:"thumb_width,omitempty"`
-	ThumbHeight     int      `json:"thumb_height,omitempty"`
-	ServiceIcon     string   `json:"service_icon,omitempty"`
-	ID              int      `json:"id"`
-	OriginalURL     string   `json:"original_url,omitempty"`
-	VideoHTML       string   `json:"video_html,omitempty"`
-	VideoHTMLWidth  int      `json:"video_html_width,omitempty"`
-	VideoHTMLHeight int      `json:"video_html_height,omitempty"`
-	Footer          string   `json:"footer,omitempty"`
-	FooterIcon      string   `json:"footer_icon,omitempty"`
-	IsMsgUnfurl     bool     `json:"is_msg_unfurl,omitempty"`
-	MrkdwnIn        []string `json:"mrkdwn_in,omitempty"`
-	Ts              *Ts      `json:"ts,omitempty"`
-}
-
-// MessageReaction repersents a reaction for message.
-type MessageReaction struct {
-	Name  string   `json:"name"`
-	Users []string `json:"users"`
-	Count int      `json:"count"`
 }

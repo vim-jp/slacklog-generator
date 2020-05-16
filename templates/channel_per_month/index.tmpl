@@ -42,16 +42,16 @@
         </div>
         {{- range .msgs }}
         {{- if visible . }}
-        <div class="clearfix m-3" id="ts-{{ .Ts }}">
+        <div class="clearfix m-3" id="ts-{{ .Timestamp }}">
           <div class="border-bottom">
             <div class="float-left mr-2">
               <img class="avatar" width="36" height="36" src="{{ userIconUrl . }}" />
             </div>
             <div>
               <span class="text-bold mr-1">{{ username . }}</span>
-              <a href="#ts-{{ .Ts }}">{{ datetime .Ts }}</a>
+              <a href="#ts-{{ .Timestamp }}">{{ datetime .Timestamp }}</a>
               <span class="Label Label--outline">
-                <a href="https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Ts }}">Slack</a>
+                <a href="https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Timestamp }}">Slack</a>
               </span>
             </div>
             <div class="overflow-hidden mb-3">
@@ -59,14 +59,14 @@
                 {{ text . }}
               </div>
 
-            {{- if and (ne .ThreadTs "") (ne .ThreadTs .Ts) }}
+            {{- if and (ne .ThreadTimestamp "") (ne .ThreadTimestamp .Timestamp) }}
             <span class="f6 text-gray-light">
-              このスレッドに返信しました : <a href="#ts-{{- .ThreadTs }}">{{- threadRootText .ThreadTs }}</a>
+              このスレッドに返信しました : <a href="#ts-{{- .ThreadTimestamp }}">{{- threadRootText .ThreadTimestamp }}</a>
             </span>
             {{- end }}
 
             {{- if .Attachments }}
-            <div class="mt-2 border p-2" id="ts-{{ .Ts }}">
+            <div class="mt-2 border p-2" id="ts-{{ .Timestamp }}">
               {{ template "attachment.tmpl" . }}
             </div>
             {{- end }}
@@ -75,12 +75,12 @@
               <div class="mt-2 border p-3">
                 {{- range .Files }}
                 <div>
-                  {{- if .IsSlackHosted }}
-                  <a href="{{ $.baseURL }}/files/{{ .OriginalFilePath }}">
-                  {{- if eq .TopLevelMimetype "image" }}
-                  <img src="{{ $.baseURL }}/files/{{ .ThumbImagePath }}" width="{{ .ThumbImageWidth }}" height="{{ .ThumbImageHeight }}" alt="{{ .Title }}" />
-                  {{- else if eq .TopLevelMimetype "video" }}
-                  <video src="{{ $.baseURL }}/files/{{ .OriginalFilePath }}" poster="{{ $.baseURL }}/files/{{ .ThumbVideoPath }}" controls alt="{{ .Title }}">
+                  {{- if hostBySlack . }}
+                  <a href="{{ $.baseURL }}/files/{{ localPath . }}">
+                  {{- if eq (topLevelMimetype .) "image" }}
+                  <img src="{{ $.baseURL }}/files/{{ thumbImagePath . }}" width="{{ thumbImageWidth . }}" height="{{ thumbImageHeight . }}" alt="{{ .Title }}" />
+                  {{- else if eq (topLevelMimetype .) "video" }}
+                  <video src="{{ $.baseURL }}/files/{{ localPath . }}" poster="{{ $.baseURL }}/files/{{ thumbVideoPath . }}" controls alt="{{ .Title }}">
                   </video>
                   {{- else }}
                   <span class="f5">[[ダウンロード: {{ .Title }}({{ .PrettyType }})]]</span>
@@ -98,17 +98,17 @@
               </div>
             {{- end }}
 
-            {{- if threads .Ts }}
+            {{- if threads .Timestamp }}
               <details class="details-reset mt-3">
                 <summary class="btn-link">
                   <span class="f5">
-                  {{- threadNum .ThreadTs }} 件の返信 最終返信:{{- threadMtime .ThreadTs }} <span class="dropdown-caret"></span>
+                  {{- threadNum .ThreadTimestamp }} 件の返信 最終返信:{{- threadMtime .ThreadTimestamp }} <span class="dropdown-caret"></span>
                   </span>
                 </summary>
                 <div class="border mt-2">
-                  {{- range threads .Ts }}
-                  <div class="p-2" id="ts-{{ .Ts }}">
-                    {{- if eq .Subtype "thread_broadcast" }}
+                  {{- range threads .Timestamp }}
+                  <div class="p-2" id="ts-{{ .Timestamp }}">
+                    {{- if eq .SubType "thread_broadcast" }}
                     <div class="d-flex flex-wrap">
                       <div class="f6 ml-3 text-gray-light">#←</div>
                       <div class="f6 ml-2 text-gray-light">チャンネルにも投稿済</div>
@@ -119,7 +119,7 @@
                     </div>
                     <div>
                       <span class="text-bold mr-1">{{ username . }}</span>
-                      <a href="#ts-{{ .Ts }}">{{ datetime .Ts }}</a>
+                      <a href="#ts-{{ .Timestamp }}">{{ datetime .Timestamp }}</a>
                     </div>
                     <div class="overflow-hidden">
                       {{ text . }}

@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/slack-go/slack"
 	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
 )
@@ -62,6 +63,21 @@ func downloadFiles(c *cli.Context) error {
 	return nil
 }
 
+func urlAndSuffixes(f slack.File) map[string]string {
+	return map[string]string{
+		f.URLPrivate:  "",
+		f.Thumb64:     "_64",
+		f.Thumb80:     "_80",
+		f.Thumb160:    "_160",
+		f.Thumb360:    "_360",
+		f.Thumb480:    "_480",
+		f.Thumb720:    "_720",
+		f.Thumb960:    "_960",
+		f.Thumb1024:   "_1024",
+		f.Thumb360Gif: "_360",
+	}
+}
+
 func generateMessageFileTargets(d *slacklog.Downloader, s *slacklog.LogStore, outputDir string) {
 	defer d.CloseQueue()
 	channels := s.GetChannels()
@@ -80,7 +96,7 @@ func generateMessageFileTargets(d *slacklog.Downloader, s *slacklog.LogStore, ou
 				// 基本的に msg.Upload の判定で弾けるはずだが、
 				// 複数のファイルが含まれていた場合が不明。
 				// 念のためこちらでもチェックして弾くようにしておく
-				if !f.IsSlackHosted() {
+				if !slacklog.HostBySlack(f) {
 					continue
 				}
 
@@ -91,13 +107,13 @@ func generateMessageFileTargets(d *slacklog.Downloader, s *slacklog.LogStore, ou
 					return
 				}
 
-				for url, suffix := range f.DownloadURLsAndSuffixes() {
+				for url, suffix := range urlAndSuffixes(f) {
 					if url == "" {
 						continue
 					}
 					d.QueueDownloadRequest(
 						url,
-						filepath.Join(targetDir, f.DownloadFilename(url, suffix)),
+						filepath.Join(targetDir, slacklog.LocalName(f, url, suffix)),
 						true,
 					)
 				}

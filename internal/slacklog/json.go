@@ -7,14 +7,16 @@ import (
 
 // ReadFileAsJSON reads a file and unmarshal its contents as JSON to `dst`
 // destination object.
-func ReadFileAsJSON(filename string, dst interface{}) error {
+func ReadFileAsJSON(filename string, strict bool, dst interface{}) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	d := json.NewDecoder(f)
-	d.DisallowUnknownFields()
+	if strict {
+		d.DisallowUnknownFields()
+	}
 	err = d.Decode(dst)
 	if err != nil {
 		return err

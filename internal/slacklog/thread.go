@@ -14,7 +14,7 @@ type Thread struct {
 
 // LastReplyTime returns last replied time for the thread.
 func (th Thread) LastReplyTime() time.Time {
-	return TsToDateTime(th.replies[len(th.replies)-1].Ts)
+	return TsToDateTime(th.replies[len(th.replies)-1].Timestamp)
 }
 
 // ReplyCount return counts of replied messages.
