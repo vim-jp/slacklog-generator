@@ -336,38 +336,35 @@ type ReactionInfo struct {
 	Default   bool
 }
 
-func (g *HTMLGenerator) generateEmojiLink(msg Message) []ReactionInfo {
+func (g *HTMLGenerator) generateEmojiLink(msg Message) ([]ReactionInfo, error) {
 	var info []ReactionInfo
 
+	emojiTable, err := NewEmojiTable("_logdata/slacklog_data/emoji.json")
+	if err != nil {
+		return nil, err
+	}
+
 	for _, reaction := range msg.Reactions {
-		emojiLink := "_logdata/emojis/" + reaction.Name
-
-		_, err := os.Stat(emojiLink + ".png")
-
 		var displayName []string
 		for _, user := range reaction.Users {
 			displayName = append(displayName, g.s.GetDisplayNameByUserID(user))
 		}
-
 		users := strings.Join(displayName, ", ")
 
-		if err == nil {
-			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + ".png", Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
-		}
+		emojiExt, ok := emojiTable.NameToExt[reaction.Name]
 
-		_, err = os.Stat(emojiLink + ".gif")
-
-		if err == nil {
-			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + ".gif", Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
-		}
-
-		char, ok := emoji.CodeMap()[":"+reaction.Name+":"]
 		if ok {
-			info = append(info, ReactionInfo{EmojiLink: "", Name: char, Count: reaction.Count, Users: users, Default: true})
+			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + emojiExt, Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
+		} else {
+			char, ok := emoji.CodeMap()[":"+reaction.Name+":"]
+
+			if ok {
+				info = append(info, ReactionInfo{EmojiLink: "", Name: char, Count: reaction.Count, Users: users, Default: true})
+			}
 		}
 	}
 
-	return info
+	return info, nil
 }
 
 // executeAndWrite executes a template and writes contents to a file.
