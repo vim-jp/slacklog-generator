@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -356,6 +357,7 @@ func (g *HTMLGenerator) getReactions(msg Message) []ReactionInfo {
 			users = append(users, n)
 		}
 
+		// custom emoji case
 		emojiExt, ok := g.s.et.NameToExt[reaction.Name]
 		if ok {
 			info = append(info, ReactionInfo{
@@ -368,21 +370,15 @@ func (g *HTMLGenerator) getReactions(msg Message) []ReactionInfo {
 			continue
 		}
 
-		char, ok := emoji.CodeMap()[":"+reaction.Name+":"]
-		if !ok {
-			g.ueMu.Lock()
-			if g.ueMap == nil {
-				g.ueMap = map[string]struct{}{}
-			}
-			if _, ok := g.ueMap[reaction.Name]; !ok {
-				g.ueMap[reaction.Name] = struct{}{}
-				log.Printf("[WARN] reaction with unknown emoji: %s", reaction.Name)
-			}
-			g.ueMu.Unlock()
+		// fallback to unicode.
+		emojiStr := ":" + reaction.Name + ":"
+		unicodeEmojis := g.emojiToString(emojiStr)
+		if unicodeEmojis == "" {
+			log.Printf("[ERROR] no unicodes for emoji: %s", emojiStr)
 			continue
 		}
 		info = append(info, ReactionInfo{
-			Name:    char,
+			Name:    unicodeEmojis,
 			Count:   reaction.Count,
 			Users:   users,
 			Default: true,
@@ -390,6 +386,29 @@ func (g *HTMLGenerator) getReactions(msg Message) []ReactionInfo {
 	}
 
 	return info
+}
+
+var rxEmoji = regexp.MustCompile(`:[^:]+:`)
+
+func (g *HTMLGenerator) emojiToString(emojiSeq string) string {
+	b := &strings.Builder{}
+	for _, s := range rxEmoji.FindAllString(emojiSeq, -1) {
+		ch, ok := emoji.CodeMap()[s]
+		if !ok {
+			g.ueMu.Lock()
+			if g.ueMap == nil {
+				g.ueMap = map[string]struct{}{}
+			}
+			if _, ok := g.ueMap[s]; !ok {
+				g.ueMap[s] = struct{}{}
+				log.Printf("[WARN] unknown emoji: %s", s)
+			}
+			g.ueMu.Unlock()
+			continue
+		}
+		b.WriteString(ch)
+	}
+	return b.String()
 }
 
 // executeAndWrite executes a template and writes contents to a file.
