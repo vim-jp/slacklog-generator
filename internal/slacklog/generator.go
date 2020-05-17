@@ -336,13 +336,8 @@ type ReactionInfo struct {
 	Default   bool
 }
 
-func (g *HTMLGenerator) generateEmojiLink(msg Message) ([]ReactionInfo, error) {
+func (g *HTMLGenerator) generateEmojiLink(msg Message) []ReactionInfo {
 	var info []ReactionInfo
-
-	emojiTable, err := NewEmojiTable("_logdata/slacklog_data/emoji.json")
-	if err != nil {
-		return nil, err
-	}
 
 	for _, reaction := range msg.Reactions {
 		var displayName []string
@@ -351,7 +346,7 @@ func (g *HTMLGenerator) generateEmojiLink(msg Message) ([]ReactionInfo, error) {
 		}
 		users := strings.Join(displayName, ", ")
 
-		emojiExt, ok := emojiTable.NameToExt[reaction.Name]
+		emojiExt, ok := g.s.et.NameToExt[reaction.Name]
 
 		if ok {
 			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + emojiExt, Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
@@ -364,7 +359,7 @@ func (g *HTMLGenerator) generateEmojiLink(msg Message) ([]ReactionInfo, error) {
 		}
 	}
 
-	return info, nil
+	return info
 }
 
 // executeAndWrite executes a template and writes contents to a file.
