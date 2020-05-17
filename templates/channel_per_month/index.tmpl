@@ -60,10 +60,11 @@
               </div>
 
               <div>
-                {{- if reactions . }}
+                {{- $rs := reactions .}}
+                {{- if $rs }}
                   <div>
                     <ul class="d-flex list-style-none flex-justify-start pt-2">
-                      {{- range reactions . }}
+                      {{- range $rs }}
                         <li>
                           <span class="tooltipped tooltipped-ne tooltipped-align-left-1 p-1" aria-label="{{ .Users }}">
                             {{- if eq .Default false }}
