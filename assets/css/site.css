@@ -30,26 +30,33 @@ a:visited {
 }
 
 code {
- margin: 1px;
- padding: 2px;
- line-height: 1.4em;
- border: solid 1px #ccc;
+  margin: 1px;
+  padding: 2px;
+  line-height: 1.4em;
+  border: solid 1px #ccc;
 }
 
 pre > code {
- border: 0px;
- margin: 0px;
- padding: 0px;
+  border: 0px;
+  margin: 0px;
+  padding: 0px;
 }
 
 pre {
- color: white;
- background-color: black;
- padding: 0.5em;
+  color: white;
+  background-color: black;
+  padding: 0.5em;
 }
 
 .slacklog-emoji {
   height: 1.0em;
+}
+
+pre[class*="language-"] {
+  resize: vertical;
+  min-height: 15vh;
+  max-height: 80vh;
+  height: 30vh;
 }
 
 /* vim:set ts=8 sts=2 sw=2 noet: */
