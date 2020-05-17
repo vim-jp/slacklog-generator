@@ -67,9 +67,9 @@
                       {{- range $rs }}
                         <li>
                           <span class="tooltipped tooltipped-ne tooltipped-align-left-1 p-1" aria-label="{{ stringsJoin .Users ", " }}">
-                            {{- if eq .Default false }}
+                            {{- if not .Default }}
                               <img class="slacklog-emoji" alt="{{ .Name }}" title="{{ .Name }}" src="{{ $.baseURL }}/emojis/{{ .EmojiPath }}"><span class="ml-1">{{ .Count }}</span>
-                            {{- else if eq .Default true }}
+                            {{- else }}
                               <span>{{ .Name }}{{ .Count }}</span>
                             {{- end }}
                           </span>
