@@ -59,6 +59,28 @@
                 {{ text . }}
               </div>
 
+              <div>
+                {{- $rs := reactions .}}
+                {{- if $rs }}
+                  <div>
+                    <ul class="d-flex list-style-none flex-justify-start pt-2">
+                      {{- range $rs }}
+                        <li>
+                          <span class="tooltipped tooltipped-ne tooltipped-align-left-1 p-1" aria-label="{{ .Users }}">
+                            {{- if eq .Default false }}
+                              <img class="slacklog-emoji" alt="{{ .Name }}" title="{{ .Name }}" src="{{ .EmojiLink }}"><span class="ml-1">{{ .Count }}</span>
+                            {{- else if eq .Default true }}
+                              <span>{{ .Name }}{{ .Count }}</span>
+                            {{- end }}
+                          </span>
+                        </li>
+                      {{- end }}
+                    </ul>
+                  </div>
+                {{- end }}
+              </div>
+
+
             {{- if and (ne .ThreadTimestamp "") (ne .ThreadTimestamp .Timestamp) }}
             <span class="f6 text-gray-light">
               このスレッドに返信しました : <a href="#ts-{{- .ThreadTimestamp }}">{{- threadRootText .ThreadTimestamp }}</a>
