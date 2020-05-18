@@ -13,6 +13,7 @@ type FileStore struct {
 	dir string
 
 	cs *channelStore
+	us *userStore
 }
 
 // New creates a FileStore.
@@ -30,6 +31,9 @@ func New(dir string) (*FileStore, error) {
 	return &FileStore{
 		dir: dir,
 		cs: &channelStore{
+			dir: filepath.Join(dir, "slacklog_data"),
+		},
+		us: &userStore{
 			dir: filepath.Join(dir, "slacklog_data"),
 		},
 	}, nil

@@ -48,3 +48,11 @@ func (fn ChannelIterateFunc) Iterate(c *Channel) bool {
 }
 
 var _ ChannelIterator = ChannelIterateFunc(nil)
+
+// User represents user object in Slack.
+type User slack.User
+
+// Tidy removes sensitive data from user.
+func (u *User) Tidy() {
+	// nothing to do for now.
+}
