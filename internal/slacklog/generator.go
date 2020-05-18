@@ -6,8 +6,10 @@ import (
 	"html"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -31,6 +33,10 @@ type HTMLGenerator struct {
 
 	// baseURL is root path for public site, configured by `BASEURL` environment variable.
 	baseURL string
+
+	// ueMap is a set of unknown emojis.
+	ueMap map[string]struct{}
+	ueMu  sync.Mutex
 }
 
 // maxEmbeddedFileSize : 添付ファイルの埋め込みを行うファイルサイズ
@@ -229,7 +235,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 				return user.Profile.Image48
 			},
 			"text":           g.generateMessageText,
-			"reactions":      g.generateEmojiLink,
+			"reactions":      g.getReactions,
 			"attachmentText": g.generateAttachmentText,
 			"fileHTML":       g.generateFileHTML,
 			"threadMtime": func(ts string) string {
@@ -275,6 +281,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"thumbImageWidth":  ThumbImageWidth,
 			"thumbImageHeight": ThumbImageHeight,
 			"thumbVideoPath":   ThumbVideoPath,
+			"stringsJoin":      strings.Join,
 		}).
 		ParseGlob(filepath.Join(g.templateDir, "channel_per_month", "*.tmpl"))
 	if err != nil {
@@ -328,38 +335,80 @@ func (g *HTMLGenerator) generateFileHTML(file slack.File) string {
 	return "<code class='language-" + ftype + "'>" + string(src) + "</code>"
 }
 
+// ReactionInfo is information for a reaction.
 type ReactionInfo struct {
-	EmojiLink string
+	EmojiPath string
 	Name      string
 	Count     int
-	Users     string
+	Users     []string
 	Default   bool
 }
 
-func (g *HTMLGenerator) generateEmojiLink(msg Message) []ReactionInfo {
+func (g *HTMLGenerator) getReactions(msg Message) []ReactionInfo {
 	var info []ReactionInfo
 
 	for _, reaction := range msg.Reactions {
-		var displayName []string
+		users := make([]string, 0, len(reaction.Users))
 		for _, user := range reaction.Users {
-			displayName = append(displayName, g.s.GetDisplayNameByUserID(user))
-		}
-		users := strings.Join(displayName, ", ")
-
-		emojiExt, ok := g.s.et.NameToExt[reaction.Name]
-
-		if ok {
-			info = append(info, ReactionInfo{EmojiLink: "/emojis/" + reaction.Name + emojiExt, Name: reaction.Name, Count: reaction.Count, Users: users, Default: false})
-		} else {
-			char, ok := emoji.CodeMap()[":"+reaction.Name+":"]
-
-			if ok {
-				info = append(info, ReactionInfo{EmojiLink: "", Name: char, Count: reaction.Count, Users: users, Default: true})
+			n := g.s.GetDisplayNameByUserID(user)
+			if n == "" {
+				continue
 			}
+			users = append(users, n)
 		}
+
+		// custom emoji case
+		emojiExt, ok := g.s.et.NameToExt[reaction.Name]
+		if ok {
+			info = append(info, ReactionInfo{
+				EmojiPath: url.PathEscape(reaction.Name + emojiExt),
+				Name:      reaction.Name,
+				Count:     reaction.Count,
+				Users:     users,
+				Default:   false,
+			})
+			continue
+		}
+
+		// fallback to unicode.
+		emojiStr := ":" + reaction.Name + ":"
+		unicodeEmojis := g.emojiToString(emojiStr)
+		if unicodeEmojis == "" {
+			log.Printf("[ERROR] no unicodes for emoji: %s", emojiStr)
+			continue
+		}
+		info = append(info, ReactionInfo{
+			Name:    unicodeEmojis,
+			Count:   reaction.Count,
+			Users:   users,
+			Default: true,
+		})
 	}
 
 	return info
+}
+
+var rxEmoji = regexp.MustCompile(`:[^:]+:`)
+
+func (g *HTMLGenerator) emojiToString(emojiSeq string) string {
+	b := &strings.Builder{}
+	for _, s := range rxEmoji.FindAllString(emojiSeq, -1) {
+		ch, ok := emoji.CodeMap()[s]
+		if !ok {
+			g.ueMu.Lock()
+			if g.ueMap == nil {
+				g.ueMap = map[string]struct{}{}
+			}
+			if _, ok := g.ueMap[s]; !ok {
+				g.ueMap[s] = struct{}{}
+				log.Printf("[WARN] unknown emoji: %s", s)
+			}
+			g.ueMu.Unlock()
+			continue
+		}
+		b.WriteString(ch)
+	}
+	return b.String()
 }
 
 // executeAndWrite executes a template and writes contents to a file.
