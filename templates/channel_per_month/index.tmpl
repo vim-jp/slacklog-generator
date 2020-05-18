@@ -51,7 +51,7 @@
               <span class="text-bold mr-1">{{ username . }}</span>
               <a href="#ts-{{ .Timestamp }}">{{ datetime .Timestamp }}</a>
               <span class="Label Label--outline">
-                <a href="https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Timestamp }}">Slack</a>
+                <a href="https://vim-jp.slack.com/archives/{{ $.channel.ID }}/p{{ slackPermalink .Timestamp }}" target="_blank" rel="noopener noreferrer">Slack</a>
               </span>
             </div>
             <div class="overflow-hidden mb-3">
@@ -98,7 +98,7 @@
                 {{- range .Files }}
                 <div>
                   {{- if hostBySlack . }}
-                  <a href="{{ $.baseURL }}/files/{{ localPath . }}">
+                  <a href="{{ $.baseURL }}/files/{{ localPath . }}" target="_blank" rel="noopener noreferrer">
                   {{- if eq (topLevelMimetype .) "image" }}
                   <img src="{{ $.baseURL }}/files/{{ thumbImagePath . }}" width="{{ thumbImageWidth . }}" height="{{ thumbImageHeight . }}" alt="{{ .Title }}" />
                   {{- else if eq (topLevelMimetype .) "video" }}
@@ -113,7 +113,7 @@
                   {{- end }}
                   {{- else }}
                   {{- /* TODO: 外部ページへのリンクだということがわかりやすい表示にする */ -}}
-                  <a href="{{ .URLPrivate }}">{{ .Title }}</a>
+                  <a href="{{ .URLPrivate }}" target="_blank" rel="noopener noreferrer">{{ .Title }}</a>
                   {{- end }}
                 </div>
                 {{- end }}
@@ -166,7 +166,7 @@
     <div class="clearfix"></div>
     <div id="footer">
       <p>
-        Powered by <a href="https://github.com/">GitHub</a>
+        Powered by <a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
     </div>
     <!-- /footer -->
