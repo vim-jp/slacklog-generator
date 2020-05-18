@@ -1,3 +1,5 @@
+PACKAGES=./...
+
 .PHONY: generate
 generate: _site
 
@@ -22,15 +24,21 @@ build:
 
 .PHONY: test
 test:
-	go test ./...
+	go test ${PACKAGES}
+
+# cover - テストを実行してカバレッジを計測し結果を tmp/cover.html に出力する
+.PHONY: cover
+cover:
+	go test -coverprofile tmp/cover.out ${PACKAGES}
+	go tool cover -html tmp/cover.out -o tmp/cover.html
 
 .PHONY: vet
 vet:
-	go vet ./...
+	go vet ${PACKAGES}
 
 .PHONY: lint
 lint:
-	golint ./...
+	golint ${PACKAGES}
 
 .PHONY: go-clean
 go-clean:
