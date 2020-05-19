@@ -89,3 +89,17 @@ jobs:
           github_token: ${{ secrets.github_token }}
           tool_name: misspell
           level: info
+
+  shellcheck:
+    name: runner / shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          level: info
+          path: "scripts"
+          pattern: "*.sh"
