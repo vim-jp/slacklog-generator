@@ -56,3 +56,14 @@ type User slack.User
 func (u *User) Tidy() {
 	// nothing to do for now.
 }
+
+// Emoji represents an emoji object in Slack.
+type Emoji struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
+// Tidy removes sensitive data from emoji.
+func (e *Emoji) Tidy() {
+	// nothing to do for now.
+}
