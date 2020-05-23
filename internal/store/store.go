@@ -67,3 +67,24 @@ type Emoji struct {
 func (e *Emoji) Tidy() {
 	// nothing to do for now.
 }
+
+// Message represents message object in Slack.
+type Message slack.Message
+
+// MessageTx defines transactional object for messages.
+type MessageTx interface {
+	Upsert(Message) (bool, error)
+
+	Iterate(key TimeKey, iter MessageIterator) error
+
+	Count(key TimeKey) (int, error)
+
+	Commit() error
+
+	Rollback() error
+}
+
+// MessageIterator is callback for message iteration.
+type MessageIterator interface {
+	Iterate(*Message) bool
+}
