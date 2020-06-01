@@ -41,7 +41,7 @@ func (us *userStore) Get(id string) (*store.User, error) {
 }
 
 // Upsert updates or inserts a user in store.
-// This returns true as 1st parameter, when a channel inserted.
+// This returns true as 1st parameter, when a user inserted.
 func (us *userStore) Upsert(u store.User) (bool, error) {
 	if u.ID == "" {
 		return false, errors.New("empty ID is forbidden")
