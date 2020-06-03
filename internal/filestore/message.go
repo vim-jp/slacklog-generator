@@ -1,7 +1,10 @@
 package filestore
 
 import (
+	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 
@@ -17,16 +20,16 @@ type messages struct {
 	sparse bool
 }
 
-func (ms *messages) Merge(op *messages) {
+func (mm *messages) Merge(op *messages) {
 	// lock and assure sorted both.
-	ms.rw.Lock()
-	ms.sort()
+	mm.rw.Lock()
+	mm.sort()
 	op.rw.Lock()
 	op.sort()
 	op.rw.Unlock()
 	op.rw.RLock()
 	// merge sort.
-	a, b := ms.msgs, op.msgs
+	a, b := mm.msgs, op.msgs
 	r := make([]store.Message, len(a)+len(b), 0)
 	for len(a) > 0 && len(b) > 0 {
 		if a[0].Before(b[0]) {
@@ -49,23 +52,23 @@ func (ms *messages) Merge(op *messages) {
 		idx[m.ClientMsgID] = i
 	}
 	// update this messages and unlock.
-	ms.msgs, ms.idx = r, idx
+	mm.msgs, mm.idx = r, idx
 	op.rw.RUnlock()
-	ms.rw.Unlock()
+	mm.rw.Unlock()
 }
 
-func (ms *messages) toDense() {
-	if !ms.sparse || len(ms.msgs) == 0 {
+func (mm *messages) toDense() {
+	if !mm.sparse || len(mm.msgs) == 0 {
 		return
 	}
-	tail := len(ms.msgs) - 1
+	tail := len(mm.msgs) - 1
 	for i := 0; i < tail; {
-		if ms.msgs[i].Timestamp == "" {
+		if mm.msgs[i].Timestamp == "" {
 			i++
 			continue
 		}
 		for i < tail {
-			if ms.msgs[tail].Timestamp == "" {
+			if mm.msgs[tail].Timestamp == "" {
 				break
 			}
 			tail--
@@ -74,52 +77,55 @@ func (ms *messages) toDense() {
 			tail = i - 1
 			break
 		}
-		ms.msgs[i] = ms.msgs[tail]
+		mm.msgs[i] = mm.msgs[tail]
 		tail--
 	}
-	ms.msgs = ms.msgs[:tail+1]
-	ms.sparse = false
+	mm.msgs = mm.msgs[:tail+1]
+	mm.sparse = false
 }
 
-func (ms *messages) sort() {
-	ms.toDense()
-	if ms.sorted || len(ms.msgs) <= 1 {
+func (mm *messages) sort() {
+	mm.toDense()
+	if mm.sorted || len(mm.msgs) <= 1 {
 		return
 	}
-	sort.Slice(ms.msgs, func(i, j int) bool {
-		return ms.msgs[i].Before(ms.msgs[j])
+	sort.Slice(mm.msgs, func(i, j int) bool {
+		return mm.msgs[i].Before(mm.msgs[j])
 	})
-	ms.sorted = true
+	mm.sorted = true
 }
 
-func (ms *messages) Upsert(m store.Message) (bool, error) {
+func (mm *messages) Upsert(m store.Message) (bool, error) {
 	if m.ClientMsgID == "" {
 		return false, errors.New("empty ID is forbidden")
 	}
 	m.Tidy()
-	ms.rw.Lock()
-	defer ms.rw.Unlock()
-	ms.sorted = false
-	x, ok := ms.idx[m.ClientMsgID]
+	mm.rw.Lock()
+	defer mm.rw.Unlock()
+	mm.sorted = false
+	x, ok := mm.idx[m.ClientMsgID]
 	if ok {
-		ms.msgs[x] = m
+		mm.msgs[x] = m
 		return true, nil
 	}
-	ms.idx[m.ClientMsgID] = len(ms.msgs)
-	ms.msgs = append(ms.msgs, m)
+	if mm.idx == nil {
+		mm.idx = make(map[string]int)
+	}
+	mm.idx[m.ClientMsgID] = len(mm.msgs)
+	mm.msgs = append(mm.msgs, m)
 	return false, nil
 }
 
-func (ms *messages) Delete(m store.Message) bool {
-	ms.rw.Lock()
-	defer ms.rw.Unlock()
-	x, ok := ms.idx[m.ClientMsgID]
+func (mm *messages) Delete(m store.Message) bool {
+	mm.rw.Lock()
+	defer mm.rw.Unlock()
+	x, ok := mm.idx[m.ClientMsgID]
 	if !ok {
 		return false
 	}
-	ms.msgs[x] = store.Message{}
-	delete(ms.idx, m.ClientMsgID)
-	ms.sparse = true
+	mm.msgs[x] = store.Message{}
+	delete(mm.idx, m.ClientMsgID)
+	mm.sparse = true
 	return true
 }
 
@@ -129,12 +135,15 @@ type messageStore struct {
 
 // Begin starts a transaction for message.
 func (ms *messageStore) Begin(channelID string) (store.MessageTx, error) {
-	// TODO:
-	return &messageTx{cid: channelID}, nil
+	return &messageTx{
+		cid: channelID,
+		dir: filepath.Join(ms.dir, channelID),
+	}, nil
 }
 
 type messageTx struct {
 	cid string
+	dir string
 
 	mu      sync.Mutex
 	upserts map[store.TimeKey]*messages
@@ -151,16 +160,19 @@ func (mtx *messageTx) Upsert(m store.Message) (bool, error) {
 	tk := store.TimeKeyDate(ts)
 
 	mtx.mu.Lock()
-	ms, ok := mtx.upserts[tk]
+	mm, ok := mtx.upserts[tk]
 	if !ok {
-		ms = &messages{
+		mm = &messages{
 			idx: map[string]int{},
 		}
-		mtx.upserts[tk] = ms
+		if mtx.upserts == nil {
+			mtx.upserts = make(map[store.TimeKey]*messages)
+		}
+		mtx.upserts[tk] = mm
 	}
 	mtx.mu.Unlock()
 
-	return ms.Upsert(m)
+	return mm.Upsert(m)
 }
 
 // Iterate iterates messages in a TimeKey.
@@ -177,12 +189,80 @@ func (mtx *messageTx) Count(key store.TimeKey) (int, error) {
 
 // Commit persists changes in a transaction.
 func (mtx *messageTx) Commit() error {
-	// TODO:
+	mtx.mu.Lock()
+	defer mtx.mu.Unlock()
+	if len(mtx.upserts) == 0 {
+		return nil
+	}
+	for tk, mm := range mtx.upserts {
+		orig, err := mtx.readMsgsJSONL(tk)
+		if err != nil {
+			return err
+		}
+		mm.rw.RLock()
+		orig.Merge(mm)
+		mtx.writeMsgsJSONL(tk, orig)
+		mm.rw.RUnlock()
+	}
+	mtx.upserts = nil
+	return nil
+}
+
+// msgsFileName generate JSONL filename for `store.TimeKey.Begin`.
+func (mtx *messageTx) msgsFileName(tk store.TimeKey) string {
+	return filepath.Join(mtx.dir, tk.BeginDateString()+".jsonl")
+}
+
+// readMsgsJSONL reads messages from a JSONL file.
+// JSONL is JSON Lines where defined at http://jsonlines.org/
+func (mtx *messageTx) readMsgsJSONL(tk store.TimeKey) (*messages, error) {
+	f, err := os.Open(mtx.msgsFileName(tk))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return new(messages), nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+	mm := new(messages)
+	d := json.NewDecoder(f)
+	for d.More() {
+		var m store.Message
+		err := d.Decode(&m)
+		if err != nil {
+			return nil, err
+		}
+		mm.Upsert(m)
+	}
+	return mm, nil
+}
+
+// writeMsgsJSONL writes messags as a JOSNL file.
+// JSONL is JSON Lines where defined at http://jsonlines.org/
+func (mtx *messageTx) writeMsgsJSONL(tk store.TimeKey, mm *messages) error {
+	err := os.MkdirAll(mtx.dir, 0777)
+	if err != nil {
+		return err
+	}
+	f, err := os.Create(mtx.msgsFileName(tk))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	e := json.NewEncoder(f)
+	for _, m := range mm.msgs {
+		err := e.Encode(m)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 // Rollback discards changes in a transaction.
 func (mtx *messageTx) Rollback() error {
-	// TODO:
+	mtx.mu.Lock()
+	defer mtx.mu.Unlock()
+	mtx.upserts = nil
 	return nil
 }

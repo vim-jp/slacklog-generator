@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -17,6 +18,11 @@ func (tk TimeKey) Include(v time.Time) bool {
 		return false
 	}
 	return tk.End.After(v)
+}
+
+func (tk TimeKey) BeginDateString() string {
+	y, m, d := tk.Begin.Date()
+	return fmt.Sprintf("%04d-%02d-%02d", y, int(m), d)
 }
 
 var defaultLocation *time.Location
