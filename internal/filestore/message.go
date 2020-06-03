@@ -146,7 +146,7 @@ type messageTx struct {
 	dir string
 
 	mu      sync.Mutex
-	upserts map[store.TimeKey]*messages
+	upserts map[store.DateKey]*messages
 }
 
 var _ store.MessageTx = (*messageTx)(nil)
@@ -157,34 +157,22 @@ func (mtx *messageTx) Upsert(m store.Message) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	tk := store.TimeKeyDate(ts)
+	dk := store.Time2DateKey(ts)
 
 	mtx.mu.Lock()
-	mm, ok := mtx.upserts[tk]
+	mm, ok := mtx.upserts[dk]
 	if !ok {
 		mm = &messages{
 			idx: map[string]int{},
 		}
 		if mtx.upserts == nil {
-			mtx.upserts = make(map[store.TimeKey]*messages)
+			mtx.upserts = make(map[store.DateKey]*messages)
 		}
-		mtx.upserts[tk] = mm
+		mtx.upserts[dk] = mm
 	}
 	mtx.mu.Unlock()
 
 	return mm.Upsert(m)
-}
-
-// Iterate iterates messages in a TimeKey.
-func (mtx *messageTx) Iterate(key store.TimeKey, iter store.MessageIterator) error {
-	// TODO:
-	return nil
-}
-
-// Count counts messages in a TimeKey.
-func (mtx *messageTx) Count(key store.TimeKey) (int, error) {
-	// TODO:
-	return 0, nil
 }
 
 // Commit persists changes in a transaction.
@@ -194,29 +182,29 @@ func (mtx *messageTx) Commit() error {
 	if len(mtx.upserts) == 0 {
 		return nil
 	}
-	for tk, mm := range mtx.upserts {
-		orig, err := mtx.readMsgsJSONL(tk)
+	for dk, mm := range mtx.upserts {
+		orig, err := mtx.readMsgsJSONL(dk)
 		if err != nil {
 			return err
 		}
 		mm.rw.RLock()
 		orig.Merge(mm)
-		mtx.writeMsgsJSONL(tk, orig)
+		mtx.writeMsgsJSONL(dk, orig)
 		mm.rw.RUnlock()
 	}
 	mtx.upserts = nil
 	return nil
 }
 
-// msgsFileName generate JSONL filename for `store.TimeKey.Begin`.
-func (mtx *messageTx) msgsFileName(tk store.TimeKey) string {
-	return filepath.Join(mtx.dir, tk.BeginDateString()+".jsonl")
+// msgsFileName generate JSONL filename for store.DateKey
+func (mtx *messageTx) msgsFileName(dk store.DateKey) string {
+	return filepath.Join(mtx.dir, dk.String()+".jsonl")
 }
 
 // readMsgsJSONL reads messages from a JSONL file.
 // JSONL is JSON Lines where defined at http://jsonlines.org/
-func (mtx *messageTx) readMsgsJSONL(tk store.TimeKey) (*messages, error) {
-	f, err := os.Open(mtx.msgsFileName(tk))
+func (mtx *messageTx) readMsgsJSONL(dk store.DateKey) (*messages, error) {
+	f, err := os.Open(mtx.msgsFileName(dk))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return new(messages), nil
@@ -239,12 +227,12 @@ func (mtx *messageTx) readMsgsJSONL(tk store.TimeKey) (*messages, error) {
 
 // writeMsgsJSONL writes messags as a JOSNL file.
 // JSONL is JSON Lines where defined at http://jsonlines.org/
-func (mtx *messageTx) writeMsgsJSONL(tk store.TimeKey, mm *messages) error {
+func (mtx *messageTx) writeMsgsJSONL(dk store.DateKey, mm *messages) error {
 	err := os.MkdirAll(mtx.dir, 0777)
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(mtx.msgsFileName(tk))
+	f, err := os.Create(mtx.msgsFileName(dk))
 	if err != nil {
 		return err
 	}
@@ -266,3 +254,16 @@ func (mtx *messageTx) Rollback() error {
 	mtx.upserts = nil
 	return nil
 }
+
+// Iterate iterates messages in a TimeKey.
+func (mtx *messageTx) Iterate(key store.TimeKey, iter store.MessageIterator) error {
+	// TODO:
+	return nil
+}
+
+// Count counts messages in a TimeKey.
+func (mtx *messageTx) Count(key store.TimeKey) (int, error) {
+	// TODO:
+	return 0, nil
+}
+
