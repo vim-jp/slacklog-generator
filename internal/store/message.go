@@ -23,6 +23,13 @@ func (m *Message) Tidy() {
 	// nothing to do for now.
 }
 
+// Before returns true when `m` is older than `b`
+func (m Message) Before(b Message) bool {
+	ta, _ := m.TimestampTime()
+	tb, _ := b.TimestampTime()
+	return ta.Before(tb)
+}
+
 // MessageTx defines transactional object for messages.
 type MessageTx interface {
 	Upsert(Message) (bool, error)
