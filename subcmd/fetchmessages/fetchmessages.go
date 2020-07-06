@@ -21,7 +21,7 @@ func toDateString(ti time.Time) string {
 }
 
 func parseDateString(s string) (time.Time, error) {
-	l, err := time.LoadLocation("Asia/Tokeyo")
+	l, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		return time.Time{}, err
 	}
