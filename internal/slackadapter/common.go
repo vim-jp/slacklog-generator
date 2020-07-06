@@ -1,5 +1,10 @@
 package slackadapter
 
+import (
+	"fmt"
+	"time"
+)
+
 // Error represents error response of Slack.
 type Error struct {
 	Ok  bool   `json:"ok"`
@@ -18,3 +23,12 @@ type NextCursor struct {
 
 // Cursor is type of cursor of Slack API.
 type Cursor string
+
+// Timestamp converts time.Time to timestamp formed for
+// Slack API (<UNIX seconds>.<microseconds>)
+func Timestamp(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return fmt.Sprintf("%d.%6d", t.Unix(), t.Nanosecond()/1000)
+}
