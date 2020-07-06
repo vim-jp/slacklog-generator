@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -69,7 +70,11 @@ func run(token, datadir, date string, verbose bool) error {
 	}
 
 	for _, sch := range ct.Channels {
-		outfile := filepath.Join(datadir, sch.ID, toDateString(oldest)+".json")
+		outdir := filepath.Join(datadir, sch.ID)
+		if err := os.MkdirAll(outdir, 0755); err != nil {
+			return fmt.Errorf("making outdir: %w", err)
+		}
+		outfile := filepath.Join(outdir, toDateString(oldest)+".json")
 		fw, err := jsonwriter.CreateFile(outfile, true)
 		if err != nil {
 			return err
