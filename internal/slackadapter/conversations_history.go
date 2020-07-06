@@ -17,8 +17,8 @@ type ConversationsHistoryParams struct {
 	Oldest    *time.Time `json:"oldest,omitempty"`
 }
 
-// ConversationsHistoryReponse is response for ConversationsHistory
-type ConversationsHistoryReponse struct {
+// ConversationsHistoryResponse is response for ConversationsHistory
+type ConversationsHistoryResponse struct {
 	Ok               bool                `json:"ok"`
 	Messages         []*slacklog.Message `json:"messages,omitempty"`
 	HasMore          bool                `json:"has_more"`
