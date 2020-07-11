@@ -2,9 +2,6 @@ package fetchchannels
 
 import (
 	"context"
-	"errors"
-	"flag"
-	"os"
 	"path/filepath"
 
 	cli "github.com/urfave/cli/v2"
@@ -12,28 +9,7 @@ import (
 	"github.com/vim-jp/slacklog-generator/internal/slackadapter"
 )
 
-// Run runs "fetch-channels" sub-command. It fetch channels in the workspace.
-func Run(args []string) error {
-	var (
-		token   string
-		datadir string
-		verbose bool
-	)
-	fs := flag.NewFlagSet("fetch-channels", flag.ExitOnError)
-	fs.StringVar(&token, "token", os.Getenv("SLACK_TOKEN"), `slack token. can be set by SLACK_TOKEN env var`)
-	fs.StringVar(&datadir, "datadir", "_logdata", `directory to load/save data`)
-	fs.BoolVar(&verbose, "verbose", false, "verbose log")
-	err := fs.Parse(args)
-	if err != nil {
-		return err
-	}
-	if token == "" {
-		return errors.New("SLACK_TOKEN environment variable requied")
-	}
-	return run(token, datadir, verbose)
-}
-
-func run(token, datadir string, verbose bool) error {
+func run(token, datadir string, excludeArchived, verbose bool) error {
 	outfile := filepath.Join(datadir, "channels.json")
 	fw, err := jsonwriter.CreateFile(outfile, true)
 	if err != nil {
@@ -42,8 +18,10 @@ func run(token, datadir string, verbose bool) error {
 	err = slackadapter.IterateCursor(context.Background(),
 		slackadapter.CursorIteratorFunc(func(ctx context.Context, c slackadapter.Cursor) (slackadapter.Cursor, error) {
 			r, err := slackadapter.Conversations(ctx, token, slackadapter.ConversationsParams{
-				Cursor: c,
-				Limit:  100,
+				Cursor:          c,
+				Limit:           100,
+				ExcludeArchived: excludeArchived,
+				Types:           []string{"public_channel"},
 			})
 			if err != nil {
 				return "", err
@@ -75,15 +53,16 @@ func run(token, datadir string, verbose bool) error {
 // sub-command.
 func NewCLICommand() *cli.Command {
 	var (
-		token   string
-		datadir string
-		verbose bool
+		token           string
+		datadir         string
+		excludeArchived bool
+		verbose         bool
 	)
 	return &cli.Command{
 		Name:  "fetch-channels",
 		Usage: "fetch channels in the workspace",
 		Action: func(c *cli.Context) error {
-			return run(token, datadir, verbose)
+			return run(token, datadir, excludeArchived, verbose)
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -97,6 +76,11 @@ func NewCLICommand() *cli.Command {
 				Usage:       "directory to load/save data",
 				Value:       "_logdata",
 				Destination: &datadir,
+			},
+			&cli.BoolFlag{
+				Name:        "exclude-archived",
+				Usage:       "exclude archived channesls",
+				Destination: &excludeArchived,
 			},
 			&cli.BoolFlag{
 				Name:        "verbose",

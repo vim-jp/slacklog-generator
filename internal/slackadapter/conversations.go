@@ -11,7 +11,7 @@ import (
 type ConversationsParams struct {
 	Cursor          Cursor   `json:"cursor,omitempty"`
 	Limit           int      `json:"limit,omitempty"`
-	ExcludeArchived string   `json:"excludeArchived,omitempty"`
+	ExcludeArchived bool     `json:"excludeArchived,omitempty"`
 	Types           []string `json:"types,omitempty"`
 }
 
@@ -28,7 +28,7 @@ func Conversations(ctx context.Context, token string, params ConversationsParams
 	channels, nextCursor, err := client.GetConversationsContext(ctx, &slack.GetConversationsParameters{
 		Cursor:          string(params.Cursor),
 		Limit:           params.Limit,
-		ExcludeArchived: params.ExcludeArchived,
+		ExcludeArchived: BoolString(params.ExcludeArchived),
 		Types:           params.Types,
 	})
 	if err != nil {
