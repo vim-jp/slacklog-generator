@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/subcmd"
+	"github.com/vim-jp/slacklog-generator/subcmd/fetchchannels"
 	"github.com/vim-jp/slacklog-generator/subcmd/fetchmessages"
 	"github.com/vim-jp/slacklog-generator/subcmd/serve"
 )
@@ -29,6 +30,7 @@ func main() {
 		subcmd.GenerateHTMLCommand,        // "generate-html"
 		serve.Command,                     // "serve"
 		fetchmessages.NewCLICommand(),     // "fetch-messages"
+		fetchchannels.NewCLICommand(),     // "fetch-channels"
 	}
 
 	err = app.Run(os.Args)
