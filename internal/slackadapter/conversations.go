@@ -2,6 +2,7 @@ package slackadapter
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/slack-go/slack"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
@@ -28,7 +29,7 @@ func Conversations(ctx context.Context, token string, params ConversationsParams
 	channels, nextCursor, err := client.GetConversationsContext(ctx, &slack.GetConversationsParameters{
 		Cursor:          string(params.Cursor),
 		Limit:           params.Limit,
-		ExcludeArchived: BoolString(params.ExcludeArchived),
+		ExcludeArchived: strconv.FormatBool(params.ExcludeArchived),
 		Types:           params.Types,
 	})
 	if err != nil {

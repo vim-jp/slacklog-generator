@@ -32,11 +32,3 @@ func Timestamp(t *time.Time) string {
 	}
 	return fmt.Sprintf("%d.%6d", t.Unix(), t.Nanosecond()/1000)
 }
-
-// BoolString converts bool to string (true / false).
-func BoolString(b bool) string {
-	if b {
-		return "true"
-	}
-	return "false"
-}
