@@ -26,6 +26,9 @@ func (fw *fileWriter) Write(v interface{}) error {
 }
 
 func (fw *fileWriter) Close() error {
+	if len(fw.buf) == 0 {
+		return nil
+	}
 	// FIXME: ファイルの作成が Close まで遅延している。本来なら CreateFile のタ
 	// イミングでやるのが好ましいが、いましばらく目を瞑る
 	f, err := os.Create(fw.name)
