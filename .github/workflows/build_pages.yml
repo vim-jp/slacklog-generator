@@ -47,4 +47,4 @@ jobs:
           git config user.email "slacklog@vim-jp.org"
           git config user.name "Slack Log Generator"
           git commit --message='publish' --quiet
-          git push --force origin gh-pages
+          git push --force origin gh-pages --quiet
