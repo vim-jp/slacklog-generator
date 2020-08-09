@@ -32,10 +32,9 @@ jobs:
 
       - name: 'Generate htdocs'
         run: |
-          cp -r data/files/ data/emojis/ pages/
+          cp -r data/files/ data/emojis/ generator/assets/ pages/
           cd generator
           BASEURL=/slacklog go run . generate-html --filesdir ../pages/files/ --indir ../data/slacklog_data/ --outdir ../pages/
-          cp -r assets ../pages/
           # create finger print
           cd ../pages
           find . -type d -name '.git' -prune -o -type f -print0 | xargs -0 md5sum > ../files.txt
@@ -48,10 +47,10 @@ jobs:
 
       - name: 'Update https://vim-jp.org/slacklog/'
         if: github.ref == 'refs/heads/master'
-        working-directory: './data'
+        working-directory: './pages'
         run: |
           git add --all --intent-to-add --force
-          if git diff --exit-code; then
+          if git diff --exit-code --quiet; then
             echo 'Nothing to update.'
             exit 0
           fi

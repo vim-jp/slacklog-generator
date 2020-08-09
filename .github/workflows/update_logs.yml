@@ -47,7 +47,7 @@ jobs:
         working-directory: './data'
         run: |
           git add --all --intent-to-add --force
-          if git diff --exit-code; then
+          if git diff --exit-code --quiet; then
             echo 'Nothing to update.'
             exit 0
           fi
