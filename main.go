@@ -9,6 +9,7 @@ import (
 	"github.com/vim-jp/slacklog-generator/subcmd"
 	"github.com/vim-jp/slacklog-generator/subcmd/fetchchannels"
 	"github.com/vim-jp/slacklog-generator/subcmd/fetchmessages"
+	"github.com/vim-jp/slacklog-generator/subcmd/fetchusers"
 	"github.com/vim-jp/slacklog-generator/subcmd/serve"
 )
 
@@ -31,6 +32,7 @@ func main() {
 		serve.Command,                     // "serve"
 		fetchmessages.NewCLICommand(),     // "fetch-messages"
 		fetchchannels.NewCLICommand(),     // "fetch-channels"
+		fetchusers.NewCLICommand(),        // "fetch-users"
 	}
 
 	err = app.Run(os.Args)
