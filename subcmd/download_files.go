@@ -89,13 +89,7 @@ func generateMessageFileTargets(d *slacklog.Downloader, s *slacklog.LogStore, ou
 		}
 
 		for _, msg := range msgs {
-			if !msg.Upload {
-				continue
-			}
 			for _, f := range msg.Files {
-				// 基本的に msg.Upload の判定で弾けるはずだが、
-				// 複数のファイルが含まれていた場合が不明。
-				// 念のためこちらでもチェックして弾くようにしておく
 				if !slacklog.HostBySlack(f) {
 					continue
 				}
