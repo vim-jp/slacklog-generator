@@ -5,6 +5,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/slack-go/slack"
 )
@@ -25,7 +26,30 @@ func LocalName(f slack.File, url, suffix string) string {
 			ext = FiletypeToExtension[f.Filetype]
 		}
 	}
+	name = truncateName(name, 200)
 	return RegulateFilename(name + suffix + ext)
+}
+
+func truncateName(name string, size int) string {
+	if len(name) < size {
+		return name
+	}
+	name = name[:size]
+
+	if !utf8.ValidString(name) {
+		v := make([]rune, 0, len(name))
+		for i, r := range name {
+			if r == utf8.RuneError {
+				_, size := utf8.DecodeRuneInString(name[i:])
+				if size == 1 {
+					continue
+				}
+			}
+			v = append(v, r)
+		}
+		name = string(v)
+	}
+	return name
 }
 
 // LocalPath returns path of local downloaded file.
