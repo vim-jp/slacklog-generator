@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - '**'
+  workflow_run:
+    workflows: ['Update logs']
+    types: ['completed']
 
 jobs:
   build-pages:

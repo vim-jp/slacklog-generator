@@ -1,0 +1,50 @@
+name: 'Update logs'
+on:
+  schedule:
+    - cron: '0 19 * * *'  # Every 4:00 am on JST
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Date to update logs (YYYY-MM-DD) (empty to yesterday)'
+        required: false
+        default: ''
+
+jobs:
+  update-logs:
+    name: 'Update log-data of https://github.com/vim-jp/slacklog'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - uses: 'actions/checkout@v2'
+        with:
+          path: 'generator'
+
+      - uses: 'actions/checkout@v2'
+        with:
+          repository: 'vim-jp/slacklog'
+          path: 'data'
+          ref: 'log-data'
+          ssh-key: '${{ secrets.SLACKLOG_SSH_KEY }}'
+
+      - name: 'Update logs'
+        working-directory: './generator'
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+        run: |
+          go run . fetch-users --datadir ../data/slacklog_data/
+          go run . fetch-channels --datadir ../data/slacklog_data/
+          date='${{ github.event.inputs.date }}'
+          : "${date:=$(TZ=Asia/Tokyo date --date '1 day ago' --rfc-3339=date)}"
+          go run . fetch-messages --datadir ../data/slacklog_data/ --date "${date}"
+
+          go run . download-emoji --outdir ../data/emojis/ --emojiJSON ../data/slacklog_data/emoji.json
+          go run . download-files --indir ../data/slacklog_data/ --outdir ../data/files/
+
+      - name: 'Push logs'
+        working-directory: './data'
+        run: |
+          git add --all --force
+          git config user.email "slacklog@vim-jp.org"
+          git config user.name "Slack Log Generator"
+          git commit --amend --message='Log data' --quiet
+          git push --force origin log-data --quiet
