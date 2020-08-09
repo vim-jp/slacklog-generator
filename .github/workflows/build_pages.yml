@@ -1,4 +1,4 @@
-name: 'Trigger Rebuild Pages'
+name: 'Build pages'
 on:
   push:
     branches:
@@ -10,6 +10,7 @@ on:
 jobs:
   build-pages:
     name: 'Generate htdocs and Update https://vim-jp.org/slacklog/'
+    if: "${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}"
     runs-on: 'ubuntu-latest'
 
     steps:
@@ -56,5 +57,5 @@ jobs:
           fi
           git config user.email "slacklog@vim-jp.org"
           git config user.name "Slack Log Generator"
-          git commit --all --message 'publish' --quiet
+          git commit --all --message 'Update pages' --quiet
           git push origin gh-pages --quiet
