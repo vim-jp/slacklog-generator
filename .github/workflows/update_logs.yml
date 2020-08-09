@@ -28,6 +28,7 @@ jobs:
 
       - name: 'Update logs'
         working-directory: './generator'
+        id: update-logs
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
         run: |
@@ -40,11 +41,17 @@ jobs:
           go run . download-emoji --outdir ../data/emojis/ --emojiJSON ../data/slacklog_data/emoji.json
           go run . download-files --indir ../data/slacklog_data/ --outdir ../data/files/
 
+          echo "::set-output name=date::${date}"
+
       - name: 'Push logs'
         working-directory: './data'
         run: |
-          git add --all --force
+          git add --all --intent-to-add --force
+          if git diff --exit-code; then
+            echo 'Nothing to update.'
+            exit 0
+          fi
           git config user.email "slacklog@vim-jp.org"
           git config user.name "Slack Log Generator"
-          git commit --amend --message='Log data' --quiet
-          git push --force origin log-data --quiet
+          git commit --all --message 'Log data for ${{ steps.update-logs.outputs.date }}' --quiet
+          git push origin log-data --quiet
