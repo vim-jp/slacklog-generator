@@ -163,7 +163,10 @@ func (d *Downloader) download(t downloadTarget) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode/100 != 2 {
-		return fmt.Errorf("[%s]: %s", resp.Status, t.url)
+		// Some files cannot download by unknown reason.
+		// Just ignore.
+		fmt.Fprintf(os.Stderr, "ERROR (ignored): [%s]: %s\n", resp.Status, t.url)
+		return nil
 	}
 
 	w, err := os.Create(t.outputPath)
