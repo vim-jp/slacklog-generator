@@ -42,6 +42,8 @@ func (mm MessagesMap) Keys() []MessageMonthKey {
 // loadedFilesはすでに読み込んだファイルパスを保持する。
 // loadedFilesは同じファイルを二度読むことを防ぐために用いている。
 type MessageTable struct {
+	// key: timestamp
+	AllMessageMap map[string]*Message
 	// key: thread timestamp
 	ThreadMap map[string]*Thread
 	MsgsMap   MessagesMap
@@ -55,9 +57,10 @@ type MessageTable struct {
 // 実行時に読み込ませる。
 func NewMessageTable() *MessageTable {
 	return &MessageTable{
-		ThreadMap:   map[string]*Thread{},
-		MsgsMap:     MessagesMap{},
-		loadedFiles: map[string]struct{}{},
+		AllMessageMap: map[string]*Message{},
+		ThreadMap:     map[string]*Thread{},
+		MsgsMap:       MessagesMap{},
+		loadedFiles:   map[string]struct{}{},
 	}
 }
 
@@ -127,6 +130,9 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 			thread, ok := m.ThreadMap[threadTs]
 			if !ok {
 				thread = &Thread{}
+				if rootMsg, ok := m.AllMessageMap[threadTs]; ok {
+					thread.rootMsg = rootMsg
+				}
 				m.ThreadMap[threadTs] = thread
 			}
 			thread.Put(msg)
@@ -135,6 +141,8 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 		if !readAllMessages && msg.isThreadChild() {
 			continue
 		}
+
+		m.AllMessageMap[msg.Timestamp] = msg
 
 		visibleMsgs = append(visibleMsgs, msg)
 	}
