@@ -374,8 +374,8 @@ func (g *HTMLGenerator) getReactions(msg Message) []ReactionInfo {
 		emojiStr := ":" + reaction.Name + ":"
 		unicodeEmojis := g.emojiToString(emojiStr)
 		if unicodeEmojis == "" {
-			log.Printf("[ERROR] no unicodes for emoji: %s", emojiStr)
-			continue
+			// This may be a deleted emoji. Show `:emoji:` as is.
+			unicodeEmojis = emojiStr
 		}
 		info = append(info, ReactionInfo{
 			Name:    unicodeEmojis,
@@ -401,7 +401,6 @@ func (g *HTMLGenerator) emojiToString(emojiSeq string) string {
 			}
 			if _, ok := g.ueMap[s]; !ok {
 				g.ueMap[s] = struct{}{}
-				log.Printf("[WARN] unknown emoji: %s", s)
 			}
 			g.ueMu.Unlock()
 			continue
