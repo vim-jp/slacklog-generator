@@ -117,6 +117,9 @@ func run(token, datadir, date string, verbose bool) error {
 							}
 							return "", nil
 						}))
+						if err != nil {
+							return "", err
+						}
 					}
 				}
 				for _, m := range r.Messages {

@@ -167,6 +167,10 @@ func (m *MessageTable) ReadLogFile(path string, readAllMessages bool) error {
 		}
 	}
 
+	for _, thread := range m.ThreadMap {
+		thread.replies.Sort()
+	}
+
 	// loaded marker
 	m.loadedFiles[path] = struct{}{}
 	return nil
