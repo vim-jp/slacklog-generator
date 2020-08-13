@@ -19,7 +19,7 @@ func HostBySlack(f slack.File) bool {
 func LocalName(f slack.File, url, suffix string) string {
 	ext := filepath.Ext(url)
 	nameExt := filepath.Ext(f.Name)
-	name := f.Name[:len(f.Name)-len(ext)]
+	name := f.Name[:len(f.Name)-len(nameExt)]
 	if ext == "" {
 		ext = nameExt
 		if ext == "" {
