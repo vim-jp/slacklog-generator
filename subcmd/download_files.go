@@ -75,6 +75,7 @@ func urlAndSuffixes(f slack.File) map[string]string {
 		f.Thumb960:    "_960",
 		f.Thumb1024:   "_1024",
 		f.Thumb360Gif: "_360",
+		f.ThumbVideo:  "_video",
 	}
 }
 

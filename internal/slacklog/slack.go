@@ -92,5 +92,5 @@ func ThumbImageHeight(f slack.File) int {
 
 // ThumbVideoPath returns local path of thumbnail for the video.
 func ThumbVideoPath(f slack.File) string {
-	return path.Join(f.ID, url.PathEscape(LocalName(f, f.ThumbVideo, "_thumb_video")))
+	return path.Join(f.ID, url.PathEscape(LocalName(f, f.ThumbVideo, "_video")))
 }
