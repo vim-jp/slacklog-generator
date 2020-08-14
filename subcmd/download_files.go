@@ -65,16 +65,20 @@ func downloadFiles(c *cli.Context) error {
 
 func urlAndSuffixes(f slack.File) map[string]string {
 	return map[string]string{
-		f.URLPrivate:  "",
-		f.Thumb64:     "_64",
-		f.Thumb80:     "_80",
-		f.Thumb160:    "_160",
-		f.Thumb360:    "_360",
-		f.Thumb480:    "_480",
-		f.Thumb720:    "_720",
-		f.Thumb960:    "_960",
-		f.Thumb1024:   "_1024",
-		f.Thumb360Gif: "_360",
+		f.URLPrivate:   "",
+		f.Thumb64:      "_64",
+		f.Thumb80:      "_80",
+		f.Thumb160:     "_160",
+		f.Thumb360:     "_360",
+		f.Thumb480:     "_480",
+		f.Thumb720:     "_720",
+		f.Thumb800:     "_800",
+		f.Thumb960:     "_960",
+		f.Thumb1024:    "_1024",
+		f.Thumb360Gif:  "_360_gif",
+		f.Thumb480Gif:  "_480_gif",
+		f.DeanimateGif: "_deanimate_gif",
+		f.ThumbVideo:   "_video",
 	}
 }
 
