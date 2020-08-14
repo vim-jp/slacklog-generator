@@ -215,7 +215,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 				return strings.Replace(ts, ".", "", 1)
 			},
 			"username": func(msg *Message) string {
-				if msg.isBotMessage() {
+				if msg.Username != "" {
 					return g.c.escapeSpecialChars(msg.Username)
 				}
 				return g.c.escapeSpecialChars(g.s.GetDisplayNameByUserID(msg.User))
@@ -225,7 +225,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 					return msg.Icons.Image48
 				}
 				userID := msg.User
-				if msg.isBotMessage() {
+				if userID == "" && msg.BotID != "" {
 					userID = msg.BotID
 				}
 				user, ok := g.s.GetUserByID(userID)
