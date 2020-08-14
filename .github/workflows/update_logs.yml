@@ -1,7 +1,7 @@
 name: 'Update logs'
 on:
-  # schedule:
-  #   - cron: '0 19 * * *'  # Every 4:00 am on JST
+  schedule:
+    - cron: '0 19 * * *'  # Every 4:00 am on JST
   workflow_dispatch:
     inputs:
       date:
