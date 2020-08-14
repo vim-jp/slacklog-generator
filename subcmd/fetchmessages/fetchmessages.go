@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/slack-go/slack"
 	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/jsonwriter"
 	"github.com/vim-jp/slacklog-generator/internal/slackadapter"
@@ -89,6 +90,37 @@ func run(token, datadir, date string, verbose bool) error {
 				})
 				if err != nil {
 					return "", err
+				}
+				for _, message := range r.Messages {
+					if message.IsRootOfThread() {
+						client := slack.New(token)
+						err = slackadapter.IterateCursor(ctx, slackadapter.CursorIteratorFunc(func(ctx context.Context, c slackadapter.Cursor) (slackadapter.Cursor, error) {
+							msgs, hasMore, nextCursor, err := client.GetConversationRepliesContext(ctx, &slack.GetConversationRepliesParameters{
+								ChannelID: sch.ID,
+								Cursor:    string(c),
+								Timestamp: message.Timestamp,
+							})
+							if err != nil {
+								return "", err
+							}
+							for _, m := range msgs {
+								sMes := slacklog.Message{
+									Message: m,
+								}
+								// スレッドのルートとブロードキャストメッセージは通常のログに含まれるのでここでは弾く
+								if !sMes.IsRootOfThread() && sMes.SubType != "thread_broadcast" {
+									r.Messages = append(r.Messages, &sMes)
+								}
+							}
+							if hasMore {
+								return slackadapter.Cursor(nextCursor), nil
+							}
+							return "", nil
+						}))
+						if err != nil {
+							return "", err
+						}
+					}
 				}
 				for _, m := range r.Messages {
 					err := fw.Write(m)
