@@ -47,7 +47,7 @@
           <h4 class="text-gray mb-2 pb-2">Channels</h4>
           <nav class="SideNav bg-white">
             {{- range .channels }}
-              <a class="SideNav-item border-top" href="{{ $.baseURL }}/{{ .ID }}/">&#35{{ .Name }}</a>
+              <a class="SideNav-item border-top" href="{{ $.baseURL }}/{{ .ID }}/">&#35;{{ .Name }}</a>
             {{- end }}
           </nav>
         </div>
