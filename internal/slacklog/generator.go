@@ -332,7 +332,7 @@ func (g *HTMLGenerator) generateFileHTML(file slack.File) string {
 	if file.Filetype == "text" {
 		ftype = "none"
 	}
-	return "<code class='language-" + ftype + "'>" + string(src) + "</code>"
+	return "<code class='language-" + ftype + "'>" + html.EscapeString(string(src)) + "</code>"
 }
 
 // ReactionInfo is information for a reaction.
