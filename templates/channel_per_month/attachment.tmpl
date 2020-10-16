@@ -40,9 +40,16 @@
     {{- end }}
   {{- else if eq .ServiceName "Gyazo" }}
       <div class="d-flex">
-        <div>
+        <div class="flex-self-baseline f4 ml-2">
           <!-- Gyazo -->
-          <a href="{{ .Fallback }}" target="_blank" rel="noopener noreferrer">{{ .Fallback }}</a>
+          <span class="Label Label--outline">
+            <a href="{{ .ImageURL }}" target="_blank" rel="noopener noreferrer">{{ .Fallback }}</a>
+          </span>
+        </div>
+      </div>
+      <div class="d-flex">
+        <div class="mt-2">
+          <img src="{{ .ImageURL }}" alt="{{ .Fallback }}" />
         </div>
       </div>
   {{- else if or .Title .Text }}
