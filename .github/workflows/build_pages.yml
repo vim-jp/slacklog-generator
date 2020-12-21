@@ -14,17 +14,20 @@ jobs:
     runs-on: 'ubuntu-latest'
 
     steps:
-      - uses: 'actions/checkout@v2'
+      - name: 'Checkout generator'
+        uses: 'actions/checkout@v2'
         with:
           path: 'generator'
 
-      - uses: 'actions/checkout@v2'
+      - name: 'Checkout log-data'
+        uses: 'actions/checkout@v2'
         with:
           repository: 'vim-jp/slacklog'
           path: 'data'
           ref: 'log-data'
 
-      - uses: 'actions/checkout@v2'
+      - name: 'Checkout gh-pages'
+        uses: 'actions/checkout@v2'
         with:
           repository: 'vim-jp/slacklog'
           path: 'pages'
