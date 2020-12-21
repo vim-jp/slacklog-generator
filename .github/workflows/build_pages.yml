@@ -37,6 +37,7 @@ jobs:
       - name: 'Generate htdocs'
         run: |
           cp -r data/files/ data/emojis/ generator/assets/ pages/
+          rm -fr data/files/ data/emojis/
           cd generator
           BASEURL=/slacklog go run . generate-html --filesdir ../pages/files/ --indir ../data/slacklog_data/ --outdir ../pages/
           # create finger print
