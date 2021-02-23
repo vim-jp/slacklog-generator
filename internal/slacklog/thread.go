@@ -24,7 +24,10 @@ func (th Thread) ReplyCount() int {
 
 // RootText returns text of root message of the thread.
 func (th Thread) RootText() string {
-	return th.rootMsg.Text
+	if th.rootMsg != nil {
+		return th.rootMsg.Text
+	}
+	return ""
 }
 
 // Replies returns replied messages for the thread.
