@@ -12,7 +12,7 @@ done
 
 mkdir -p ${outdir}
 
-cp -a assets ${outdir}
+cp -a static/* ${outdir}
 
 for d in emojis files ; do
   if [ ! -d _logdata/${d} ] ; then
