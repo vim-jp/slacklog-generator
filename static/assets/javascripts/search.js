@@ -1,4 +1,4 @@
-const onLoad = () => {
+const onLoad = async () => {
   const GRAM_N = 2;
   const toHexString = (n) => {
     return n.toString(16).padStart(2, "0");
@@ -94,15 +94,16 @@ const onLoad = () => {
   const index = new Index();
   const sepRegexp = new RegExp(`.{1,${GRAM_N}}`, "g");
 
-  const numToChannel = new Map();
-  (async () => {
+  const numToChannel = await (async () => {
+    const map = new Map();
     const res = await fetch("./index/channel");
     for (const line of (await res.text()).split("\n")) {
       const [n, channelID, channelName] = line.split("\t");
       if (channelID != null) {
-        numToChannel.set(n - 0, {channelID, channelName});
+        map.set(n - 0, {channelID, channelName});
       }
     }
+    return map;
   })();
 
   const searchByWord = async (word) => {
@@ -140,11 +141,12 @@ const onLoad = () => {
     return searchByWord(word);
   };
 
+  const text = document.getElementById("search-text");
+  const resultElement = document.getElementById("result");
+
   const execute = async () => {
-    const resultElement = document.getElementById("result");
     try {
       const startTime = Date.now();
-      const text = document.getElementById("search-text");
 
       const result = await search(text.value);
 
@@ -160,14 +162,38 @@ const onLoad = () => {
     } catch (e) {
       resultElement.innerHTML = `検索中にエラーが発生しました: ${e.name}: ${e.message}`;
     }
-  }
+  };
 
-  document.getElementById("search-button").addEventListener("click", execute);
+  const searchFromParams = () => {
+    const query = new URL(location).searchParams.get("q");
+    if (query) {
+      text.value = query;
+      execute();
+    } else {
+      text.value = "";
+      resultElement.innerHTML = "";
+    }
+  };
+
+  const moveToResultPage = () => {
+    const params = new URLSearchParams();
+    params.set("q", text.value);
+    history.pushState({q: text.value}, document.title, `${location.pathname}?${params.toString()}`);
+    execute();
+  };
+
+  document.getElementById("search-button").addEventListener("click", moveToResultPage);
   document.getElementById("search-text").addEventListener("keypress", (event) => {
     if (event.key === "Enter") {
-      execute();
+      moveToResultPage();
     }
   });
+  window.addEventListener("popstate", (e) => {
+    console.log(e);
+    searchFromParams();
+  });
+
+  searchFromParams();
 };
 
 window.addEventListener('DOMContentLoaded', () => {
