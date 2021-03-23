@@ -97,6 +97,10 @@ func generateMessageFileTargets(d *slacklog.Downloader, s *slacklog.LogStore, ou
 				if !slacklog.HostBySlack(f) {
 					continue
 				}
+				// avoid github's file size limit
+				if f.Size >= 104857600 {
+					continue
+				}
 
 				targetDir := filepath.Join(outputDir, f.ID)
 				err := os.MkdirAll(targetDir, 0777)
