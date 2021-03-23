@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"html"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"text/template"
@@ -38,10 +38,6 @@ type HTMLGenerator struct {
 	ueMap map[string]struct{}
 	ueMu  sync.Mutex
 }
-
-// maxEmbeddedFileSize : 添付ファイルの埋め込みを行うファイルサイズ
-// これ以下の場合、表示されるようになる
-const maxEmbeddedFileSize = 102400
 
 // NewHTMLGenerator : HTMLGeneratorを生成する。
 func NewHTMLGenerator(templateDir string, filesDir string, s *LogStore) *HTMLGenerator {
@@ -314,25 +310,13 @@ func (g *HTMLGenerator) generateAttachmentText(attachment slack.Attachment) stri
 	return g.c.ToHTML(attachment.Text)
 }
 
-// generateFileHTML : 'text/plain' な添付ファイルをHTMLに埋め込む
-// 存在しない場合、エラーを表示する
+// generateFileHTML : 'text/plain' な添付ファイルのためのタグを生成する
 func (g *HTMLGenerator) generateFileHTML(file slack.File) string {
-	if file.Size > maxEmbeddedFileSize {
-		return `<span class="file-error">file size is too big to embed. please download from above link to see.</span>`
-	}
-	path := filepath.Join(g.filesDir, file.ID, LocalName(file, file.URLPrivate, ""))
-	src, err := ioutil.ReadFile(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Sprintf(`<span class="file-error">no files found: %s</span>`, err)
-		}
-		return fmt.Sprintf(`<span class="file-error">failed to read a file: %s</span>`, err)
-	}
 	ftype := file.Filetype
 	if file.Filetype == "text" {
 		ftype = "none"
 	}
-	return "<code class='language-" + ftype + "'>" + html.EscapeString(string(src)) + "</code>"
+	return "<code class='language-" + ftype + "' data-path='" + g.baseURL + "/files/" + LocalPath(file) + "' data-size='" + strconv.Itoa(file.Size) + "'>(Loading...)</code>"
 }
 
 // ReactionInfo is information for a reaction.
