@@ -150,13 +150,19 @@ const onLoad = async () => {
 
       const result = await search(text.value);
 
-      const links = [...result.keys()].map((doc) => {
-        const [channelNumber, ts] = doc.split(":");
-        const {channelID, channelName} = numToChannel.get(channelNumber - 0);
-        const date = new Date(ts.split(".")[0] * 1000);
-        const link = `${channelID}/${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, "0")}/#ts-${ts}`;
-        return `<a href="${link}">&#35;${channelName}: ${date.getFullYear()}-${to2dString(date.getMonth() + 1)}-${to2dString(date.getDay())} ${to2dString(date.getHours())}:${to2dString(date.getMinutes())}:${to2dString(date.getSeconds())}</a>`;
-      });
+      const links =
+        [...result.keys()]
+        .map((doc) => doc.split(":"))
+        .map(([channelNumber, ts]) => [channelNumber, ts, parseFloat(ts)])
+        .sort(([, , tsA], [, , tsB]) => tsB - tsA)
+        .map(
+          ([channelNumber, ts, tsFloat]) => {
+            const {channelID, channelName} = numToChannel.get(channelNumber - 0);
+            const date = new Date(tsFloat * 1000);
+            const link = `${channelID}/${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, "0")}/#ts-${ts}`;
+            return `<a href="${link}">&#35;${channelName}: ${date.getFullYear()}-${to2dString(date.getMonth() + 1)}-${to2dString(date.getDay())} ${to2dString(date.getHours())}:${to2dString(date.getMinutes())}:${to2dString(date.getSeconds())}</a>`;
+          }
+        );
       const processTime = Date.now() - startTime;
       resultElement.innerHTML = `<p>${links.length} 件ヒットしました (${processTime / 1000} 秒)</p>${links.join("<br>")}`;
     } catch (e) {
