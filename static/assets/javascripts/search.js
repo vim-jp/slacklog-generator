@@ -160,7 +160,7 @@ const onLoad = async () => {
             const {channelID, channelName} = numToChannel.get(channelNumber - 0);
             const date = new Date(tsFloat * 1000);
             const link = `${channelID}/${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, "0")}/#ts-${ts}`;
-            return `<a href="${link}">&#35;${channelName}: ${date.getFullYear()}-${to2dString(date.getMonth() + 1)}-${to2dString(date.getDay())} ${to2dString(date.getHours())}:${to2dString(date.getMinutes())}:${to2dString(date.getSeconds())}</a>`;
+            return `<a href="${link}">&#35;${channelName}: ${date.getFullYear()}-${to2dString(date.getMonth() + 1)}-${to2dString(date.getDate())} ${to2dString(date.getHours())}:${to2dString(date.getMinutes())}:${to2dString(date.getSeconds())}</a>`;
           }
         );
       const processTime = Date.now() - startTime;
