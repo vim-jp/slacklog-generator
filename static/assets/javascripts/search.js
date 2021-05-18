@@ -1,4 +1,4 @@
-const onLoad = async () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const GRAM_N = 2;
   const toHexString = (n) => {
     return n.toString(16).padStart(2, "0");
@@ -200,8 +200,4 @@ const onLoad = async () => {
   });
 
   searchFromParams();
-};
-
-window.addEventListener('DOMContentLoaded', () => {
-  onLoad();
 });
