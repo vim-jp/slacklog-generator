@@ -1,6 +1,7 @@
 package slacklog
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
@@ -282,6 +283,25 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 			"thumbImageHeight": ThumbImageHeight,
 			"thumbVideoPath":   ThumbVideoPath,
 			"stringsJoin":      strings.Join,
+			"genAttachedURL": func(ts json.Number, fromURL string) string {
+				timestamp := string(ts)
+				if len(strings.Split(timestamp, ".")) < 2 {
+					return ""
+				}
+				postTime := TsToDateTime(timestamp)
+				c := strings.Split(fromURL, "/")
+				if len(c) < 2 {
+					return ""
+				}
+				channel := c[len(c)-2]
+				return fmt.Sprintf("/%s/%d/%02d/#ts-%s", channel, postTime.Year(), postTime.Month(), ts)
+			},
+			"isSlackMessage": func(fromURL string) bool {
+				return len(fromURL) >= 25 && fromURL[0:25] == "https://vim-jp.slack.com/"
+			},
+			"getBaseURL": func() string {
+				return g.baseURL
+			},
 		}).
 		ParseGlob(filepath.Join(g.templateDir, "channel_per_month", "*.tmpl"))
 	if err != nil {
