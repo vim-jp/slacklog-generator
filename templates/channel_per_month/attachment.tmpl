@@ -73,6 +73,11 @@
       <div class="d-flex">
         <div class="mt-2">{{ attachmentText . }}</div>
       </div>
+      {{- if isSlackMessage .FromURL}}
+      <span class="Label Label--outline">
+        <a href="{{ getBaseURL }}{{ genAttachedURL .Ts .FromURL }}" target="_blank" rel="noopener noreferrer">slacklog</a>
+      </span>
+      {{- end}}
     {{- end }}
 
     {{- if .ThumbURL }}
