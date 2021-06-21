@@ -75,7 +75,7 @@
       </div>
       {{- if isSlackMessage .FromURL}}
       <span class="Label Label--outline">
-        <a href="{{ getBaseURL }}{{ genAttachedURL .Ts .FromURL }}" target="_blank" rel="noopener noreferrer">slacklog</a>
+        <a href="{{ getBaseURL }}{{ genAttachedURL .Ts .FromURL }}">slacklog</a>
       </span>
       {{- end}}
     {{- end }}
