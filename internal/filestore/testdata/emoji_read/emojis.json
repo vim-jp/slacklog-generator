@@ -1,0 +1,22 @@
+[
+  {
+    "name": "emoji01",
+    "url": "http://example.org/emoji/0001.png"
+  },
+  {
+    "name": "emoji02",
+    "url": "http://example.org/emoji/0002.png"
+  },
+  {
+    "name": "emoji03",
+    "url": "http://example.org/emoji/0003.png"
+  },
+  {
+    "name": "emoji04",
+    "url": "http://example.org/emoji/0004.png"
+  },
+  {
+    "name": "emoji05",
+    "url": "http://example.org/emoji/0005.png"
+  }
+]
