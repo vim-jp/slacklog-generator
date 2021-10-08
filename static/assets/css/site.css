@@ -46,6 +46,7 @@ pre {
   color: white;
   background-color: black;
   padding: 0.5em;
+  overflow: scroll;
 }
 
 .slacklog-emoji {
