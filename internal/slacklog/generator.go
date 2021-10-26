@@ -35,6 +35,9 @@ type HTMLGenerator struct {
 	// baseURL is root path for public site, configured by `BASEURL` environment variable.
 	baseURL string
 
+	// filesBaseURL is root path for attachment files, configured by `FILES_BASEURL` environment variable.
+	filesBaseURL string
+
 	// ueMap is a set of unknown emojis.
 	ueMap map[string]struct{}
 	ueMu  sync.Mutex
@@ -50,12 +53,19 @@ func NewHTMLGenerator(templateDir string, filesDir string, s *LogStore) *HTMLGen
 	emojis := s.GetEmojiMap()
 	c := NewTextConverter(users, emojis)
 
+	baseURL := os.Getenv("BASEURL")
+	filesBaseURL := os.Getenv("FILES_BASEURL")
+	if filesBaseURL == "" {
+		filesBaseURL = baseURL + "/files"
+	}
+
 	return &HTMLGenerator{
-		templateDir: templateDir,
-		filesDir:    filesDir,
-		s:           s,
-		c:           c,
-		baseURL:     os.Getenv("BASEURL"),
+		templateDir:  templateDir,
+		filesDir:     filesDir,
+		s:            s,
+		c:            c,
+		baseURL:      baseURL,
+		filesBaseURL: filesBaseURL,
 	}
 }
 
@@ -196,6 +206,7 @@ func (g *HTMLGenerator) generateMessageDir(channel Channel, key MessageMonthKey,
 
 	params := make(map[string]interface{})
 	params["baseURL"] = g.baseURL
+	params["filesBaseURL"] = g.filesBaseURL
 	params["channel"] = channel
 	params["monthKey"] = key
 	params["msgs"] = msgs

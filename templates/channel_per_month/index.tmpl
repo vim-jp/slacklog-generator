@@ -98,11 +98,11 @@
                 {{- range .Files }}
                 <div>
                   {{- if hostBySlack . }}
-                  <a href="{{ $.baseURL }}/files/{{ localPath . }}" target="_blank" rel="noopener noreferrer">
+                  <a href="{{ $.filesBaseURL }}/{{ localPath . }}" target="_blank" rel="noopener noreferrer">
                   {{- if eq (topLevelMimetype .) "image" }}
-                  <img src="{{ $.baseURL }}/files/{{ thumbImagePath . }}" width="{{ thumbImageWidth . }}" height="{{ thumbImageHeight . }}" alt="{{ .Title }}" />
+                  <img src="{{ $.filesBaseURL }}/{{ thumbImagePath . }}" width="{{ thumbImageWidth . }}" height="{{ thumbImageHeight . }}" alt="{{ .Title }}" />
                   {{- else if eq (topLevelMimetype .) "video" }}
-                  <video src="{{ $.baseURL }}/files/{{ localPath . }}" poster="{{ $.baseURL }}/files/{{ thumbVideoPath . }}" controls alt="{{ .Title }}">
+                  <video src="{{ $.filesBaseURL }}/{{ localPath . }}" poster="{{ $.filesBaseURL }}/{{ thumbVideoPath . }}" controls alt="{{ .Title }}">
                   </video>
                   {{- else }}
                   <span class="f5">[[ダウンロード: {{ .Title }}({{ .PrettyType }})]]</span>
