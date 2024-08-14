@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	cli "github.com/urfave/cli/v2"
 	"github.com/vim-jp/slacklog-generator/internal/slacklog"
@@ -138,8 +139,16 @@ func ReadAllMessages(inDir string) ([]*slacklog.Message, error) {
 		return nil, err
 	}
 
+	r, err := regexp.Compile(`\d{4}-\d{2}-\d{2}\.json`)
+	if err != nil {
+		return nil, err
+	}
+
 	var messages []*slacklog.Message
 	for _, name := range names {
+		if !r.MatchString(name) {
+			continue
+		}
 		var msgs []*slacklog.Message
 		err := slacklog.ReadFileAsJSON(filepath.Join(inDir, name), false, &msgs)
 		if err != nil {
